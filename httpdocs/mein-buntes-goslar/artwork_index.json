@@ -1,0 +1,98 @@
+[
+    {
+        "id": 1,
+        "title": "Mein buntes Goslar",
+        "description": "by Leonie Nasser el Dine - Hier entsteht eine Beschreibung",
+        "image_url": "https://crawler.goslar.app/mein-buntes-goslar/11.jpeg",
+        "call_to_action_url": "https://machmit.goslar.de/mein-buntes-goslar",
+        "published_at": "2025-06-04T12:00"
+    },
+    {
+        "id": 2,
+        "title": "Mein buntes Goslar",
+        "description": "by Krestena.k.h - Hier entsteht eine Beschreibung",
+        "image_url": "https://crawler.goslar.app/mein-buntes-goslar/10.jpeg",
+        "call_to_action_url": "https://machmit.goslar.de/mein-buntes-goslar",
+        "published_at": "2025-06-04T12:00"
+    },
+    {
+        "id": 3,
+        "title": "Mein buntes Goslar",
+        "description": "by Schöne Blumen - Hier entsteht eine Beschreibung",
+        "image_url": "https://crawler.goslar.app/mein-buntes-goslar/9.jpeg",
+        "call_to_action_url": "https://machmit.goslar.de/mein-buntes-goslar",
+        "published_at": "2025-06-04T12:00"
+    },
+    {
+        "id": 4,
+        "title": "Regenbogen",
+        "description": "by Anne Kurrat - Das Bild heißt „Der Regenbogen“ und ist mitten im Winter bei Eiskälte und grauem Wetter entstanden. Es soll daran erinnern, dass Farbe und Leben trotzdem da sind, auch wenn es Winter ist und wir alle im Winterschlaf sind. Es soll Kraft geben und an die Farben des Regenbogens erinnern.",
+        "image_url": "https://crawler.goslar.app/mein-buntes-goslar/8.jpeg",
+        "call_to_action_url": "https://machmit.goslar.de/mein-buntes-goslar",
+        "published_at": "2025-06-04T12:00"
+    },
+    {
+        "id": 5,
+        "title": "Regenbogen",
+        "description": "by F.A.R.B.K.L.E.C.K.S - Hier entsteht eine Beschreibung",
+        "image_url": "https://crawler.goslar.app/mein-buntes-goslar/7.jpg",
+        "call_to_action_url": "https://machmit.goslar.de/mein-buntes-goslar",
+        "published_at": "2025-06-04T12:00"
+    },
+    {
+        "id": 6,
+        "title": "Mein buntes Goslar",
+        "description": "by Franziskus Steinmetz - In meinem Entwurf habe ich mich schwerpunktmässig für Motive der Kaiserpfalz entschieden, da diese für viele Bürger in der Stadt eine große Identifikation besitzt. In meiner Arbeit möchte ich über eine reine Darstellung hinaus gehen und die Kaiserpfalz mit ihren Reiterstatuen in einer bunten und dynamischen Weise neu präsentieren. Dabei habe ich mich für einen collagenartigen Ansatz entschieden, um sie nahbarer darzustellen und stärker mit dem Stadtbild zu verweben. Das bunte Farbklima gemeinsam mit den historischen Elementen visualisiert die Idee, die bedeutsame Geschichte Goslars mit einem vielfältigen Stadtbild zu vereinen. ",
+        "image_url": "https://crawler.goslar.app/mein-buntes-goslar/6.jpeg",
+        "call_to_action_url": "https://machmit.goslar.de/mein-buntes-goslar",
+        "published_at": "2025-06-04T12:00"
+    },
+    {
+        "id": 7,
+        "title": "Portal zum Harz",
+        "description": "by Janis Hochbohm - In meinem Bild habe ich den Bezug zum Harz durch die Darstellung hölzerner Wanderwege hergestellt, die sich quer durch die Szene ziehen. Ergänzt wird dies durch ein symbolisches Portal, das sowohl von der Unterführung kommend als auch in Richtung Bahnhof durchschritten werden kann. Es soll wie ein sinnbildliches Tor zum Harz wirken. Die über 1500 Fachwerkhäuser, die das Stadtbild von Goslar prägen, inspirierten mich dazu, ein schwebendes Herz aus Fachwerkhölzern in die Szene zu integrieren. Dieses Herz dient zugleich als Schaufenster mit Blick auf den Brocken.",
+        "image_url": "https://crawler.goslar.app/mein-buntes-goslar/5.jpg",
+        "call_to_action_url": "https://machmit.goslar.de/mein-buntes-goslar",
+        "published_at": "2025-06-04T12:00"
+    },
+    {
+        "id": 8,
+        "title": "Nachtwächter",
+        "description": "by Janis Hochbohm - Im dunklen Wald, wenn Herzen schwer,geht mancher still und sieht nicht mehr.Der Blick gesenkt, der Mut versiegt,bis Hoffnung in der Ferne fliegt. Sein Licht bricht still das Grau entzwei,bleibt stets präsent, lässt keinen allein.Mit weitem Blick, aus Nacht geboren,fliegt er, als wär er nie verloren. In seinen Augen wohnt die Kraft,die dunkle Nächte hell erschafft.Er trägt den Trost aus alten Zeiten,um einsam Schritte heimzuleiten. Ein Wesen still, doch voller Sinn,das weiß, wo du und ich beginnen.Der Harzer Wald, sein Schattenreich,doch er selbst lässt die Sonne scheinen. Er trägt dich weiter ohne Zweifel,lässt keine Raben um dich kreisen.Und leise, fast wie ein Gedicht,führt er dich heim ins Morgenlicht.",
+        "image_url": "https://crawler.goslar.app/mein-buntes-goslar/4.jpg",
+        "call_to_action_url": "https://machmit.goslar.de/mein-buntes-goslar",
+        "published_at": "2025-06-04T12:00"
+    },
+    {
+        "id": 9,
+        "title": "Held Mario in Goslar",
+        "description": "by Emilie - Mario ist als ein Held nach Goslar gekommen und möchte den Menschen Freude bereiten.",
+        "image_url": "https://crawler.goslar.app/mein-buntes-goslar/3.jpg",
+        "call_to_action_url": "https://machmit.goslar.de/mein-buntes-goslar",
+        "published_at": "2025-06-04T12:00"
+    },
+    {
+        "id": 9,
+        "title": "Mein buntes Goslar",
+        "description": "by Shauny Streckenbach - Bei meinem Bild habe ich mich mit dem Rammelsberg und dem Bergbau befasst. Ausschlaggebend für dieses Thema waren die wertvollen Gesteine und die urige, geheimnisvolle Atmosphäre, die ich versucht habe einzufangen. Der Betrachter schaut dabei wie der Minenarbeiter in die Tiefen des Berges und entdeckt verschiedenste Elemente und Gegenstände. Das Leuchten der Mineralien ist für mich das Magischste an meinem Bild. Blau und rot eingefärbte Einbuchtungen verleihen dem Ganzen neben den funkelnden Steinen Farbe. Es wäre mir eine Freude den Rammelsberg als zu entdeckenden Ort auf eine der Wandflächen in der Goslarer Unterführung zum Leben erwecken zu",
+        "image_url": "https://crawler.goslar.app/mein-buntes-goslar/2.png",
+        "call_to_action_url": "https://machmit.goslar.de/mein-buntes-goslar",
+        "published_at": "2025-06-04T12:00"
+    },
+    {
+        "id": 10,
+        "title": "Löwenzahn",
+        "description": "by Dagmar Gentner - Eine Allegorie auf Werden und Vergehen (Verwehen). Nach dem Winter ist der Löwenzahn eine der frühen Pflanzen und die Blüten sind ein wahrer Sonnenschein. Außerdem ust der Löwenzahn eine Marienblume und schmecht sehr gut (finde ich).",
+        "image_url": "https://crawler.goslar.app/mein-buntes-goslar/12.jpg",
+        "call_to_action_url": "https://machmit.goslar.de/mein-buntes-goslar",
+        "published_at": "2025-06-04T12:00"
+    },
+    {
+        "id": 11,
+        "title": "Gemeinsame Stärke",
+        "description": "by Evuallavea - Ich würde den Löwen 'gemeinsame Stärke' nennen und Passanten, die gerne einen farbigen Händeabdruck, in einer der Farben die wir auftragen, dalassen wollen dazu animieren. Der Löwe symbolisiert Stärke und die bunten Teile sowie die Händeabdrücke symbolisieren unsere Gemeinschaft.",
+        "image_url": "https://crawler.goslar.app/mein-buntes-goslar/1.jpeg",
+        "call_to_action_url": "https://machmit.goslar.de/mein-buntes-goslar",
+        "published_at": "2025-06-04T12:00"
+    }
+]

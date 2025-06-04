@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zufallsanzeige</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+
+    .text {
+      padding: 24px;
+      max-width: 90%;
+      width: 400px;
+      text-align: center;
+      cursor: pointer;
+      font-size: 100%; 
+      line-height: 1.5; 
+    }
+
+    .kachel {
+      background-color: #f9f9f9;
+      border-radius: 16px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      padding: 24px;
+      max-width: 90%;
+      width: 400px;
+      text-align: center;
+      margin-bottom: 24px;
+      cursor: pointer;
+    }
+
+    .kachel:hover {
+      background-color: #f1f1f1;
+    }
+
+    .kachel img {
+      width: 100%;
+      height: 250px;
+      object-fit: cover;
+      border-radius: 12px;
+      margin-bottom: 16px;
+    }
+
+    .button-container {
+      width: 100%;
+      max-width: 400px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px 24px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      background-color: #007BFF;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    @media (max-width: 600px) {
+      .kachel {
+        padding: 16px;
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="text">
+    <h2>Zufällig nix vor</h2>
+    <p>Goslarer:innen empfehlen euch was ihr in Goslar unbedingt mal gemacht haben solltet. So entsteht ein bunter Mix an Vorschlägen.</p>
+  </div>
+
+  <div class="button-container">
+    <button id="zufall-button">Nächster zufälliger Vorschlag</button>
+  </div>
+  
+  <div class="kachel" id="kachel">
+    <img id="kachel-image" src="" alt="Bild zur Aktion" style="display:none;" />
+    <h2 id="kachel-title">Titel</h2>
+    <p id="kachel-description">Beschreibung</p>
+  </div>
+
+  <script>
+    let alleDaten = [];
+    let aktuelleUrl = null;
+
+    async function ladeInitialdaten() {
+      try {
+        const response = await fetch("004-zufaellig-nix-vor.json");
+        const daten = await response.json();
+        zeigeKachel(daten);
+      } catch (err) {
+        console.error("Fehler beim Laden der Initialdaten:", err);
+      }
+    }
+
+    async function ladeAlleDatenUndZeigeZufall() {
+      try {
+        if (alleDaten.length === 0) {
+          const response = await fetch("004-zufaellig-nix-vor-alle.json");
+          alleDaten = await response.json();
+        }
+        const zufall = alleDaten[Math.floor(Math.random() * alleDaten.length)];
+        zeigeKachel(zufall);
+      } catch (err) {
+        console.error("Fehler beim Laden der Zufallsdaten:", err);
+      }
+    }
+
+    function zeigeKachel(daten) {
+      document.getElementById("kachel-title").textContent = daten.title;
+      document.getElementById("kachel-description").textContent = daten.description;
+      aktuelleUrl = daten.call_to_action_url;
+
+      const image = document.getElementById("kachel-image");
+      if (daten.image_url) {
+        image.src = daten.image_url;
+        image.style.display = "block";
+      } else {
+        image.style.display = "none";
+      }
+    }
+
+    document.getElementById("kachel").addEventListener("click", function () {
+      if (aktuelleUrl) {
+        window.open(aktuelleUrl, "_blank");
+      }
+    });
+
+    document.getElementById("zufall-button").addEventListener("click", ladeAlleDatenUndZeigeZufall);
+
+    ladeInitialdaten();
+  </script>
+</body>
+</html>
