@@ -26,12 +26,16 @@ libxml_clear_errors();
 $xpath = new DOMXPath($dom);
 
 
+ensureDirectoryExists(pathinfo($file_path)['dirname']);
+
 //RSS Feed anlegen
 if(file_exists($file_path) && $file = file_get_contents($file_path)) {
     $xml = simplexml_load_string($file);
     $channel = $xml->channel;
     $first_run = false;
 } else {
+
+
     $xml = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8" ?><rss version="2.0"></rss>'); 
     $channel = $xml->addChild("channel");
     $channel->addChild("title", "Seniorenzeitung der Stadt Goslar");
@@ -98,5 +102,28 @@ foreach ($xpath->query('//a[contains(@href, ".pdf")]') as $link) {
     }
 }
 $xml->saveXML($file_path);
+
+
+/**
+ * Erstellt alle Verzeichnisse im angegebenen Pfad, falls sie nicht existieren.
+ *
+ * @param string $path Der vollständige Pfad, z. B. "/var/www/html/projekt/logs"
+ * @param int $permissions Dateirechte, Standard: 0755
+ * @return bool True, wenn der Pfad existiert oder erfolgreich erstellt wurde, sonst False
+ */
+function ensureDirectoryExists(string $path, int $permissions = 0755): bool {
+    if (is_dir($path)) {
+        return true;
+    }
+
+    // Versuche, das Verzeichnis rekursiv zu erstellen
+    if (mkdir($path, $permissions, true)) {
+        return true;
+    }
+
+    // Falls mkdir fehlschlägt
+    return false;
+}
+
 
 ?>
