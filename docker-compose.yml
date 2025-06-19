@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  gs_compiler_001_senioren:
+    build: ./docker_instances/001_senioren
+    volumes:
+      - ./httpdocs/crawler:/app/output
+    container_name: gs_compiler_001_senioren
+  gs_compiler_002_fepa:
+    build: ./docker_instances/002_ferienpass
+    volumes:
+      - ./httpdocs/crawler:/app/output
+    container_name: gs_compiler_002_fepa
+

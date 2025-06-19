@@ -1,3 +1,7 @@
 .php-ini
 .php-version
 httpdocs/*
+docker_instances/*/.python-version
+docker_instances/*/.venv
+docker_instances/*/output
+.venv

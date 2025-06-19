@@ -1,9 +1,0 @@
-version: '3.8'
-
-services:
-  gs_python_compiler_001_senioren:
-    build: ./001_senioren
-    volumes:
-      - ./output:/app/output
-    container_name: gs_python_compiler_001_senioren
-
