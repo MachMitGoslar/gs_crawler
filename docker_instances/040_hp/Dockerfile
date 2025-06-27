@@ -4,7 +4,8 @@ WORKDIR /app
 
 
 COPY requirements.txt requirements.txt
-COPY script.py script.py
+COPY helpers.py helpers.py
+COPY 040-hp.py script.py
 COPY crontab /etc/cron.d/mycron
 
 RUN apt-get update && apt-get install -y cron python3-venv \

@@ -4,6 +4,7 @@ WORKDIR /app
 
 
 COPY requirements.txt requirements.txt
+COPY helpers.py helpers.py
 COPY script.py script.py
 COPY crontab /etc/cron.d/mycron
 

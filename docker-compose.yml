@@ -11,4 +11,48 @@ services:
     volumes:
       - ./httpdocs/crawler:/app/output
     container_name: gs_compiler_002_fepa
-
+  gs_compiler_040_hp:
+    build: ./docker_instances/040_hp
+    volumes:
+      - ./httpdocs/crawler:/app/output
+    container_name: gs_compiler_040_hp
+  gs_compiler_019_was_app:
+    build: ./docker_instances/019_was_app
+    volumes:
+      - ./httpdocs/crawler:/app/output
+    container_name: gs_compiler_019_was_app
+  gs_compiler_041_immenrode:
+    build: ./docker_instances/041_immenrode
+    volumes:
+      - ./httpdocs/crawler:/app/output
+    container_name: gs_compiler_041_immenrode
+  gs_compiler_042_freiwilligen:
+    build: ./docker_instances/042_freiwilligen
+    volumes:
+      - ./httpdocs/crawler:/app/output
+    container_name: gs_compiler_042_freiwilligen
+  gs_compiler_044_wiedelah:
+    build: ./docker_instances/044_wiedelah
+    volumes:
+      - ./httpdocs/crawler:/app/output
+    container_name: gs_compiler_044_wiedelah
+  gs_compiler_045_naturgefahren:
+    build: ./docker_instances/045_naturgefahren
+    volumes:
+      - ./httpdocs/crawler:/app/output
+    container_name: gs_compiler_045_naturgefahren
+  gs_compiler_047_bodenwasser:
+    build: ./docker_instances/047_bodenwasser
+    volumes:
+      - ./httpdocs/crawler:/app/output
+    container_name: gs_compiler_047_bodenwasser
+  gs_compiler_048_jerstedt:
+    build: ./docker_instances/048_jerstedt
+    volumes:
+      - ./httpdocs/crawler:/app/output
+    container_name: gs_compiler_048_jerstedt
+  gs_compiler_002_gz:
+    build: ./docker_instances/002_gz
+    volumes:
+      - ./httpdocs/crawler:/app/output
+    container_name: gs_compiler_002_gz

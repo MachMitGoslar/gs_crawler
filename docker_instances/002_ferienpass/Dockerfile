@@ -7,8 +7,9 @@ COPY fepa_fetcher.php fepa_fetcher.php
 COPY crontab /etc/cron.d/mycron
 
 RUN apt-get update && apt-get install -y cron \
- && chmod 0644 /etc/cron.d/mycron \
+ && chmod 0600 /etc/cron.d/mycron \
  && crontab /etc/cron.d/mycron
 
+RUN php fepa_fetcher.php
 
 CMD ["cron", "-f"]

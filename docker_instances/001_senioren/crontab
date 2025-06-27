@@ -5,4 +5,4 @@
 # │ │ │ │ ┌───────────── Day of week (0 - 6) (Sunday to Saturday)
 # │ │ │ │ │
 # │ │ │ │ │
-  0 2 * * * python3 /app/script.py
+0 2 * * * cd /app ; python3 /app/script.py >> /proc/1/fd/1
