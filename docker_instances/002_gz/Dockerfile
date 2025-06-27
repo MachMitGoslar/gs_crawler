@@ -6,6 +6,7 @@ WORKDIR /app
 COPY requirements.txt requirements.txt
 COPY helpers.py helpers.py
 COPY script.py script.py
+COPY start_up.sh .
 COPY crontab /etc/cron.d/mycron
 
 RUN apt-get update && apt-get install -y cron python3-venv \
@@ -13,6 +14,11 @@ RUN apt-get update && apt-get install -y cron python3-venv \
  && crontab /etc/cron.d/mycron
 
 RUN python3 -m venv .venv
-RUN pip install -r requirements.txt
+RUN .venv/bin/pip install -r requirements.txt
 
-CMD ["cron", "-f"]
+
+RUN chmod +x start_up.sh
+
+# Starte Cron + zeige Logs
+#CMD ["cron", "-f", ">> /proc/1/fd/1"] 
+ENTRYPOINT [ "/app/start_up.sh" ]
