@@ -77,8 +77,9 @@
         }
 
         .running { color: #27ae60; }
-        .stopped { color: #e74c3c; }
-        .error { color: #f39c12; }
+        .stopped { color: #95a5a6; }
+        .warning { color: #f39c12; }
+        .error { color: #e74c3c; }
         .total { color: #3498db; }
 
         .containers-grid {
@@ -122,9 +123,11 @@
         }
 
         .status-running { background: #27ae60; }
-        .status-exited { background: #e74c3c; }
-        .status-stopped { background: #e74c3c; }
-        .status-restarting { background: #f39c12; }
+        .status-warning { background: #f39c12; }
+        .status-exited { background: #95a5a6; }
+        .status-stopped { background: #95a5a6; }
+        .status-error { background: #e74c3c; }
+        .status-unknown { background: #95a5a6; }
 
         .container-info {
             margin-bottom: 15px;
@@ -263,8 +266,8 @@
                 <div class="stat-label">Laufend</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number stopped">{{ status.stopped }}</div>
-                <div class="stat-label">Gestoppt</div>
+                <div class="stat-number warning">{{ status.warning }}</div>
+                <div class="stat-label">Warnungen</div>
             </div>
             <div class="stat-card">
                 <div class="stat-number error">{{ status.error }}</div>
@@ -276,7 +279,7 @@
             {% for container in status.containers %}
             <div class="container-card">
                 <div class="container-header">
-                    <div class="container-name">{{ container.name }}</div>
+                    <div class="container-name">{{ container.display_name or container.name }}</div>
                     <div class="status-badge status-{{ container.status }}">
                         {{ container.status.upper() }}
                     </div>
@@ -284,57 +287,64 @@
 
                 <div class="container-info">
                     <div class="info-row">
-                        <span class="info-label">Image:</span>
-                        <span class="info-value">{{ container.image }}</span>
+                        <span class="info-label">Container:</span>
+                        <span class="info-value">{{ container.name }}</span>
                     </div>
                     <div class="info-row">
-                        <span class="info-label">Erstellt:</span>
-                        <span class="info-value">{{ container.created }}</span>
+                        <span class="info-label">Typ:</span>
+                        <span class="info-value">{{ container.type }}</span>
                     </div>
-                    {% if container.health != 'unknown' %}
                     <div class="info-row">
-                        <span class="info-label">Health:</span>
-                        <span class="info-value">{{ container.health }}</span>
+                        <span class="info-label">Zeitplan:</span>
+                        <span class="info-value">{{ container.schedule }}</span>
                     </div>
-                    {% endif %}
+                    <div class="info-row">
+                        <span class="info-label">Quelle:</span>
+                        <span class="info-value">{{ container.source }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Letzte Datei:</span>
+                        <span class="info-value">{{ container.last_file_update }}</span>
+                    </div>
                 </div>
 
-                {% if container.stats and 'error' not in container.stats %}
                 <div class="stats-section">
-                    <div class="stats-title">📊 Performance</div>
+                    <div class="stats-title">📁 Dateien ({{ container.file_count }}/{{ container.expected_files|length }})</div>
+                    
+                    {% for file in container.file_status %}
+                    <div class="info-row">
+                        <span class="info-label">{{ file.name }}:</span>
+                        <span class="info-value">
+                            {% if file.exists %}
+                                ✅ {{ file.size_mb }} MB ({{ file.age_hours }}h alt)
+                                {% if file.name.endswith('.json') and file.valid_json == false %}
+                                    ⚠️ Invalid JSON
+                                {% endif %}
+                            {% else %}
+                                ❌ Nicht gefunden
+                            {% endif %}
+                        </span>
+                    </div>
+                    {% endfor %}
                     
                     <div class="info-row">
-                        <span class="info-label">CPU:</span>
-                        <span class="info-value">{{ container.stats.cpu_percent }}%</span>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: {{ container.stats.cpu_percent }}%"></div>
-                    </div>
-
-                    <div class="info-row">
-                        <span class="info-label">Memory:</span>
-                        <span class="info-value">{{ container.stats.memory_usage_mb }} MB / {{ container.stats.memory_limit_mb }} MB ({{ container.stats.memory_percent }}%)</span>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: {{ container.stats.memory_percent }}%"></div>
+                        <span class="info-label">Gesamt:</span>
+                        <span class="info-value">{{ container.total_size_mb }} MB</span>
                     </div>
                 </div>
-                {% endif %}
 
-                {% if container.recent_logs %}
+                {% if container.issues %}
                 <div class="logs-section">
-                    <div class="logs-title">📝 Letzte Logs</div>
-                    {% for log in container.recent_logs %}
-                        {% if log.strip() %}
-                        <div class="log-line">{{ log }}</div>
-                        {% endif %}
+                    <div class="logs-title">⚠️ Probleme</div>
+                    {% for issue in container.issues %}
+                        <div class="log-line">• {{ issue }}</div>
                     {% endfor %}
                 </div>
                 {% endif %}
 
                 <div style="text-align: center; margin-top: 15px;">
-                    <button class="restart-btn" onclick="restartContainer('{{ container.name }}')">
-                        🔄 Neustart
+                    <button class="restart-btn" onclick="showContainerDetails('{{ container.name }}')">
+                        � Details
                     </button>
                 </div>
             </div>
@@ -347,28 +357,53 @@
     </div>
 
     <script>
-        function restartContainer(containerName) {
-            if (confirm(`Container "${containerName}" wirklich neu starten?`)) {
-                fetch(`/api/restart/${containerName}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert(`Container "${containerName}" wurde neu gestartet!`);
-                            setTimeout(() => location.reload(), 2000);
-                        } else {
-                            alert(`Fehler: ${data.error}`);
+        function showContainerDetails(containerName) {
+            fetch(`/api/container/${containerName}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert(`Fehler: ${data.error}`);
+                    } else {
+                        let details = `Container: ${data.display_name || data.name}\n\n`;
+                        details += `Status: ${data.status}\n`;
+                        details += `Typ: ${data.type}\n`;
+                        details += `Zeitplan: ${data.schedule}\n`;
+                        details += `Quelle: ${data.source}\n\n`;
+                        details += `Dateien:\n`;
+                        data.file_status.forEach(file => {
+                            details += `• ${file.name}: ${file.exists ? '✅' : '❌'}\n`;
+                            if (file.exists) {
+                                details += `  Größe: ${file.size_mb} MB, Alter: ${file.age_hours}h\n`;
+                            }
+                        });
+                        if (data.issues && data.issues.length > 0) {
+                            details += `\nProbleme:\n`;
+                            data.issues.forEach(issue => {
+                                details += `• ${issue}\n`;
+                            });
                         }
-                    })
-                    .catch(error => {
-                        alert(`Fehler beim Neustart: ${error}`);
-                    });
-            }
+                        alert(details);
+                    }
+                })
+                .catch(error => {
+                    alert(`Fehler beim Laden der Details: ${error}`);
+                });
         }
 
         // Auto-refresh alle 60 Sekunden
         setInterval(() => {
             location.reload();
         }, 60000);
+
+        // Health Check anzeigen
+        fetch('/api/health')
+            .then(response => response.json())
+            .then(data => {
+                console.log('System Health Score:', data.health_score + '%');
+            })
+            .catch(error => {
+                console.error('Health Check Fehler:', error);
+            });
     </script>
 </body>
 </html>

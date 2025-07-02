@@ -1,25 +1,12 @@
 
 services:
-  # gs_health_monitor:
-  #   build: ./docker_instances/000_health_monitor
-  #   volumes:
-  #     - ./httpdocs/crawler:/app/output
-  #     - /var/run/docker.sock:/var/run/docker.sock
-  #   ports:
-  #     - "5000:5000"
-  #   container_name: gs_health_monitor
-  #   depends_on:
-  #     - gs_compiler_001_senioren
-  #     - gs_compiler_002_fepa
-  #     - gs_compiler_040_hp
-  #     - gs_compiler_019_was_app
-  #     - gs_compiler_041_immenrode
-  #     - gs_compiler_042_freiwilligen
-  #     - gs_compiler_044_wiedelah
-  #     - gs_compiler_045_naturgefahren
-  #     - gs_compiler_047_bodenwasser
-  #     - gs_compiler_048_jerstedt
-  #     - gs_compiler_002_gz
+  gs_health_monitor:
+    build: ./docker_instances/000_health_monitor
+    volumes:
+      - ./httpdocs/crawler:/app/output
+    ports:
+      - "5001:5000"
+    container_name: gs_health_monitor
   gs_compiler_001_senioren:
     build: ./docker_instances/001_senioren
     volumes:
