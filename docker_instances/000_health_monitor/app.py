@@ -4,7 +4,6 @@ import time
 from datetime import datetime, timedelta
 from flask import Flask, render_template, jsonify
 import threading
-import glob
 import requests
 from pathlib import Path
 
