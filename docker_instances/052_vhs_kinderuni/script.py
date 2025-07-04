@@ -30,10 +30,10 @@ if hauptbereich:
             eintrag = {
                 "id": index + 1,  # ID hinzufügen
                 "title": span_tag.get_text(strip=True),
-                "description": span_tag.get_text(strip=True),
+                "description": "",
                 "call_to_action_url": url_base + a_tag["href"],
                 "image_url": None,
-                "published_at": datetime.now().strftime("%Y-%m-%dT%H:%M")
+                "published_at": None
             }
             eintraege.append(eintrag)
 
@@ -44,6 +44,9 @@ if eintraege:
 
     # Zufällig einen auswählen und speichern
     zufall = random.choice(eintraege)
+    zufall["description"] = zufall["title"] + " " + zufall["description"]
+    zufall["title"] = "VHS Kinderuni"
+    zufall["published_at"] = None    
     zufall["call_to_action_url"] = "https://crawler.goslar.app/crawler/" + export_alle_jsonfile
     with open(os.path.join(output_dir, export_jsonfile), "w", encoding="utf-8") as f:
         json.dump(zufall, f, ensure_ascii=False, indent=2)

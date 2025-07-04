@@ -25,14 +25,21 @@ if hauptbereich:
         a_tag = row.find("a")
         span_tag = row.find("span")
 
+        txtdat = div_tag.get_text(strip=True).replace(span_tag.get_text(strip=True), "")
+        match = re.search(r'\b\d{2}\.\d{2}\.\d{4}\b', txtdat)
+
+        if match:
+            datum_fmt = datetime.strptime(match.group(), "%d.%m.%Y") 
+            datum = datetime.strptime(match.group(), "%d.%m.%Y").strftime("%Y-%m-%dT00:00")
+
         if a_tag and a_tag.has_attr("href") and span_tag:
             eintrag = {
                 "id": index + 1,  # ID hinzufügen
-                "title": a_tag.get_text(strip=True) + "\n" + span_tag.get_text(strip=True),
-                "description": span_tag.get_text(strip=True),
+                "title": a_tag.get_text(strip=True),
+                "description": txtdat + " " + span_tag.get_text(strip=True),
                 "call_to_action_url": url + a_tag["href"],
                 "image_url": None,
-                "published_at": datetime.now().strftime("%Y-%m-%dT%H:%M")
+                "published_at": None
             }
             eintraege.append(eintrag)
 
@@ -43,7 +50,11 @@ if eintraege:
 
     # Zufällig einen auswählen und speichern
     zufall = random.choice(eintraege)
+    zufall["description"] = zufall["title"] + " " + zufall["description"]
+    zufall["title"] = "VHS Empfehlungen"
+    zufall["published_at"] = None
     zufall["call_to_action_url"] = "https://crawler.goslar.app/crawler/" + export_alle_jsonfile
+
     with open(os.path.join(output_dir, export_jsonfile), "w", encoding="utf-8") as f:
         json.dump(zufall, f, ensure_ascii=False, indent=2)
     print(zufall)
