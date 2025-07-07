@@ -10,8 +10,8 @@ url = "https://www.vhs-goslar.de/programm/junge-vhs-kurse-fuer-kinder-und-jugend
 url_base = "https://www.vhs-goslar.de" 
 response = requests.get(url)
 soup = BeautifulSoup(response.text, "html.parser")
-export_jsonfile = "052-vhs-kinderuni.json"
-export_alle_jsonfile = "052-vhs-kinderuni-alle.json"
+export_jsonfile = "052_vhs_kinderuni.json"
+export_alle_jsonfile = "052_vhs_kinderuni_alle.json"
 
 # Ausgabe-Ordner
 output_dir = "output/"
