@@ -262,14 +262,49 @@ docker-compose up --build -d
 
 ### Health Monitor Dashboard
 Das Health Monitor Dashboard bietet:
-- ✅ Real-time Container Status
-- 📊 Performance Metriken (CPU, Memory)
-- 📝 Live Logs der letzten Ausgaben
-- 🔄 Container Restart-Funktionalität
-- 📡 API Endpoints für externe Integration
+- ✅ Real-time Status aller Crawler-Container (basierend auf Output-Dateien)
+- 📊 Datei-basierte Überwachung (Dateigröße, Alter, Gültigkeit)
+- 📝 Status-API für externe Integration
+- � Web-Interface zur Systemübersicht
+- 📡 RESTful API Endpoints
+
+## GitHub Actions / CI/CD
+
+### Automatisierte Tests
+Das System verfügt über umfassende GitHub Actions für kontinuierliche Integration:
+
+#### Docker Build and Container Health Test
+- **Trigger:** Push auf main/develop, Pull Requests
+- **Zweck:** Build-Tests, Container-Start, Health-Checks
+- **Features:**
+  - Baut alle 24 Container
+  - Testet Health Monitor API
+  - Validiert Output-Dateien
+  - Security-Scan mit Trivy
+
+#### Daily Health Check
+- **Trigger:** Täglich um 06:00 UTC
+- **Zweck:** Regelmäßige Systemüberwachung
+- **Features:**
+  - 3-Minuten Laufzeit für vollständige Crawler-Ausführung
+  - JSON-Validierung aller Output-Dateien
+  - Detaillierte Health-Reports als Artefakte
+  - Kritische Issue-Erkennung
+
+### Monitoring & Alerting
+- ✅ Automatische Container-Status-Prüfung
+- 📊 Output-Datei-Analyse und -Validierung
+- 🚨 Failure-Detection mit detaillierten Logs
+- � Health-Reports als downloadbare Artefakte
+
+**Workflow-Dateien:** `.github/workflows/`
+- `docker-build-test.yml` - Build & Test Pipeline
+- `daily-health-check.yml` - Tägliche Systemprüfung
+- `README.md` - Detaillierte Workflow-Dokumentation
 
 ---
 
 **Letzte Aktualisierung:** 2. Juli 2025  
 **Gesamt Container:** 24 (23 Crawler + 1 Health Monitor)  
-**Aktive Cron Jobs:** 23
+**Aktive Cron Jobs:** 23  
+**GitHub Actions:** 2 (Build-Test + Daily Health Check)
