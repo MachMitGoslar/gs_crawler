@@ -1,0 +1,191 @@
+name: Daily Health Check
+
+on:
+  schedule:
+    # Run daily at 06:00 UTC
+    - cron: '0 6 * * *'
+  workflow_dispatch:  # Allow manual triggering
+
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Create output directory
+      run: |
+        mkdir -p httpdocs/crawler
+        echo "Created output directory for crawler data"
+    
+    - name: Build and start containers
+      run: |
+        echo "Building and starting containers for health check..."
+        docker-compose build
+        docker-compose up -d
+    
+    - name: Extended wait for initialization
+      run: |
+        echo "Waiting 180 seconds for containers to fully initialize and run their tasks..."
+        sleep 180
+    
+    - name: Comprehensive health check
+      run: |
+        echo "=== COMPREHENSIVE HEALTH CHECK ==="
+        
+        # Check container status
+        echo "Container Status:"
+        docker-compose ps
+        
+        # Check health monitor
+        echo "Testing Health Monitor..."
+        health_response=$(curl -s http://localhost:5000/api/status)
+        echo "Health Monitor Response:"
+        echo "$health_response" | jq '.'
+        
+        # Analyze output files
+        echo "=== OUTPUT FILE ANALYSIS ==="
+        if [ -d "httpdocs/crawler" ]; then
+          total_files=$(find httpdocs/crawler -type f | wc -l)
+          echo "Total output files: $total_files"
+          
+          # Check file ages and sizes
+          echo "File details:"
+          for file in httpdocs/crawler/*; do
+            if [ -f "$file" ]; then
+              size=$(stat -c%s "$file" 2>/dev/null || stat -f%z "$file" 2>/dev/null || echo "unknown")
+              echo "  $(basename "$file"): ${size} bytes"
+            fi
+          done
+          
+          # Count JSON files
+          json_count=$(find httpdocs/crawler -name "*.json" | wc -l)
+          xml_count=$(find httpdocs/crawler -name "*.xml" | wc -l)
+          other_count=$((total_files - json_count - xml_count))
+          
+          echo "File type breakdown:"
+          echo "  JSON files: $json_count"
+          echo "  XML files: $xml_count"
+          echo "  Other files: $other_count"
+          
+          # Check for empty files
+          empty_files=$(find httpdocs/crawler -type f -size 0 | wc -l)
+          if [ "$empty_files" -gt 0 ]; then
+            echo "⚠️ Found $empty_files empty files:"
+            find httpdocs/crawler -type f -size 0
+          fi
+          
+          # Validate JSON files
+          echo "=== JSON VALIDATION ==="
+          for json_file in httpdocs/crawler/*.json; do
+            if [ -f "$json_file" ]; then
+              if jq empty "$json_file" 2>/dev/null; then
+                echo "✅ Valid JSON: $(basename "$json_file")"
+              else
+                echo "❌ Invalid JSON: $(basename "$json_file")"
+              fi
+            fi
+          done
+          
+        else
+          echo "❌ Output directory not found!"
+          exit 1
+        fi
+    
+    - name: Generate health report
+      run: |
+        echo "=== GENERATING HEALTH REPORT ==="
+        
+        # Create a summary report
+        cat > health_report.md << EOF
+        # Crawler System Health Report
+        
+        **Date:** $(date -u)
+        **Workflow:** Daily Health Check
+        
+        ## Container Status
+        \`\`\`
+        $(docker-compose ps)
+        \`\`\`
+        
+        ## Output Statistics
+        - Total files: $(find httpdocs/crawler -type f 2>/dev/null | wc -l)
+        - JSON files: $(find httpdocs/crawler -name "*.json" 2>/dev/null | wc -l)
+        - XML files: $(find httpdocs/crawler -name "*.xml" 2>/dev/null | wc -l)
+        - Empty files: $(find httpdocs/crawler -type f -size 0 2>/dev/null | wc -l)
+        
+        ## Health Monitor Status
+        \`\`\`json
+        $(curl -s http://localhost:5000/api/status 2>/dev/null || echo '{"error": "Health monitor not accessible"}')
+        \`\`\`
+        
+        ## File Listing
+        \`\`\`
+        $(ls -la httpdocs/crawler/ 2>/dev/null || echo "No files found")
+        \`\`\`
+        EOF
+        
+        echo "Health report generated:"
+        cat health_report.md
+    
+    - name: Upload health report as artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: health-report-${{ github.run_number }}
+        path: health_report.md
+        retention-days: 30
+    
+    - name: Check for critical issues
+      run: |
+        echo "=== CRITICAL ISSUE CHECK ==="
+        
+        issues_found=0
+        
+        # Check if health monitor is accessible
+        if ! curl -f http://localhost:5000/health > /dev/null 2>&1; then
+          echo "❌ Health monitor is not accessible"
+          issues_found=$((issues_found + 1))
+        fi
+        
+        # Check if we have any output files
+        file_count=$(find httpdocs/crawler -type f 2>/dev/null | wc -l)
+        if [ "$file_count" -eq 0 ]; then
+          echo "❌ No output files generated"
+          issues_found=$((issues_found + 1))
+        fi
+        
+        # Check for too many empty files
+        empty_count=$(find httpdocs/crawler -type f -size 0 2>/dev/null | wc -l)
+        if [ "$empty_count" -gt 3 ]; then
+          echo "❌ Too many empty files: $empty_count"
+          issues_found=$((issues_found + 1))
+        fi
+        
+        # Check container status
+        down_containers=$(docker-compose ps | grep -c "Exit\|Down" || true)
+        if [ "$down_containers" -gt 0 ]; then
+          echo "❌ $down_containers containers are down"
+          issues_found=$((issues_found + 1))
+        fi
+        
+        echo "Critical issues found: $issues_found"
+        
+        if [ "$issues_found" -gt 2 ]; then
+          echo "❌ Too many critical issues detected!"
+          exit 1
+        elif [ "$issues_found" -gt 0 ]; then
+          echo "⚠️ Some issues detected, but system appears functional"
+        else
+          echo "✅ No critical issues found"
+        fi
+    
+    - name: Cleanup
+      if: always()
+      run: |
+        echo "Stopping and removing containers..."
+        docker-compose down -v
+        echo "Cleanup completed"
