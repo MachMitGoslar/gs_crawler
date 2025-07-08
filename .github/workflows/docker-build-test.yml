@@ -2,7 +2,9 @@ name: Docker Build and Container Health Test
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: 
+      - main,
+      - develop
   pull_request:
     branches: [ main ]
   workflow_dispatch:  # Allows manual triggering
@@ -16,7 +18,8 @@ jobs:
       uses: actions/checkout@v4
     
     - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
+      uses: docker/setup-docker-action@v4
+      
     
     - name: Create output directory
       run: |
