@@ -62,7 +62,7 @@ jobs:
         
         # Wait for health monitor to be ready
         for i in {1..30}; do
-          if curl -f http://localhost:5000/health > /dev/null 2>&1; then
+          if curl -f http://localhost:5001/health > /dev/null 2>&1; then
             echo "✅ Health Monitor API is responding"
             break
           fi
@@ -72,20 +72,20 @@ jobs:
         
         # Test the main endpoints
         echo "Testing main health endpoint..."
-        curl -f http://localhost:5000/health || exit 1
+        curl -f http://localhost:5001/health || exit 1
         
         echo "Testing status API endpoint..."
-        curl -f http://localhost:5000/api/status || exit 1
+        curl -f http://localhost:5001/api/status || exit 1
         
         echo "Testing web interface..."
-        curl -f http://localhost:5000/ || exit 1
+        curl -f http://localhost:5001/ || exit 1
     
     - name: Validate container health via API
       run: |
         echo "Validating container health via Health Monitor API..."
         
         # Get status from health monitor
-        response=$(curl -s http://localhost:5000/api/status)
+        response=$(curl -s http://localhost:5001/api/status)
         echo "Health Monitor Response: $response"
         
         # Parse JSON and check for critical failures
