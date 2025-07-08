@@ -4,6 +4,7 @@ from datetime import datetime
 import json
 import random
 import os
+import re
 
 # Ziel-URL
 url = "https://www.vhs-goslar.de/"
@@ -24,7 +25,7 @@ if hauptbereich:
     for index,row in enumerate(hauptbereich.find_all("div", class_="kw-table-row")):
         a_tag = row.find("a")
         span_tag = row.find("span")
-
+        div_tag = row.find("div", class_="text-muted")
         txtdat = div_tag.get_text(strip=True).replace(span_tag.get_text(strip=True), "")
         match = re.search(r'\b\d{2}\.\d{2}\.\d{4}\b', txtdat)
 

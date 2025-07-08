@@ -19,7 +19,9 @@ response = requests.get(url)
 soup = BeautifulSoup(response.text, "html.parser")
 ensure_directory_exists(os.path.dirname(FILE_PATH))
 
-link_tag = soup.find("a", href="pdf/Sammelmappe.pdf")
+epaper_div = soup.find("div", class_="epaper")
+
+link_tag = epaper_div.find("a", href=True) if epaper_div else None
 if link_tag:
     call_to_action_url = f"https://www.panorama-am-sonntag.de/{link_tag['href']}"
     img_tag = link_tag.find("img")
