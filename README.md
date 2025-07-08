@@ -1,3 +1,5 @@
+[![Docker Build and Container Health Test](https://github.com/MachMitGoslar/gs_crawler/actions/workflows/docker-build-test.yml/badge.svg)](https://github.com/MachMitGoslar/gs_crawler/actions/workflows/docker-build-test.yml)
+
 # GS Crawler System - Container Übersicht
 
 ## System Architektur
