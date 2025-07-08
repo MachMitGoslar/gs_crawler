@@ -54,7 +54,7 @@ Dieses Verzeichnis enthält GitHub Actions Workflows zur automatisierten Überwa
 ## Features
 
 ### Health Monitor Integration
-- Beide Workflows nutzen den Health Monitor (Port 5000)
+- Beide Workflows nutzen den Health Monitor (Port 5001)
 - API-Endpoints werden getestet: `/health`, `/api/status`, `/`
 - JSON-Response wird ausgewertet für Container-Status
 
@@ -76,10 +76,10 @@ Dieses Verzeichnis enthält GitHub Actions Workflows zur automatisierten Überwa
 ## Erwartete Ausgaben
 
 Die Workflows erwarten folgende kritische Dateien in `httpdocs/crawler/`:
-- `001_senioren_feed.xml`
-- `002_goslarsche.json`
-- `019_was_app.json`
-- `040_hp.json`
+- "047_bodenwasser.json"
+- "035-talsperren_alle.json"
+- "019_was_app.json"
+- "040_hp.json"
 
 Weitere Dateien werden erkannt und validiert, aber ihr Fehlen führt nicht zu einem Workflow-Fehler.
 

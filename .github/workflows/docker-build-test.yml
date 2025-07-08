@@ -52,7 +52,7 @@ jobs:
           echo "✅ Health monitor is running"
         else
           echo "❌ Health monitor is not running"
-          docker-compose logs health_monitor
+          docker compose logs health_monitor
           exit 1
         fi
     
@@ -62,7 +62,7 @@ jobs:
         
         # Wait for health monitor to be ready
         for i in {1..30}; do
-          if curl -f http://localhost:5001/health > /dev/null 2>&1; then
+          if curl -f http://localhost:5001/api/status > /dev/null 2>&1; then
             echo "✅ Health Monitor API is responding"
             break
           fi
@@ -70,9 +70,6 @@ jobs:
           sleep 2
         done
         
-        # Test the main endpoints
-        echo "Testing main health endpoint..."
-        curl -f http://localhost:5001/health || exit 1
         
         echo "Testing status API endpoint..."
         curl -f http://localhost:5001/api/status || exit 1

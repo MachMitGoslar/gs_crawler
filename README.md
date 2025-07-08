@@ -6,9 +6,9 @@ Das GS Crawler System besteht aus 24 Docker Containern, die verschiedene Website
 
 ### Health Monitor
 - **Container:** `gs_health_monitor`
-- **Port:** 5000 (Web Interface)
+- **Port:** 5001 (Web Interface)
 - **Aufgabe:** Überwacht alle anderen Container und stellt Status-Dashboard bereit
-- **Zugriff:** `http://localhost:5000`
+- **Zugriff:** `http://localhost:5001`
 
 ## Container Details
 
