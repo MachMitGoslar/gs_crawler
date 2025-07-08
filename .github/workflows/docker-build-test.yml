@@ -32,7 +32,7 @@ jobs:
     - name: Start all containers
       run: |
         echo "Starting all containers..."
-        docker-compose up -d
+        docker compose up -d
         echo "All containers started"
     
     - name: Wait for containers to initialize
@@ -43,10 +43,10 @@ jobs:
     - name: Check container status
       run: |
         echo "Checking container status..."
-        docker-compose ps
+        docker compose ps
         
         # Check if health monitor is running
-        if docker-compose ps | grep -q "health_monitor.*Up"; then
+        if docker compose ps | grep -q "health_monitor.*Up"; then
           echo "✅ Health monitor is running"
         else
           echo "❌ Health monitor is not running"
@@ -157,22 +157,22 @@ jobs:
       if: failure()
       run: |
         echo "=== CONTAINER STATUS ==="
-        docker-compose ps
+        docker compose ps
         
         echo "=== HEALTH MONITOR LOGS ==="
-        docker-compose logs health_monitor
+        docker compose logs health_monitor
         
         echo "=== ALL CONTAINER LOGS (last 50 lines each) ==="
-        for container in $(docker-compose ps --services); do
+        for container in $(docker compose ps --services); do
           echo "--- Logs for $container ---"
-          docker-compose logs --tail=50 "$container" 2>/dev/null || echo "No logs for $container"
+          docker compose logs --tail=50 "$container" 2>/dev/null || echo "No logs for $container"
         done
     
     - name: Cleanup
       if: always()
       run: |
         echo "Stopping and removing containers..."
-        docker-compose down -v
+        docker compose down -v
         echo "Cleanup completed"
 
   security-scan:
