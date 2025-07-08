@@ -141,7 +141,7 @@ CONTAINERS = {
     },
     'gs_compiler_052_vhs_kinderuni': {
         'name': 'VHS Kinderuni',
-        'expected_files': ['052-vhs-kinderuni.json', '052-vhs-kinderuni-alle.json'],
+        'expected_files': ['052_vhs_kinderuni.json', '052_vhs_kinderuni-alle.json'],
         'source': 'https://www.vhs-goslar.de/',
         'schedule': 'Täglich 09:00',
         'type': 'Education Portal'
