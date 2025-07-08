@@ -26,7 +26,7 @@ jobs:
     - name: Build all Docker containers
       run: |
         echo "Building all containers..."
-        docker-compose build --no-cache
+        docker compose build --no-cache
         echo "All containers built successfully"
     
     - name: Start all containers
