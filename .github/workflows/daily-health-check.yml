@@ -15,7 +15,7 @@ jobs:
       uses: actions/checkout@v4
     
     - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
+      uses: docker/setup-docker-action@v4
     
     - name: Create output directory
       run: |
@@ -25,8 +25,8 @@ jobs:
     - name: Build and start containers
       run: |
         echo "Building and starting containers for health check..."
-        docker-compose build
-        docker-compose up -d
+        docker compose build
+        docker compose up -d
     
     - name: Extended wait for initialization
       run: |
@@ -39,11 +39,11 @@ jobs:
         
         # Check container status
         echo "Container Status:"
-        docker-compose ps
+        docker compose ps
         
         # Check health monitor
         echo "Testing Health Monitor..."
-        health_response=$(curl -s http://localhost:5000/api/status)
+        health_response=$(curl -s http://localhost:5001/api/status)
         echo "Health Monitor Response:"
         echo "$health_response" | jq '.'
         
@@ -120,7 +120,7 @@ jobs:
         
         ## Health Monitor Status
         \`\`\`json
-        $(curl -s http://localhost:5000/api/status 2>/dev/null || echo '{"error": "Health monitor not accessible"}')
+        $(curl -s http://localhost:5001/api/status 2>/dev/null || echo '{"error": "Health monitor not accessible"}')
         \`\`\`
         
         ## File Listing
@@ -146,7 +146,7 @@ jobs:
         issues_found=0
         
         # Check if health monitor is accessible
-        if ! curl -f http://localhost:5000/health > /dev/null 2>&1; then
+        if ! curl -f http://localhost:5001/health > /dev/null 2>&1; then
           echo "❌ Health monitor is not accessible"
           issues_found=$((issues_found + 1))
         fi
@@ -187,5 +187,5 @@ jobs:
       if: always()
       run: |
         echo "Stopping and removing containers..."
-        docker-compose down -v
+        docker compose down -v
         echo "Cleanup completed"

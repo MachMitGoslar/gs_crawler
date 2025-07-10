@@ -25,9 +25,10 @@ for url in urls:
     images.append(img)
 
 # GIF-Pfad festlegen
-gif_filename = "webcam.gif"
+gif_filename = "032_webcams.gif"
 savemepath = "output/"
 output_path = os.path.join(savemepath, gif_filename)
+img_url_path = "https://crawler.goslar.app/crawler/"
 
 
 # GIF erzeugen
@@ -46,7 +47,7 @@ print(f"✅ GIF wurde erstellt: {savemepath}")
 json_data = {
     "title": "Webcams Goslar",
     "description": "Webcam Views aus Goslar",
-    "image_url": f"https://machmit.goslar.de/fileadmin/media-machmit/goslar-app/{gif_filename}",  # URL zum veröffentlichten GIF
+    "image_url": f"{img_url_path}{gif_filename}",  # URL zum veröffentlichten GIF
     "call_to_action_url": "https://www.meingoslar.de/erleben-und-geniessen/webcams#h5189",
     "published_at": datetime.now().strftime("%Y-%m-%dT%H:%M")
 }
