@@ -1,5 +1,4 @@
 name: Docker Build and Container Health Test
-
 on:
   push:
     branches: 
@@ -24,6 +23,15 @@ jobs:
       run: |
         mkdir -p httpdocs/crawler
         echo "Created output directory for crawler data"
+
+    - name: Build Base Images first
+      run: |
+        echo "Building base images..."
+        cd base_images
+        chmod +x build_all.sh
+        ./build_all.sh
+        echo "Base images built successfully"
+        cd ..
     
     - name: Build all Docker containers
       run: |

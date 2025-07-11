@@ -1,14 +1,8 @@
-FROM python:3.13-slim
+# Migriert zu Base-Image für bessere Wartbarkeit
+FROM gs_crawler/flask_monitor:latest
 
-WORKDIR /app
-
-COPY requirements.txt requirements.txt
-COPY app.py app.py
+# Kopiere container-spezifische Dateien
+COPY app.py .
 COPY templates/ templates/
 
-RUN python3 -m venv .venv
-RUN .venv/bin/pip install -r requirements.txt
-
-EXPOSE 5000
-
-CMD [".venv/bin/python3", "app.py"]
+# Port ist bereits im Base-Image exponiert
