@@ -23,6 +23,7 @@ build_image() {
             echo "❌ Failed to build $image_name"
             exit 1
         fi
+        cd ".."
     else
         echo "❌ Directory $build_dir not found"
         exit 1
