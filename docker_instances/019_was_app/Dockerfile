@@ -1,23 +1,12 @@
-FROM python:3.13-slim
+# Migriert zu Base-Image für bessere Wartbarkeit
+FROM gs_crawler/python_basic_crawler:latest
 
-WORKDIR /app
-
-
-COPY requirements.txt requirements.txt
+# Kopiere container-spezifische Dateien
 COPY 019_was_app.py script.py
-COPY helpers.py helpers.py
 COPY crontab /etc/cron.d/mycron
-COPY start_up.sh .
 
-RUN apt-get update && apt-get install -y cron python3-venv \
- && chmod 0600 /etc/cron.d/mycron \
- && crontab /etc/cron.d/mycron
+# helpers.py wird vom Base-Image bereitgestellt
 
-RUN python3 -m venv .venv
-RUN .venv/bin/pip install -r requirements.txt
-
-RUN chmod +x start_up.sh
-
-# Starte Cron + zeige Logs
-#CMD ["cron", "-f", ">> /proc/1/fd/1"] 
-ENTRYPOINT [ "/app/start_up.sh" ]
+# Konfiguriere Cron
+RUN chmod 0600 /etc/cron.d/mycron && \
+    crontab /etc/cron.d/mycron

@@ -1,19 +1,12 @@
-FROM python:3.13-slim
+# Migriert zu Base-Image für bessere Wartbarkeit
+FROM gs_crawler/python_basic_crawler:latest
 
-WORKDIR /app
-
-COPY requirements.txt requirements.txt
-COPY script.py script.py
+# Kopiere container-spezifische Dateien
+COPY script.py .
 COPY crontab /etc/cron.d/mycron
-COPY start_up.sh .
 
-RUN apt-get update && apt-get install -y cron python3-venv \
- && chmod 0600 /etc/cron.d/mycron \
- && crontab /etc/cron.d/mycron
 
-RUN python3 -m venv .venv
-RUN .venv/bin/pip install -r requirements.txt
 
-RUN chmod +x start_up.sh
-
-CMD ["./start_up.sh"]
+# Konfiguriere Cron
+RUN chmod 0600 /etc/cron.d/mycron && \
+    crontab /etc/cron.d/mycron

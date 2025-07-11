@@ -1,5 +1,9 @@
 
+# Base-Images für den GS Crawler Stack
+# Reduziert Redundanz und verbessert Wartbarkeit
+
 services:
+  # === HEALTH MONITOR ===
   gs_health_monitor:
     build: ./docker_instances/000_health_monitor
     volumes:
@@ -8,98 +12,120 @@ services:
       - "5001:5000"
     container_name: gs_health_monitor
     restart: unless-stopped
+    depends_on:
+      - gs_compiler_001_senioren
+      - gs_compiler_002_fepa
+      - gs_compiler_002_gz
+
+  # === NEWS & MEDIA CRAWLER ===
   gs_compiler_001_senioren:
     build: ./docker_instances/001_senioren
     volumes:
       - ./httpdocs/crawler:/app/output
     container_name: gs_compiler_001_senioren
     restart: unless-stopped
-  gs_compiler_002_fepa:
-    build: ./docker_instances/002_ferienpass
-    volumes:
-      - ./httpdocs/crawler:/app/output
-    container_name: gs_compiler_002_fepa
-    restart: unless-stopped
-  gs_compiler_040_hp:
-    build: ./docker_instances/040_hp
-    volumes:
-      - ./httpdocs/crawler:/app/output
-    container_name: gs_compiler_040_hp
-    restart: unless-stopped
-  gs_compiler_019_was_app:
-    build: ./docker_instances/019_was_app
-    volumes:
-      - ./httpdocs/crawler:/app/output
-    container_name: gs_compiler_019_was_app
-    restart: unless-stopped
-  gs_compiler_041_immenrode:
-    build: ./docker_instances/041_immenrode
-    volumes:
-      - ./httpdocs/crawler:/app/output
-    container_name: gs_compiler_041_immenrode
-    restart: unless-stopped
-  gs_compiler_042_freiwilligen:
-    build: ./docker_instances/042_freiwilligen
-    volumes:
-      - ./httpdocs/crawler:/app/output
-    container_name: gs_compiler_042_freiwilligen
-    restart: unless-stopped
-  gs_compiler_044_wiedelah:
-    build: ./docker_instances/044_wiedelah
-    volumes:
-      - ./httpdocs/crawler:/app/output
-    container_name: gs_compiler_044_wiedelah
-    restart: unless-stopped
-  gs_compiler_045_naturgefahren:
-    build: ./docker_instances/045_naturgefahren
-    volumes:
-      - ./httpdocs/crawler:/app/output
-    container_name: gs_compiler_045_naturgefahren
-    restart: unless-stopped
-  gs_compiler_047_bodenwasser:
-    build: ./docker_instances/047_bodenwasser
-    volumes:
-      - ./httpdocs/crawler:/app/output
-    container_name: gs_compiler_047_bodenwasser
-    restart: unless-stopped
-  gs_compiler_048_jerstedt:
-    build: ./docker_instances/048_jerstedt
-    volumes:
-      - ./httpdocs/crawler:/app/output
-    container_name: gs_compiler_048_jerstedt
-    restart: unless-stopped
+
   gs_compiler_002_gz:
     build: ./docker_instances/002_gz
     volumes:
       - ./httpdocs/crawler:/app/output
     container_name: gs_compiler_002_gz
     restart: unless-stopped
-  
-  gs_compiler_053_tschuessschule_praktikum:
-    build: ./docker_instances/053_tschuessschule_praktikum
+
+  gs_compiler_040_hp:
+    build: ./docker_instances/040_hp
     volumes:
       - ./httpdocs/crawler:/app/output
-    container_name: gs_compiler_053_tschuessschule_praktikum
-    restart: unless-stopped
-  gs_compiler_054_tschuessschule_ausbildung:
-    build: ./docker_instances/054_tschuessschule_ausbildung
-    volumes:
-      - ./httpdocs/crawler:/app/output
+    container_name: gs_compiler_040_hp
     restart: unless-stopped
 
-    container_name: gs_compiler_054_tschuessschule_ausbildung
+  # === EVENT CRAWLER ===
+  gs_compiler_002_fepa:
+    build: ./docker_instances/002_ferienpass
+    volumes:
+      - ./httpdocs/crawler:/app/output
+    container_name: gs_compiler_002_fepa
+    restart: unless-stopped
+
+  gs_compiler_019_was_app:
+    build: ./docker_instances/019_was_app
+    volumes:
+      - ./httpdocs/crawler:/app/output
+    container_name: gs_compiler_019_was_app
+    restart: unless-stopped
+
+  gs_compiler_027_erster_freitag:
+    build: ./docker_instances/027_erster_freitag
+    volumes:
+      - ./httpdocs/crawler:/app/output
+    container_name: gs_compiler_027_erster_freitag
+    restart: unless-stopped
+
+  # === LOCAL NEWS CRAWLER ===
+  gs_compiler_041_immenrode:
+    build: ./docker_instances/041_immenrode
+    volumes:
+      - ./httpdocs/crawler:/app/output
+    container_name: gs_compiler_041_immenrode
+    restart: unless-stopped
+
+  gs_compiler_048_jerstedt:
+    build: ./docker_instances/048_jerstedt
+    volumes:
+      - ./httpdocs/crawler:/app/output
+    container_name: gs_compiler_048_jerstedt
+    restart: unless-stopped
+
+  # === COMMUNITY & VOLUNTEER CRAWLER ===
+  gs_compiler_042_freiwilligen:
+    build: ./docker_instances/042_freiwilligen
+    volumes:
+      - ./httpdocs/crawler:/app/output
+    container_name: gs_compiler_042_freiwilligen
+    restart: unless-stopped
+
+  gs_compiler_044_wiedelah:
+    build: ./docker_instances/044_wiedelah
+    volumes:
+      - ./httpdocs/crawler:/app/output
+    container_name: gs_compiler_044_wiedelah
+    restart: unless-stopped
+
+  gs_compiler_031_goslarer_geschichten:
+    build: ./docker_instances/031_goslarer_geschichten
+    volumes:
+      - ./httpdocs/crawler:/app/output
+    container_name: gs_compiler_031_goslarer_geschichten
+    restart: unless-stopped
+
+  # === ENVIRONMENTAL MONITORING ===
+  gs_compiler_045_naturgefahren:
+    build: ./docker_instances/045_naturgefahren
+    volumes:
+      - ./httpdocs/crawler:/app/output
+    container_name: gs_compiler_045_naturgefahren
+    restart: unless-stopped
+
+  gs_compiler_047_bodenwasser:
+    build: ./docker_instances/047_bodenwasser
+    volumes:
+      - ./httpdocs/crawler:/app/output
+    container_name: gs_compiler_047_bodenwasser
+    restart: unless-stopped
+
+  gs_compiler_035_talsperren:
+    build: ./docker_instances/035_talsperren
+    volumes:
+      - ./httpdocs/crawler:/app/output
+    container_name: gs_compiler_035_talsperren
+    restart: unless-stopped
+
+  # === EDUCATION CRAWLER ===
   gs_compiler_050_tschuessschule_studium:
     build: ./docker_instances/050_tschuessschule_studium
     volumes:
       - ./httpdocs/crawler:/app/output
     container_name: gs_compiler_050_tschuessschule_studium
-    restart: unless-stopped
-
-  gs_compiler_014_kunst_in_ar:
-    build: ./docker_instances/014_kunst_in_ar
-    volumes:
-      - ./httpdocs/crawler:/app/output
-    container_name: gs_compiler_014_kunst_in_ar
     restart: unless-stopped
 
   gs_compiler_051_vhs:
@@ -115,18 +141,34 @@ services:
       - ./httpdocs/crawler:/app/output
     container_name: gs_compiler_052_vhs_kinderuni
     restart: unless-stopped
-  gs_compiler_031_goslarer_geschichten:
-    build: ./docker_instances/031_goslarer_geschichten
+
+  gs_compiler_053_tschuessschule_praktikum:
+    build: ./docker_instances/053_tschuessschule_praktikum
     volumes:
       - ./httpdocs/crawler:/app/output
-    container_name: gs_compiler_031_goslarer_geschichten
+    container_name: gs_compiler_053_tschuessschule_praktikum
     restart: unless-stopped
 
-  gs_compiler_035_talsperren:
-    build: ./docker_instances/035_talsperren
+  gs_compiler_054_tschuessschule_ausbildung:
+    build: ./docker_instances/054_tschuessschule_ausbildung
     volumes:
       - ./httpdocs/crawler:/app/output
-    container_name: gs_compiler_035_talsperren
+    container_name: gs_compiler_054_tschuessschule_ausbildung
+    restart: unless-stopped
+
+  # === SPECIALIZED CRAWLER ===
+  gs_compiler_014_kunst_in_ar:
+    build: ./docker_instances/014_kunst_in_ar
+    volumes:
+      - ./httpdocs/crawler:/app/output
+    container_name: gs_compiler_014_kunst_in_ar
+    restart: unless-stopped
+
+  gs_compiler_032_webcams_goslar:
+    build: ./docker_instances/032_webcams_goslar
+    volumes:
+      - ./httpdocs/crawler:/app/output
+    container_name: gs_compiler_032_webcams_goslar
     restart: unless-stopped
 
   gs_compiler_056_serviceportal:
@@ -136,16 +178,11 @@ services:
     container_name: gs_compiler_056_serviceportal
     restart: unless-stopped
 
-  gs_compiler_027_erster_freitag:
-    build: ./docker_instances/027_erster_freitag
-    volumes:
-      - ./httpdocs/crawler:/app/output
-    container_name: gs_compiler_027_erster_freitag
-    restart: unless-stopped
-
-  gs_compiler_032_webcams_goslar:
-    build: ./docker_instances/032_webcams_goslar
-    volumes:
-      - ./httpdocs/crawler:/app/output
-    container_name: gs_compiler_032_webcams_goslar
-    restart: unless-stopped
+# Gemeinsames Volume für alle Output-Dateien
+volumes:
+  crawler_output:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./httpdocs/crawler

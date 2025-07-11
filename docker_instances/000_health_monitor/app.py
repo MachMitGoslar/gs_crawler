@@ -64,7 +64,7 @@ CONTAINERS = {
     },
     'gs_compiler_032_webcams_goslar': {
         'name': 'Webcams Goslar',
-        'expected_files': ['032_webcams_goslar.json'],
+        'expected_files': ['032_webcams_goslar.json', '032_webcams.gif'],
         'source': 'https://webcams.goslar.de/',
         'schedule': 'Täglich 09:00',
         'type': 'Webcam Processor'
@@ -141,7 +141,7 @@ CONTAINERS = {
     },
     'gs_compiler_052_vhs_kinderuni': {
         'name': 'VHS Kinderuni',
-        'expected_files': ['052_vhs_kinderuni.json', '052_vhs_kinderuni-alle.json'],
+        'expected_files': ['052_vhs_kinderuni.json', '052_vhs_kinderuni_alle.json'],
         'source': 'https://www.vhs-goslar.de/',
         'schedule': 'Täglich 09:00',
         'type': 'Education Portal'
