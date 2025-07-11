@@ -6,7 +6,7 @@ echo "🔧 Building GS Crawler Base Images..."
 echo "=================================="
 
 # Basis-Pfad
-BASE_DIR="/Users/stuff/Documents/projects/gs_crawler/base_images"
+BASE_DIR="./"
 
 # Funktion zum Bauen eines Base-Images
 build_image() {

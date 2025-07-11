@@ -1,4 +1,3 @@
-version: '3.8'
 
 # Base-Images für den GS Crawler Stack
 # Reduziert Redundanz und verbessert Wartbarkeit
