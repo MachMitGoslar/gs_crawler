@@ -11,7 +11,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_PREFIX: ghcr.io/${{ github.repository }}r Instances - Build and Deploy
+  IMAGE_PREFIX: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}
 
 jobs:
   prepare-version:
@@ -463,7 +463,7 @@ jobs:
           
           ## Health Check
           
-          Health Monitor available at: http://localhost:5001
+          Health Monitor available at: http://localhost:5015
           
           ## Rollback
           
