@@ -171,12 +171,12 @@ jobs:
         
         # Pull the PR version of the base image and tag it for local use
 
-        echo "Pulling PR version of python_basic_crawler..."
+        echo "Pulling PR version of Base Container..."
         docker pull $base_image:pr-${{ github.event.number }}
         docker tag $base_image:pr-${{ github.event.number }} $base_image:pr-test
 
         # Verify the base image is available
-        if docker images "$base_image:pr-${{ github.event.number }}" | grep -q "pr-test"; then
+        if docker images "$base_image:pr-${{ github.event.number }}" | grep "pr-test"; then
           echo "✅ Base image available for testing"
         else
           echo "❌ Base image not found"
