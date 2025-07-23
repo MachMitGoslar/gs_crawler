@@ -143,7 +143,7 @@ jobs:
         
         base_image=$(grep "^FROM" "$dockerfile" | head -1 | awk '{print $2}' | cut -d':' -f1)
         echo "📦 Base image needed: $base_image"
-        
+        docker image list
         # Baue Base-Image falls nötig
         case "$base_image" in
           "gs_crawler/python_basic_crawler"|"stuffdev/python_basic_crawler")
