@@ -87,7 +87,7 @@ jobs:
   build-base-images:
     runs-on: ubuntu-latest
     needs: detect-changes
-    if: needs.detect-changes.outputs.base-images-changed == 'true'
+    if: needs.detect-changes.outputs.base-images-changed == 'true' || needs.detect-changes.outputs.changed-containers != '[]'
     strategy:
       matrix:
         image: 
@@ -102,17 +102,31 @@ jobs:
     
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
+      with:
+        driver-opts: network=host
     
-    - name: Build base image ${{ matrix.image }}
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Build and push base image ${{ matrix.image }}
       run: |
-        echo "🏗️ Building base image ${{ matrix.image }} for testing..."
+        echo "🏗️ Building and pushing base image ${{ matrix.image }} to GHCR..."
         cd base_images/${{ matrix.image }}
+        
+        # Build and push to GHCR for sharing between jobs
         docker buildx build \
           --platform linux/amd64 \
-          --tag gs_crawler/${{ matrix.image }}:test \
-          --load \
+          --tag ghcr.io/${{ github.repository_owner }}/gs_crawler_${{ matrix.image }}:pr-${{ github.event.number || 'test' }} \
+          --push \
+          --cache-from=type=gha \
+          --cache-to=type=gha,mode=max \
           .
-        echo "✅ Base image ${{ matrix.image }} built successfully"
+        
+        echo "✅ Base image ${{ matrix.image }} built and pushed to GHCR successfully"
 
   test-container-builds:
     runs-on: ubuntu-latest
@@ -128,10 +142,19 @@ jobs:
     
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
+      with:
+        driver-opts: network=host
     
-    - name: Build base images if needed
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Prepare base images
       run: |
-        echo "🔧 Ensuring base images are available..."
+        echo "🔧 Preparing base images for container ${{ matrix.container }}..."
         
         # Bestimme welches Base-Image benötigt wird
         dockerfile="docker_instances/${{ matrix.container }}/Dockerfile"
@@ -143,63 +166,53 @@ jobs:
         
         base_image=$(grep "^FROM" "$dockerfile" | head -1 | awk '{print $2}' | cut -d':' -f1)
         echo "📦 Base image needed: $base_image"
-        docker image list
-        # Baue Base-Image falls nötig
+        
+        # Map base image name to GHCR image name
         case "$base_image" in
           "gs_crawler/python_basic_crawler"|"stuffdev/python_basic_crawler")
-            if ! docker image inspect gs_crawler/python_basic_crawler:test >/dev/null 2>&1; then
-              echo "Building python_basic_crawler..."
-              cd base_images/python_basic_crawler
-              docker buildx build --platform linux/amd64 --tag gs_crawler/python_basic_crawler:test --load .
-              cd ../..
-            fi
+            ghcr_image="ghcr.io/${{ github.repository_owner }}/gs_crawler_python_basic_crawler:pr-${{ github.event.number || 'test' }}"
+            local_tag="gs_crawler/python_basic_crawler:test"
+            base_image_dir="python_basic_crawler"
             ;;
           "gs_crawler/python_selenium_crawler"|"stuffdev/python_selenium_crawler")
-            if ! docker image inspect gs_crawler/python_selenium_crawler:test >/dev/null 2>&1; then
-              echo "Building python_selenium_crawler..."
-              cd base_images/python_selenium_crawler
-              docker buildx build --platform linux/amd64 --tag gs_crawler/python_selenium_crawler:test --load .
-              cd ../..
-            fi
+            ghcr_image="ghcr.io/${{ github.repository_owner }}/gs_crawler_python_selenium_crawler:pr-${{ github.event.number || 'test' }}"
+            local_tag="gs_crawler/python_selenium_crawler:test"
+            base_image_dir="python_selenium_crawler"
             ;;
           "gs_crawler/php_basic_crawler"|"stuffdev/php_basic_crawler")
-            if ! docker image inspect gs_crawler/php_basic_crawler:test >/dev/null 2>&1; then
-              echo "Building php_basic_crawler..."
-              cd base_images/php_basic_crawler
-              docker buildx build --platform linux/amd64 --tag gs_crawler/php_basic_crawler:test --load .
-              cd ../..
-            fi
+            ghcr_image="ghcr.io/${{ github.repository_owner }}/gs_crawler_php_basic_crawler:pr-${{ github.event.number || 'test' }}"
+            local_tag="gs_crawler/php_basic_crawler:test"
+            base_image_dir="php_basic_crawler"
             ;;
           "gs_crawler/flask_monitor"|"stuffdev/flask_monitor")
-            if ! docker image inspect gs_crawler/flask_monitor:test >/dev/null 2>&1; then
-              echo "Building flask_monitor..."
-              cd base_images/flask_monitor
-              docker buildx build --platform linux/amd64 --tag gs_crawler/flask_monitor:test --load .
-              cd ../..
-            fi
+            ghcr_image="ghcr.io/${{ github.repository_owner }}/gs_crawler_flask_monitor:pr-${{ github.event.number || 'test' }}"
+            local_tag="gs_crawler/flask_monitor:test"
+            base_image_dir="flask_monitor"
+            ;;
+          *)
+            echo "❌ Unknown base image: $base_image"
+            exit 1
             ;;
         esac
-              docker buildx build --platform linux/amd64 --tag gs_crawler/python_selenium_crawler:test --load .
-              cd ../..
-            fi
-            ;;
-          "gs_crawler/php_basic_crawler")
-            if ! docker image inspect gs_crawler/php_basic_crawler:test >/dev/null 2>&1; then
-              echo "Building php_basic_crawler..."
-              cd base_images/php_basic_crawler
-              docker buildx build --platform linux/amd64 --tag gs_crawler/php_basic_crawler:test --load .
-              cd ../..
-            fi
-            ;;
-          "gs_crawler/flask_monitor")
-            if ! docker image inspect gs_crawler/flask_monitor:test >/dev/null 2>&1; then
-              echo "Building flask_monitor..."
-              cd base_images/flask_monitor
-              docker buildx build --platform linux/amd64 --tag gs_crawler/flask_monitor:test --load .  
-              cd ../..
-            fi
-            ;;
-        esac
+        
+        # Try to pull from GHCR first (in case base images were built in build-base-images job)
+        if docker pull "$ghcr_image" 2>/dev/null; then
+          echo "✅ Pulled base image from GHCR: $ghcr_image"
+          docker tag "$ghcr_image" "$local_tag"
+        else
+          echo "ℹ️ Base image not found in GHCR, building locally with cache..."
+          cd "base_images/$base_image_dir"
+          docker buildx build \
+            --platform linux/amd64 \
+            --tag "$local_tag" \
+            --load \
+            --cache-from=type=gha \
+            --cache-to=type=gha,mode=max \
+            .
+          cd ../..
+        fi
+        
+        echo "✅ Base image prepared successfully: $local_tag"
     
     - name: Test build ${{ matrix.container }}
       run: |
@@ -209,12 +222,14 @@ jobs:
         # Ersetze Base-Image-Tags für Test
         sed 's/:latest/:test/g' Dockerfile > Dockerfile.test
         
-        # Build Container
+        # Build Container mit Cache
         docker buildx build \
           --platform linux/amd64 \
           --file Dockerfile.test \
           --tag gs_crawler_test/${{ matrix.container }}:test \
           --load \
+          --cache-from=type=gha \
+          --cache-to=type=gha,mode=max \
           .
         
         echo "✅ Build test successful for ${{ matrix.container }}"
@@ -296,7 +311,7 @@ jobs:
 
   test-integration:
     runs-on: ubuntu-latest
-    needs: [detect-changes, test-container-builds]
+    needs: [detect-changes, build-base-images, test-container-builds]
     if: always() && needs.test-container-builds.result == 'success'
     
     steps:
@@ -305,6 +320,15 @@ jobs:
     
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
+      with:
+        driver-opts: network=host
+    
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
     
     - name: Create test output directory
       run: |
@@ -315,26 +339,51 @@ jobs:
       run: |
         echo "🔧 Building key containers for integration test..."
         
-        # Baue Base-Images
+        # Use cached base images when available
         key_base_images=("python_basic_crawler" "flask_monitor")
         for image in "${key_base_images[@]}"; do
           if [ -d "base_images/$image" ]; then
-            echo "Building base image: $image"
-            cd base_images/$image
-            docker buildx build --platform linux/amd64 --tag gs_crawler/$image:test --load .
-            cd ../..
+            echo "Preparing base image: $image"
+            
+            # Try to pull from GHCR first
+            ghcr_image="ghcr.io/${{ github.repository_owner }}/gs_crawler_$image:pr-${{ github.event.number || 'test' }}"
+            local_tag="gs_crawler/$image:test"
+            
+            if docker pull "$ghcr_image" 2>/dev/null; then
+              echo "✅ Pulled base image from GHCR: $ghcr_image"
+              docker tag "$ghcr_image" "$local_tag"
+            else
+              echo "ℹ️ Base image not found in GHCR, building locally with cache..."
+              cd "base_images/$image"
+              docker buildx build \
+                --platform linux/amd64 \
+                --tag "$local_tag" \
+                --load \
+                --cache-from=type=gha \
+                --cache-to=type=gha,mode=max \
+                .
+              cd ../..
+            fi
           fi
         done
         
-        # Baue Test-Container
+        # Baue Test-Container mit Cache
         key_containers=("000_health_monitor" "019_was_app" "001_senioren")
         for container in "${key_containers[@]}"; do
           if [ -d "docker_instances/$container" ]; then
             echo "Building container: $container"
             cd docker_instances/$container
             sed 's/:latest/:test/g' Dockerfile > Dockerfile.test
-            docker buildx build --platform linux/amd64 --file Dockerfile.test --tag gs_crawler_test/$container:test --load .
+            docker buildx build \
+              --platform linux/amd64 \
+              --file Dockerfile.test \
+              --tag gs_crawler_test/$container:test \
+              --load \
+              --cache-from=type=gha \
+              --cache-to=type=gha,mode=max \
+              .
             cd ../..
+            echo "✅ Built container with cache: $container"
           fi
         done
     
@@ -367,7 +416,7 @@ jobs:
 
   security-scan:
     runs-on: ubuntu-latest
-    needs: [detect-changes, test-container-builds]
+    needs: [detect-changes, build-base-images, test-container-builds]
     if: always() && needs.test-container-builds.result == 'success'
     strategy:
       matrix:
@@ -395,7 +444,7 @@ jobs:
 
   summary:
     runs-on: ubuntu-latest
-    needs: [detect-changes, test-container-builds, test-integration, security-scan]
+    needs: [detect-changes, build-base-images, test-container-builds, test-integration, security-scan]
     if: always()
     
     steps:
