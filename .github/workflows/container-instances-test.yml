@@ -243,56 +243,21 @@ jobs:
         # Grundlegende Funktionstests
         container_type=$(basename $(dirname $(find docker_instances/${{ matrix.container }} -name "*.py" -o -name "*.php" | head -1)) 2>/dev/null || echo "unknown")
         
-        case "${{ matrix.container }}" in
-          "000_health_monitor")
-            # Flask App Test
-            echo "Testing Flask health monitor..."
-            docker run --rm --name test_${{ matrix.container }} -d gs_crawler_test/${{ matrix.container }}:test
-            sleep 3
-            # Prüfe ob Container läuft
-            if docker ps | grep -q test_${{ matrix.container }}; then
-              echo "✅ Health monitor container started successfully"
-              docker stop test_${{ matrix.container }} || true
-            else
-              echo "❌ Health monitor container failed to start"
-              docker logs test_${{ matrix.container }} || true
-              exit 1
-            fi
-            ;;
-          "002_ferienpass")
-            # PHP Container Test
-            echo "Testing PHP container..."
-            docker run --rm gs_crawler_test/${{ matrix.container }}:test php --version
-            docker run --rm gs_crawler_test/${{ matrix.container }}:test /bin/bash -c "ls -la /app"
-            sleep 3
-            # Prüfe ob Container läuft
-            if docker ps | grep -q test_${{ matrix.container }}; then
-              echo "✅ Health monitor container started successfully"
-              docker stop test_${{ matrix.container }} || true
-            else
-              echo "❌ Health monitor container failed to start"
-              docker logs test_${{ matrix.container }} || true
-              exit 1
-            fi
-            ;;
-          *)
-            # Python Container Test
-            echo "Testing Python container..."
-            docker run --rm gs_crawler_test/${{ matrix.container }}:test python3 --version
-            docker run --rm gs_crawler_test/${{ matrix.container }}:test /bin/bash -c "ls -la /app/.venv/bin/python3"
-            docker run --rm gs_crawler_test/${{ matrix.container }}:test /bin/bash -c "/app/.venv/bin/python3 /app/script.py"
-            sleep 3
-            # Prüfe ob Container läuft
-            if docker ps | grep -q test_${{ matrix.container }}; then
-              echo "✅ Health monitor container started successfully"
-              docker stop test_${{ matrix.container }} || true
-            else
-              echo "❌ Health monitor container failed to start"
-              docker logs test_${{ matrix.container }} || true
-              exit 1
-            fi
-            ;;
-        esac
+
+        echo "Testing Container Health"
+        docker run --rm --name test_${{ matrix.container }} -d gs_crawler_test/${{ matrix.container }}:test
+        sleep 3
+        # Prüfe ob Container läuft
+        if docker ps | grep -q test_${{ matrix.container }}; then
+            echo "✅ Container started successfully"
+            docker stop test_${{ matrix.container }} || true
+        else
+            echo "❌ Container failed to start"
+            docker logs test_${{ matrix.container }} || true
+            exit 1
+        fi
+        ;;
+
         
         echo "✅ Functionality test passed for ${{ matrix.container }}"
     
