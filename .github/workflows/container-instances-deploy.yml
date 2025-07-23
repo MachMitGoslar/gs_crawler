@@ -197,43 +197,6 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
     
-    - name: Prepare base images
-      run: |
-        echo "🔧 Preparing base images for ${{ matrix.container }}..."
-        
-        dockerfile="docker_instances/${{ matrix.container }}/Dockerfile"
-        if [ ! -f "$dockerfile" ]; then
-          echo "❌ Dockerfile not found: $dockerfile"
-          exit 1
-        fi
-        
-        base_image=$(grep "^FROM" "$dockerfile" | head -1 | awk '{print $2}' | cut -d':' -f1)
-        echo "📦 Base image needed: $base_image"
-        
-        # Verwende die neuen Versionen
-        case "$base_image" in
-        "gs_crawler/python_basic_crawler")
-            echo "Pulling updated python_basic_crawler..."
-            docker pull ${{ env.IMAGE_PREFIX }}_python_basic_crawler:${{ needs.prepare-version.outputs.version }}
-            docker tag ${{ env.IMAGE_PREFIX }}_python_basic_crawler:${{ needs.prepare-version.outputs.version }} gs_crawler/python_basic_crawler:latest
-            ;;
-        "gs_crawler/python_selenium_crawler")
-            echo "Pulling updated python_selenium_crawler..."
-            docker pull ${{ env.IMAGE_PREFIX }}_python_selenium_crawler:${{ needs.prepare-version.outputs.version }}
-            docker tag ${{ env.IMAGE_PREFIX }}_python_selenium_crawler:${{ needs.prepare-version.outputs.version }} gs_crawler/python_selenium_crawler:latest
-            ;;
-        "gs_crawler/php_basic_crawler")
-            echo "Pulling updated php_basic_crawler..."
-            docker pull ${{ env.IMAGE_PREFIX }}_php_basic_crawler:${{ needs.prepare-version.outputs.version }}
-            docker tag ${{ env.IMAGE_PREFIX }}_php_basic_crawler:${{ needs.prepare-version.outputs.version }} gs_crawler/php_basic_crawler:latest
-            ;;
-        "gs_crawler/flask_monitor")
-            echo "Pulling updated flask_monitor..."
-            docker pull ${{ env.IMAGE_PREFIX }}_flask_monitor:${{ needs.prepare-version.outputs.version }}
-            docker tag ${{ env.IMAGE_PREFIX }}_flask_monitor:${{ needs.prepare-version.outputs.version }} gs_crawler/flask_monitor:latest
-            ;;
-        esac
-
     
     - name: Extract metadata
       id: meta
