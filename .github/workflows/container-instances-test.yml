@@ -264,6 +264,16 @@ jobs:
             echo "Testing PHP container..."
             docker run --rm gs_crawler_test/${{ matrix.container }}:test php --version
             docker run --rm gs_crawler_test/${{ matrix.container }}:test /bin/bash -c "ls -la /app"
+            sleep 3
+            # Prüfe ob Container läuft
+            if docker ps | grep -q test_${{ matrix.container }}; then
+              echo "✅ Health monitor container started successfully"
+              docker stop test_${{ matrix.container }} || true
+            else
+              echo "❌ Health monitor container failed to start"
+              docker logs test_${{ matrix.container }} || true
+              exit 1
+            fi
             ;;
           *)
             # Python Container Test
@@ -271,6 +281,16 @@ jobs:
             docker run --rm gs_crawler_test/${{ matrix.container }}:test python3 --version
             docker run --rm gs_crawler_test/${{ matrix.container }}:test /bin/bash -c "ls -la /app/.venv/bin/python3"
             docker run --rm gs_crawler_test/${{ matrix.container }}:test /bin/bash -c "/app/.venv/bin/python3 /app/script.py"
+            sleep 3
+            # Prüfe ob Container läuft
+            if docker ps | grep -q test_${{ matrix.container }}; then
+              echo "✅ Health monitor container started successfully"
+              docker stop test_${{ matrix.container }} || true
+            else
+              echo "❌ Health monitor container failed to start"
+              docker logs test_${{ matrix.container }} || true
+              exit 1
+            fi
             ;;
         esac
         
