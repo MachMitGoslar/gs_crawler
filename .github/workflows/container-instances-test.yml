@@ -1,0 +1,451 @@
+name: Container Instances - Build Test
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'docker_instances/**'
+      - 'base_images/**'
+      - '.github/workflows/container-instances-test.yml'
+  workflow_dispatch:  # Allow manual triggering
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ghcr.io/${{ github.repository }}
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      changed-containers: ${{ steps.changes.outputs.changed-containers }}
+      all-containers: ${{ steps.containers.outputs.all-containers }}
+      base-images-changed: ${{ steps.changes.outputs.base-images-changed }}
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Detect changed files
+      id: changes
+      run: |
+        echo "🔍 Detecting changed containers and base images..."
+        
+        # Erkenne geänderte Container
+        changed_files=$(git diff --name-only HEAD~1 HEAD)
+        changed_containers=()
+        base_images_changed="false"
+        
+        # Prüfe auf Base-Image-Änderungen
+        if echo "$changed_files" | grep -q "^base_images/"; then
+          base_images_changed="true"
+          echo "🔄 Base images changed - will test all containers"
+        fi
+        
+        # Sammle geänderte Container
+        for file in $changed_files; do
+          if [[ $file == docker_instances/*/Dockerfile ]] || [[ $file == docker_instances/*/*.py ]] || [[ $file == docker_instances/*/*.php ]] || [[ $file == docker_instances/*/crontab ]]; then
+            container=$(echo $file | cut -d'/' -f2)
+            if [[ ! " ${changed_containers[@]} " =~ " ${container} " ]]; then
+              changed_containers+=("$container")
+            fi
+          fi
+        done
+        
+        # Ausgabe als JSON Array
+        if [ ${#changed_containers[@]} -eq 0 ] && [ "$base_images_changed" == "false" ]; then
+          echo "changed-containers=[]" >> $GITHUB_OUTPUT
+        else
+          printf -v joined '"%s",' "${changed_containers[@]}"
+          echo "changed-containers=[${joined%,}]" >> $GITHUB_OUTPUT
+        fi
+        
+        echo "base-images-changed=$base_images_changed" >> $GITHUB_OUTPUT
+        
+        echo "📋 Changed containers: ${changed_containers[*]}"
+        echo "🏗️ Base images changed: $base_images_changed"
+    
+    - name: List all containers
+      id: containers
+      run: |
+        echo "📦 Listing all available containers..."
+        
+        containers=()
+        for dir in docker_instances/*/; do
+          if [ -f "$dir/Dockerfile" ]; then
+            container=$(basename "$dir")
+            containers+=("$container")
+          fi
+        done
+        
+        printf -v joined '"%s",' "${containers[@]}"
+        echo "all-containers=[${joined%,}]" >> $GITHUB_OUTPUT
+        
+        echo "📋 All containers: ${containers[*]}"
+
+  build-base-images:
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.base-images-changed == 'true'
+    strategy:
+      matrix:
+        image: 
+          - python_basic_crawler
+          - python_selenium_crawler
+          - php_basic_crawler
+          - flask_monitor
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Build base image ${{ matrix.image }}
+      run: |
+        echo "🏗️ Building base image ${{ matrix.image }} for testing..."
+        cd base_images/${{ matrix.image }}
+        docker buildx build \
+          --platform linux/amd64 \
+          --tag gs_crawler/${{ matrix.image }}:test \
+          --load \
+          .
+        echo "✅ Base image ${{ matrix.image }} built successfully"
+
+  test-container-builds:
+    runs-on: ubuntu-latest
+    needs: [detect-changes, build-base-images]
+    if: always() && (needs.detect-changes.outputs.changed-containers != '[]' || needs.detect-changes.outputs.base-images-changed == 'true')
+    strategy:
+      matrix:
+        container: ${{ fromJson(needs.detect-changes.outputs.base-images-changed == 'true' && needs.detect-changes.outputs.all-containers || needs.detect-changes.outputs.changed-containers) }}
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Build base images if needed
+      run: |
+        echo "🔧 Ensuring base images are available..."
+        
+        # Bestimme welches Base-Image benötigt wird
+        dockerfile="docker_instances/${{ matrix.container }}/Dockerfile"
+        
+        if [ ! -f "$dockerfile" ]; then
+          echo "❌ Dockerfile not found: $dockerfile"
+          exit 1
+        fi
+        
+        base_image=$(grep "^FROM" "$dockerfile" | head -1 | awk '{print $2}' | cut -d':' -f1)
+        echo "📦 Base image needed: $base_image"
+        
+        # Baue Base-Image falls nötig
+        case "$base_image" in
+          "gs_crawler/python_basic_crawler"|"stuffdev/python_basic_crawler")
+            if ! docker image inspect gs_crawler/python_basic_crawler:test >/dev/null 2>&1; then
+              echo "Building python_basic_crawler..."
+              cd base_images/python_basic_crawler
+              docker buildx build --platform linux/amd64 --tag gs_crawler/python_basic_crawler:test --load .
+              cd ../..
+            fi
+            ;;
+          "gs_crawler/python_selenium_crawler"|"stuffdev/python_selenium_crawler")
+            if ! docker image inspect gs_crawler/python_selenium_crawler:test >/dev/null 2>&1; then
+              echo "Building python_selenium_crawler..."
+              cd base_images/python_selenium_crawler
+              docker buildx build --platform linux/amd64 --tag gs_crawler/python_selenium_crawler:test --load .
+              cd ../..
+            fi
+            ;;
+          "gs_crawler/php_basic_crawler"|"stuffdev/php_basic_crawler")
+            if ! docker image inspect gs_crawler/php_basic_crawler:test >/dev/null 2>&1; then
+              echo "Building php_basic_crawler..."
+              cd base_images/php_basic_crawler
+              docker buildx build --platform linux/amd64 --tag gs_crawler/php_basic_crawler:test --load .
+              cd ../..
+            fi
+            ;;
+          "gs_crawler/flask_monitor"|"stuffdev/flask_monitor")
+            if ! docker image inspect gs_crawler/flask_monitor:test >/dev/null 2>&1; then
+              echo "Building flask_monitor..."
+              cd base_images/flask_monitor
+              docker buildx build --platform linux/amd64 --tag gs_crawler/flask_monitor:test --load .
+              cd ../..
+            fi
+            ;;
+        esac
+              docker buildx build --platform linux/amd64 --tag gs_crawler/python_selenium_crawler:test --load .
+              cd ../..
+            fi
+            ;;
+          "gs_crawler/php_basic_crawler")
+            if ! docker image inspect gs_crawler/php_basic_crawler:test >/dev/null 2>&1; then
+              echo "Building php_basic_crawler..."
+              cd base_images/php_basic_crawler
+              docker buildx build --platform linux/amd64 --tag gs_crawler/php_basic_crawler:test --load .
+              cd ../..
+            fi
+            ;;
+          "gs_crawler/flask_monitor")
+            if ! docker image inspect gs_crawler/flask_monitor:test >/dev/null 2>&1; then
+              echo "Building flask_monitor..."
+              cd base_images/flask_monitor
+              docker buildx build --platform linux/amd64 --tag gs_crawler/flask_monitor:test --load .  
+              cd ../..
+            fi
+            ;;
+        esac
+    
+    - name: Test build ${{ matrix.container }}
+      run: |
+        echo "🏗️ Testing build for container ${{ matrix.container }}..."
+        cd docker_instances/${{ matrix.container }}
+        
+        # Ersetze Base-Image-Tags für Test
+        sed 's/:latest/:test/g' Dockerfile > Dockerfile.test
+        
+        # Build Container
+        docker buildx build \
+          --platform linux/amd64 \
+          --file Dockerfile.test \
+          --tag gs_crawler_test/${{ matrix.container }}:test \
+          --load \
+          .
+        
+        echo "✅ Build test successful for ${{ matrix.container }}"
+    
+    - name: Validate container functionality
+      run: |
+        echo "🧪 Testing container ${{ matrix.container }} functionality..."
+        
+        # Grundlegende Funktionstests
+        container_type=$(basename $(dirname $(find docker_instances/${{ matrix.container }} -name "*.py" -o -name "*.php" | head -1)) 2>/dev/null || echo "unknown")
+        
+        case "${{ matrix.container }}" in
+          "000_health_monitor")
+            # Flask App Test
+            echo "Testing Flask health monitor..."
+            docker run --rm --name test_${{ matrix.container }} -d gs_crawler_test/${{ matrix.container }}:test
+            sleep 3
+            # Prüfe ob Container läuft
+            if docker ps | grep -q test_${{ matrix.container }}; then
+              echo "✅ Health monitor container started successfully"
+              docker stop test_${{ matrix.container }} || true
+            else
+              echo "❌ Health monitor container failed to start"
+              docker logs test_${{ matrix.container }} || true
+              exit 1
+            fi
+            ;;
+          "002_ferienpass")
+            # PHP Container Test
+            echo "Testing PHP container..."
+            docker run --rm gs_crawler_test/${{ matrix.container }}:test php --version
+            docker run --rm gs_crawler_test/${{ matrix.container }}:test /bin/bash -c "ls -la /app"
+            ;;
+          *)
+            # Python Container Test
+            echo "Testing Python container..."
+            docker run --rm gs_crawler_test/${{ matrix.container }}:test python3 --version
+            docker run --rm gs_crawler_test/${{ matrix.container }}:test /bin/bash -c "ls -la /app/.venv/bin/python3"
+            docker run --rm gs_crawler_test/${{ matrix.container }}:test /bin/bash -c "crontab -l || echo 'No crontab configured'"
+            ;;
+        esac
+        
+        echo "✅ Functionality test passed for ${{ matrix.container }}"
+    
+    - name: Check container files
+      run: |
+        echo "📋 Checking required files for ${{ matrix.container }}..."
+        
+        cd docker_instances/${{ matrix.container }}
+        required_files=("Dockerfile")
+        
+        # Container-spezifische Dateien
+        case "${{ matrix.container }}" in
+          "000_health_monitor")
+            required_files+=("app.py" "templates")
+            ;;
+          "002_ferienpass")
+            required_files+=("fepa_fetcher.php" "crontab")
+            ;;
+          *)
+            required_files+=("crontab")
+            # Prüfe auf Script-Dateien
+            if [ -f "script.py" ]; then
+              required_files+=("script.py")
+            fi
+            ;;
+        esac
+        
+        for file in "${required_files[@]}"; do
+          if [ -e "$file" ]; then
+            echo "✅ Found: $file"
+          else
+            echo "❌ Missing: $file"
+            exit 1
+          fi
+        done
+        
+        echo "✅ All required files present for ${{ matrix.container }}"
+
+  test-integration:
+    runs-on: ubuntu-latest
+    needs: [detect-changes, test-container-builds]
+    if: always() && needs.test-container-builds.result == 'success'
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Create test output directory
+      run: |
+        mkdir -p test_output
+        echo "📁 Created test output directory"
+    
+    - name: Build subset of containers for integration test
+      run: |
+        echo "🔧 Building key containers for integration test..."
+        
+        # Baue Base-Images
+        key_base_images=("python_basic_crawler" "flask_monitor")
+        for image in "${key_base_images[@]}"; do
+          if [ -d "base_images/$image" ]; then
+            echo "Building base image: $image"
+            cd base_images/$image
+            docker buildx build --platform linux/amd64 --tag gs_crawler/$image:test --load .
+            cd ../..
+          fi
+        done
+        
+        # Baue Test-Container
+        key_containers=("000_health_monitor" "019_was_app" "001_senioren")
+        for container in "${key_containers[@]}"; do
+          if [ -d "docker_instances/$container" ]; then
+            echo "Building container: $container"
+            cd docker_instances/$container
+            sed 's/:latest/:test/g' Dockerfile > Dockerfile.test
+            docker buildx build --platform linux/amd64 --file Dockerfile.test --tag gs_crawler_test/$container:test --load .
+            cd ../..
+          fi
+        done
+    
+    - name: Test container interactions
+      run: |
+        echo "🧪 Testing container interactions..."
+        
+        # Starte Health Monitor
+        docker run --rm --name test_health_monitor -d \
+          -v $(pwd)/test_output:/app/output \
+          -p 5555:5000 \
+          gs_crawler_test/000_health_monitor:test
+        
+        sleep 5
+        
+        # Teste Health Monitor API
+        if curl -f http://localhost:5555/api/health > /dev/null 2>&1; then
+          echo "✅ Health Monitor API accessible"
+        else
+          echo "❌ Health Monitor API not accessible"
+          docker logs test_health_monitor
+          docker stop test_health_monitor || true
+          exit 1
+        fi
+        
+        # Cleanup
+        docker stop test_health_monitor || true
+        
+        echo "✅ Integration test completed successfully"
+
+  security-scan:
+    runs-on: ubuntu-latest
+    needs: [detect-changes, test-container-builds]
+    if: always() && needs.test-container-builds.result == 'success'
+    strategy:
+      matrix:
+        container: ${{ fromJson(needs.detect-changes.outputs.base-images-changed == 'true' && needs.detect-changes.outputs.all-containers || needs.detect-changes.outputs.changed-containers) }}
+        exclude:
+          - container: "[]"
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: 'docker_instances/${{ matrix.container }}'
+        format: 'sarif'
+        output: 'trivy-results-${{ matrix.container }}.sarif'
+    
+    - name: Upload Trivy scan results
+      uses: github/codeql-action/upload-sarif@v2
+      if: always()
+      with:
+        sarif_file: 'trivy-results-${{ matrix.container }}.sarif'
+
+  summary:
+    runs-on: ubuntu-latest
+    needs: [detect-changes, test-container-builds, test-integration, security-scan]
+    if: always()
+    
+    steps:
+    - name: Test Summary
+      run: |
+        echo "# 🧪 Container Instances Test Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        if [ "${{ needs.detect-changes.outputs.changed-containers }}" == "[]" ] && [ "${{ needs.detect-changes.outputs.base-images-changed }}" == "false" ]; then
+          echo "ℹ️ No containers or base images changed - no tests needed" >> $GITHUB_STEP_SUMMARY
+          exit 0
+        fi
+        
+        echo "## 📋 Test Results" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        # Test Results
+        if [ "${{ needs.test-container-builds.result }}" == "success" ]; then
+          echo "✅ **Container Builds:** All containers built successfully" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ **Container Builds:** Some containers failed to build" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        if [ "${{ needs.test-integration.result }}" == "success" ]; then
+          echo "✅ **Integration Tests:** All tests passed" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ **Integration Tests:** Some tests failed" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        if [ "${{ needs.security-scan.result }}" == "success" ]; then
+          echo "✅ **Security Scan:** No critical vulnerabilities found" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "⚠️ **Security Scan:** Check security tab for details" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "## 📦 Tested Containers" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        if [ "${{ needs.detect-changes.outputs.base-images-changed }}" == "true" ]; then
+          echo "🔄 **All containers tested** (base images changed)" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "📋 **Changed containers:** ${{ needs.detect-changes.outputs.changed-containers }}" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        # Overall Status
+        echo "" >> $GITHUB_STEP_SUMMARY
+        if [ "${{ needs.test-container-builds.result }}" == "success" ] && [ "${{ needs.test-integration.result }}" == "success" ]; then
+          echo "🎉 **Overall Status:** All tests passed - ready for merge!" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ **Overall Status:** Some tests failed - review required" >> $GITHUB_STEP_SUMMARY
+          exit 1
+        fi

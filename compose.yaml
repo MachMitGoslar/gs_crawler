@@ -9,7 +9,7 @@ services:
     volumes:
       - ./httpdocs/crawler:/app/output
     ports:
-      - "5001:5000"
+      - "5015:5000"
     container_name: gs_health_monitor
     restart: unless-stopped
     depends_on:
@@ -24,6 +24,7 @@ services:
       - ./httpdocs/crawler:/app/output
     container_name: gs_compiler_001_senioren
     restart: unless-stopped
+
 
   gs_compiler_002_gz:
     build: ./docker_instances/002_gz

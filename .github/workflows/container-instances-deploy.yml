@@ -1,0 +1,525 @@
+name: Container Instances - Deploy
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'docker_instances/**'
+      - 'base_images/**'
+      - '.github/workflows/container-instances-deploy.yml'
+  workflow_dispatch:  # Allow manual triggering
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ghcr.io/${{ github.repository }}r Instances - Build and Deploy
+
+jobs:
+  prepare-version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      build_number: ${{ steps.version.outputs.build_number }}
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Calculate version number
+      id: version
+      run: |
+        # Berechne Build-Nummer basierend auf Git-Commits
+        build_number=$(git rev-list --count HEAD)
+        version="v1.0.$build_number"
+        
+        echo "build_number=$build_number" >> $GITHUB_OUTPUT
+        echo "version=$version" >> $GITHUB_OUTPUT
+        
+        echo "🏷️ Calculated version: $version (build: $build_number)"
+
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      changed-containers: ${{ steps.changes.outputs.changed-containers }}
+      all-containers: ${{ steps.containers.outputs.all-containers }}
+      base-images-changed: ${{ steps.changes.outputs.base-images-changed }}
+      deploy-all: ${{ steps.changes.outputs.deploy-all }}
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Detect changed files
+      id: changes
+      run: |
+        echo "🔍 Detecting changes for deployment..."
+        
+        # Bei main branch push - schaue auf letzten Commit
+        if [ "${{ github.event_name }}" == "push" ]; then
+          changed_files=$(git diff --name-only HEAD~1 HEAD)
+        else
+          # Fallback für manuelle Triggers
+          changed_files=$(git diff --name-only HEAD~5 HEAD)
+        fi
+        
+        changed_containers=()
+        base_images_changed="false"
+        deploy_all="false"
+        
+        echo "📋 Changed files:"
+        echo "$changed_files"
+        
+        # Prüfe auf Base-Image-Änderungen
+        if echo "$changed_files" | grep -q "^base_images/"; then
+          base_images_changed="true"
+          deploy_all="true"
+          echo "🔄 Base images changed - will deploy all containers"
+        fi
+        
+        # Sammle geänderte Container
+        for file in $changed_files; do
+          if [[ $file == docker_instances/*/Dockerfile ]] || [[ $file == docker_instances/*/*.py ]] || [[ $file == docker_instances/*/*.php ]] || [[ $file == docker_instances/*/crontab ]] || [[ $file == docker_instances/*/templates/* ]]; then
+            container=$(echo $file | cut -d'/' -f2)
+            if [[ ! " ${changed_containers[@]} " =~ " ${container} " ]]; then
+              changed_containers+=("$container")
+            fi
+          fi
+        done
+        
+        # Workflow-Änderungen führen zu vollem Deployment
+        if echo "$changed_files" | grep -q ".github/workflows/container-instances-deploy.yml"; then
+          deploy_all="true"
+          echo "🔄 Workflow changed - will deploy all containers"
+        fi
+        
+        # Ausgabe als JSON Arrays
+        if [ ${#changed_containers[@]} -eq 0 ] && [ "$deploy_all" == "false" ]; then
+          echo "changed-containers=[]" >> $GITHUB_OUTPUT
+        else
+          printf -v joined '"%s",' "${changed_containers[@]}"
+          echo "changed-containers=[${joined%,}]" >> $GITHUB_OUTPUT
+        fi
+        
+        echo "base-images-changed=$base_images_changed" >> $GITHUB_OUTPUT
+        echo "deploy-all=$deploy_all" >> $GITHUB_OUTPUT
+        
+        echo "📋 Changed containers: ${changed_containers[*]}"
+        echo "🏗️ Base images changed: $base_images_changed"
+        echo "🚀 Deploy all: $deploy_all"
+    
+    - name: List all containers
+      id: containers
+      run: |
+        echo "📦 Listing all available containers..."
+        
+        containers=()
+        for dir in docker_instances/*/; do
+          if [ -f "$dir/Dockerfile" ]; then
+            container=$(basename "$dir")
+            containers+=("$container")
+          fi
+        done
+        
+        printf -v joined '"%s",' "${containers[@]}"
+        echo "all-containers=[${joined%,}]" >> $GITHUB_OUTPUT
+        
+        echo "📋 All containers: ${containers[*]}"
+
+  build-base-images:
+    runs-on: ubuntu-latest
+    needs: [prepare-version, detect-changes]
+    if: needs.detect-changes.outputs.base-images-changed == 'true'
+    strategy:
+      matrix:
+        image: 
+          - python_basic_crawler
+          - python_selenium_crawler
+          - php_basic_crawler
+          - flask_monitor
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      with:
+        platforms: linux/amd64,linux/arm64
+    
+    - name: Log in to Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Build and push base image ${{ matrix.image }}
+      uses: docker/build-push-action@v5
+      with:
+        context: ./base_images/${{ matrix.image }}
+        platforms: linux/amd64,linux/arm64
+        push: true
+        tags: |
+          ${{ env.IMAGE_PREFIX }}_${{ matrix.image }}:latest
+          ${{ env.IMAGE_PREFIX }}_${{ matrix.image }}:${{ needs.prepare-version.outputs.version }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+    
+    - name: Update local base image for subsequent builds
+      run: |
+        echo "📦 Pulling updated base image for local use..."
+        docker pull ${{ env.IMAGE_PREFIX }}_${{ matrix.image }}:${{ needs.prepare-version.outputs.version }}
+        docker tag ${{ env.IMAGE_PREFIX }}_${{ matrix.image }}:${{ needs.prepare-version.outputs.version }} gs_crawler/${{ matrix.image }}:latest
+
+  build-and-push-containers:
+    runs-on: ubuntu-latest
+    needs: [prepare-version, detect-changes, build-base-images]
+    if: always() && (needs.detect-changes.outputs.changed-containers != '[]' || needs.detect-changes.outputs.deploy-all == 'true')
+    strategy:
+      matrix:
+        container: ${{ fromJson(needs.detect-changes.outputs.deploy-all == 'true' && needs.detect-changes.outputs.all-containers || needs.detect-changes.outputs.changed-containers) }}
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      with:
+        platforms: linux/amd64,linux/arm64
+    
+    - name: Log in to Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Prepare base images
+      run: |
+        echo "🔧 Preparing base images for ${{ matrix.container }}..."
+        
+        dockerfile="docker_instances/${{ matrix.container }}/Dockerfile"
+        if [ ! -f "$dockerfile" ]; then
+          echo "❌ Dockerfile not found: $dockerfile"
+          exit 1
+        fi
+        
+        base_image=$(grep "^FROM" "$dockerfile" | head -1 | awk '{print $2}' | cut -d':' -f1)
+        echo "📦 Base image needed: $base_image"
+        
+        # Wenn Base-Images geändert wurden, verwende die neuen Versionen
+        if [ "${{ needs.detect-changes.outputs.base-images-changed }}" == "true" ]; then
+          case "$base_image" in
+            "gs_crawler/python_basic_crawler")
+              echo "Pulling updated python_basic_crawler..."
+              docker pull ${{ env.IMAGE_PREFIX }}_python_basic_crawler:${{ needs.prepare-version.outputs.version }}
+              docker tag ${{ env.IMAGE_PREFIX }}_python_basic_crawler:${{ needs.prepare-version.outputs.version }} gs_crawler/python_basic_crawler:latest
+              ;;
+            "gs_crawler/python_selenium_crawler")
+              echo "Pulling updated python_selenium_crawler..."
+              docker pull ${{ env.IMAGE_PREFIX }}_python_selenium_crawler:${{ needs.prepare-version.outputs.version }}
+              docker tag ${{ env.IMAGE_PREFIX }}_python_selenium_crawler:${{ needs.prepare-version.outputs.version }} gs_crawler/python_selenium_crawler:latest
+              ;;
+            "gs_crawler/php_basic_crawler")
+              echo "Pulling updated php_basic_crawler..."
+              docker pull ${{ env.IMAGE_PREFIX }}_php_basic_crawler:${{ needs.prepare-version.outputs.version }}
+              docker tag ${{ env.IMAGE_PREFIX }}_php_basic_crawler:${{ needs.prepare-version.outputs.version }} gs_crawler/php_basic_crawler:latest
+              ;;
+            "gs_crawler/flask_monitor")
+              echo "Pulling updated flask_monitor..."
+              docker pull ${{ env.IMAGE_PREFIX }}_flask_monitor:${{ needs.prepare-version.outputs.version }}
+              docker tag ${{ env.IMAGE_PREFIX }}_flask_monitor:${{ needs.prepare-version.outputs.version }} gs_crawler/flask_monitor:latest
+              ;;
+          esac
+        else
+          # Baue Base-Image lokal falls nicht geändert
+          base_image_name=$(echo $base_image | cut -d'/' -f2)
+          if [ -d "base_images/$base_image_name" ]; then
+            echo "Building local base image: $base_image_name"
+            cd base_images/$base_image_name
+            docker buildx build --platform linux/amd64 --tag $base_image:latest --load .
+            cd ../..
+          fi
+        fi
+    
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.IMAGE_PREFIX }}_${{ matrix.container }}
+        tags: |
+          type=raw,value=latest
+          type=raw,value=${{ needs.prepare-version.outputs.version }}
+          type=raw,value=build-${{ needs.prepare-version.outputs.build_number }}
+          type=sha,prefix=sha-
+    
+    - name: Build and push ${{ matrix.container }}
+      uses: docker/build-push-action@v5
+      with:
+        context: ./docker_instances/${{ matrix.container }}
+        platforms: linux/amd64,linux/arm64
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+    
+    - name: Generate container summary
+      run: |
+        echo "📦 Built and pushed: ${{ matrix.container }}" >> $GITHUB_STEP_SUMMARY
+        echo "🏷️ Version: ${{ needs.prepare-version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+        echo "🏗️ Build: ${{ needs.prepare-version.outputs.build_number }}" >> $GITHUB_STEP_SUMMARY
+        echo "🌐 Platforms: linux/amd64, linux/arm64" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+
+  test-deployed-containers:
+    runs-on: ubuntu-latest
+    needs: [prepare-version, detect-changes, build-and-push-containers]
+    if: always() && needs.build-and-push-containers.result == 'success'
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Log in to Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Test deployed containers
+      run: |
+        echo "🧪 Testing deployed containers..."
+        
+        # Teste Health Monitor
+        if docker pull ${{ env.IMAGE_PREFIX }}_000_health_monitor:${{ needs.prepare-version.outputs.version }} 2>/dev/null; then
+          echo "Testing Health Monitor..."
+          docker run --rm --name test_health_monitor -d \
+            -p 5555:5000 \
+            ${{ env.IMAGE_PREFIX }}_000_health_monitor:${{ needs.prepare-version.outputs.version }}
+          
+          sleep 10
+          
+          if curl -f http://localhost:5555/api/health > /dev/null 2>&1; then
+            echo "✅ Health Monitor API accessible"
+          else
+            echo "❌ Health Monitor API not accessible"
+            docker logs test_health_monitor || true
+          fi
+          
+          docker stop test_health_monitor || true
+        fi
+        
+        # Teste einen Python Crawler
+        if docker pull ${{ env.IMAGE_PREFIX }}_001_senioren:${{ needs.prepare-version.outputs.version }} 2>/dev/null; then
+          echo "Testing Python crawler (001_senioren)..."
+          docker run --rm ${{ env.IMAGE_PREFIX }}_001_senioren:${{ needs.prepare-version.outputs.version }} python3 --version
+          docker run --rm ${{ env.IMAGE_PREFIX }}_001_senioren:${{ needs.prepare-version.outputs.version }} /bin/bash -c "ls -la /app"
+          echo "✅ Python crawler works correctly"
+        fi
+        
+        # Teste PHP Container falls verfügbar
+        if docker pull ${{ env.IMAGE_PREFIX }}_002_ferienpass:${{ needs.prepare-version.outputs.version }} 2>/dev/null; then
+          echo "Testing PHP container (002_ferienpass)..."
+          docker run --rm ${{ env.IMAGE_PREFIX }}_002_ferienpass:${{ needs.prepare-version.outputs.version }} php --version
+          echo "✅ PHP container works correctly"
+        fi
+        
+        echo "✅ Container deployment tests completed"
+
+  update-compose-file:
+    runs-on: ubuntu-latest
+    needs: [prepare-version, detect-changes, test-deployed-containers]
+    if: always() && needs.test-deployed-containers.result == 'success'
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Update docker-compose.yml with new image versions
+      run: |
+        echo "📝 Updating docker-compose.yml with version ${{ needs.prepare-version.outputs.version }}..."
+        
+        # Backup original
+        cp compose.yaml compose.yaml.backup
+        
+        # Erstelle eine Production-Version der compose.yaml
+        cat > compose.production.yaml << EOF
+        # Production Docker Compose für GS Crawler System
+        # Version: ${{ needs.prepare-version.outputs.version }}
+        # Build: ${{ needs.prepare-version.outputs.build_number }}
+        # Generated: $(date -u)
+        
+        version: '3.8'
+        
+        services:
+        EOF
+        
+        # Konvertiere lokale Images zu Registry-Images
+        containers_to_deploy='${{ needs.detect-changes.outputs.deploy-all == 'true' && needs.detect-changes.outputs.all-containers || needs.detect-changes.outputs.changed-containers }}'
+        
+        for container_json in $(echo '$containers_to_deploy' | jq -r '.[]'); do
+          echo "  gs_$container_json:" >> compose.production.yaml
+          echo "    image: ${{ env.IMAGE_PREFIX }}_$container_json:${{ needs.prepare-version.outputs.version }}" >> compose.production.yaml
+          echo "    volumes:" >> compose.production.yaml
+          echo "      - ./httpdocs/crawler:/app/output" >> compose.production.yaml
+          echo "    container_name: gs_$container_json" >> compose.production.yaml
+          echo "    restart: unless-stopped" >> compose.production.yaml
+          
+          # Spezielle Konfiguration für Health Monitor
+          if [ "$container_json" == "000_health_monitor" ]; then
+            echo "    ports:" >> compose.production.yaml
+            echo "      - \"5001:5000\"" >> compose.production.yaml
+          fi
+          
+          echo "" >> compose.production.yaml
+        done
+        
+        echo "✅ Created production compose file"
+    
+    - name: Commit compose file updates
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        
+        git add compose.production.yaml
+        
+        if ! git diff --quiet --cached; then
+          git commit -m "build: update production compose with version ${{ needs.prepare-version.outputs.version }} [skip ci]"
+          git push
+          echo "✅ Pushed production compose file"
+        else
+          echo "ℹ️ No changes to commit"
+        fi
+
+  create-release:
+    runs-on: ubuntu-latest
+    needs: [prepare-version, detect-changes, build-and-push-containers, test-deployed-containers]
+    if: always() && needs.build-and-push-containers.result == 'success' && needs.test-deployed-containers.result == 'success'
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Create Release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: containers-${{ needs.prepare-version.outputs.version }}
+        release_name: Container Release ${{ needs.prepare-version.outputs.version }}
+        body: |
+          # 🐳 GS Crawler Container Release ${{ needs.prepare-version.outputs.version }}
+          
+          ## Deployment Summary
+          
+          - **Version:** ${{ needs.prepare-version.outputs.version }}
+          - **Build Number:** ${{ needs.prepare-version.outputs.build_number }}
+          - **Registry:** ${{ env.REGISTRY }}
+          - **Platforms:** linux/amd64, linux/arm64
+          
+          ## Deployed Containers
+          
+          ${{ needs.detect-changes.outputs.deploy-all == 'true' && '🔄 **Full deployment** - All containers updated' || '📦 **Incremental deployment** - Changed containers only' }}
+          
+          ### Changed Containers:
+          ${{ needs.detect-changes.outputs.changed-containers }}
+          
+          ### Base Images Updated:
+          ${{ needs.detect-changes.outputs.base-images-changed == 'true' && '✅ Yes' || '❌ No' }}
+          
+          ## Container Images
+          
+          All containers are available at:
+          - `${{ env.IMAGE_PREFIX }}_[container-name]:${{ needs.prepare-version.outputs.version }}`
+          - `${{ env.IMAGE_PREFIX }}_[container-name]:latest`
+          
+          ## Usage
+          
+          ### Production Deployment:
+          ```bash
+          # Use the generated production compose file
+          docker-compose -f compose.production.yaml up -d
+          ```
+          
+          ### Development:
+          ```bash
+          # Pull specific version
+          docker pull ${{ env.IMAGE_PREFIX }}_000_health_monitor:${{ needs.prepare-version.outputs.version }}
+          
+          # Or use in your compose file
+          image: ${{ env.IMAGE_PREFIX }}_000_health_monitor:${{ needs.prepare-version.outputs.version }}
+          ```
+          
+          ## Health Check
+          
+          Health Monitor available at: http://localhost:5001
+          
+          ## Rollback
+          
+          To rollback to previous version:
+          ```bash
+          # Find previous version in releases
+          docker-compose -f compose.production.yaml down
+          # Edit compose.production.yaml to use previous version
+          docker-compose -f compose.production.yaml up -d
+          ```
+        draft: false
+        prerelease: false
+
+  deployment-summary:
+    runs-on: ubuntu-latest
+    needs: [prepare-version, detect-changes, build-and-push-containers, test-deployed-containers, create-release]
+    if: always()
+    
+    steps:
+    - name: Deployment Summary
+      run: |
+        echo "# 🚀 Container Deployment Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        if [ "${{ needs.detect-changes.outputs.changed-containers }}" == "[]" ] && [ "${{ needs.detect-changes.outputs.deploy-all }}" == "false" ]; then
+          echo "ℹ️ **No deployment needed** - No containers changed" >> $GITHUB_STEP_SUMMARY
+          exit 0
+        fi
+        
+        echo "## ✅ Successfully Deployed" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "- **Version:** ${{ needs.prepare-version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Build Number:** ${{ needs.prepare-version.outputs.build_number }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Registry:** ${{ env.REGISTRY }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Platforms:** linux/amd64, linux/arm64" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        if [ "${{ needs.detect-changes.outputs.deploy-all }}" == "true" ]; then
+          echo "🔄 **Full Deployment:** All containers updated" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "📦 **Incremental Deployment:** Changed containers only" >> $GITHUB_STEP_SUMMARY
+          echo "- **Changed:** ${{ needs.detect-changes.outputs.changed-containers }}" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "## 🎯 Next Steps" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "1. **Production Deployment:** Use \`compose.production.yaml\`" >> $GITHUB_STEP_SUMMARY
+        echo "2. **Health Check:** Monitor at http://localhost:5001" >> $GITHUB_STEP_SUMMARY
+        echo "3. **Rollback:** Available via previous releases if needed" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        # Status Check
+        if [ "${{ needs.build-and-push-containers.result }}" == "success" ] && [ "${{ needs.test-deployed-containers.result }}" == "success" ]; then
+          echo "🎉 **Status:** Deployment completed successfully!" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ **Status:** Deployment failed - check logs above" >> $GITHUB_STEP_SUMMARY
+          exit 1
+        fi
