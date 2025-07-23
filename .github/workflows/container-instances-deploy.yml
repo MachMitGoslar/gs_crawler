@@ -11,7 +11,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_PREFIX: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}
+  IMAGE_PREFIX: ghcr.io/machmitgoslar/gs_crawler
 
 jobs:
   prepare-version:
@@ -310,16 +310,32 @@ jobs:
         # Teste einen Python Crawler
         if docker pull ${{ env.IMAGE_PREFIX }}_001_senioren:${{ needs.prepare-version.outputs.version }} 2>/dev/null; then
           echo "Testing Python crawler (001_senioren)..."
-          docker run --rm ${{ env.IMAGE_PREFIX }}_001_senioren:${{ needs.prepare-version.outputs.version }} python3 --version
-          docker run --rm ${{ env.IMAGE_PREFIX }}_001_senioren:${{ needs.prepare-version.outputs.version }} /bin/bash -c "ls -la /app"
-          echo "✅ Python crawler works correctly"
+          docker run --rm --name test_senioren -d ${{ env.IMAGE_PREFIX }}_001_senioren:${{ needs.prepare-version.outputs.version }}
+          sleep 3
+          # Prüfe ob Container läuft
+          if docker ps | grep -q test_senioren; then
+            echo "✅ Container started successfully"
+            docker stop test_senioren || true
+          else
+            echo "❌ Container failed to start"
+            docker logs test_senioren || true
+            exit 1
+          fi
         fi
         
         # Teste PHP Container falls verfügbar
         if docker pull ${{ env.IMAGE_PREFIX }}_002_ferienpass:${{ needs.prepare-version.outputs.version }} 2>/dev/null; then
-          echo "Testing PHP container (002_ferienpass)..."
-          docker run --rm ${{ env.IMAGE_PREFIX }}_002_ferienpass:${{ needs.prepare-version.outputs.version }} php --version
-          echo "✅ PHP container works correctly"
+          docker run --rm --name test_ferienpass -d ${{ env.IMAGE_PREFIX }}_002_ferienpass:${{ needs.prepare-version.outputs.version }}
+          sleep 3
+          # Prüfe ob Container läuft
+          if docker ps | grep -q test_ferienpass; then
+            echo "✅ Container started successfully"
+            docker stop test_ferienpass || true
+          else
+            echo "❌ Container failed to start"
+            docker logs test_ferienpass || true
+            exit 1
+          fi
         fi
         
         echo "✅ Container deployment tests completed"
