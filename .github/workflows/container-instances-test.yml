@@ -177,7 +177,7 @@ jobs:
 
         # Verify the base image is available
         echo "$base_image:pr-${{ github.event.number }} available for testing"
-        if docker images "$base_image:pr-${{ github.event.number }}" | grep "pr-test"; then
+        if docker images "$base_image" | grep "pr-test"; then
           echo "✅ Base image available for testing"
         else
           echo "❌ Base image not found"
