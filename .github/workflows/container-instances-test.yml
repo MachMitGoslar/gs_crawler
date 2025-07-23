@@ -228,7 +228,7 @@ jobs:
         # Ersetze Base-Image-Tags für Test
         sed 's/:latest/:test/g' Dockerfile > Dockerfile.test
         
-        docker images list
+        docker image list
 
         # Build Container mit Cache
         docker buildx build \
