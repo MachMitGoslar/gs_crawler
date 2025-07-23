@@ -1,11 +1,10 @@
-
-# Production Docker Compose für GS Crawler Stack
-# Verwendet pre-built Images aus GitHub Container Registry
+# Development Docker Compose für GS Crawler Stack
+# Verwendet lokale Builds für Entwicklung und Tests
 
 services:
   # === HEALTH MONITOR ===
   gs_health_monitor:
-    image: ghcr.io/machmitgoslar/gs_crawler_000_health_monitor:latest
+    build: ./docker_instances/000_health_monitor
     volumes:
       - ./httpdocs/crawler:/app/output
     ports:
@@ -19,21 +18,21 @@ services:
 
   # === NEWS & MEDIA CRAWLER ===
   gs_compiler_001_senioren:
-    image: ghcr.io/machmitgoslar/gs_crawler_001_senioren:latest
+    build: ./docker_instances/001_senioren
     volumes:
       - ./httpdocs/crawler:/app/output
     container_name: gs_compiler_001_senioren
     restart: unless-stopped
 
   gs_compiler_002_gz:
-    image: ghcr.io/machmitgoslar/gs_crawler_002_gz:latest
+    build: ./docker_instances/002_gz
     volumes:
       - ./httpdocs/crawler:/app/output
     container_name: gs_compiler_002_gz
     restart: unless-stopped
 
   gs_compiler_040_hp:
-    image: ghcr.io/machmitgoslar/gs_crawler_040_hp:latest
+    build: ./docker_instances/040_hp
     volumes:
       - ./httpdocs/crawler:/app/output
     container_name: gs_compiler_040_hp
@@ -41,21 +40,21 @@ services:
 
   # === EVENT CRAWLER ===
   gs_compiler_002_fepa:
-    image: ghcr.io/machmitgoslar/gs_crawler_002_ferienpass:latest
+    build: ./docker_instances/002_ferienpass
     volumes:
       - ./httpdocs/crawler:/app/output
     container_name: gs_compiler_002_fepa
     restart: unless-stopped
 
   gs_compiler_019_was_app:
-    image: ghcr.io/machmitgoslar/gs_crawler_019_was_app:latest
+    build: ./docker_instances/019_was_app
     volumes:
       - ./httpdocs/crawler:/app/output
     container_name: gs_compiler_019_was_app
     restart: unless-stopped
 
   gs_compiler_027_erster_freitag:
-    image: ghcr.io/machmitgoslar/gs_crawler_027_erster_freitag:latest
+    build: ./docker_instances/027_erster_freitag
     volumes:
       - ./httpdocs/crawler:/app/output
     container_name: gs_compiler_027_erster_freitag
@@ -63,14 +62,14 @@ services:
 
   # === LOCAL NEWS CRAWLER ===
   gs_compiler_041_immenrode:
-    image: ghcr.io/machmitgoslar/gs_crawler_041_immenrode:latest
+    build: ./docker_instances/041_immenrode
     volumes:
       - ./httpdocs/crawler:/app/output
     container_name: gs_compiler_041_immenrode
     restart: unless-stopped
 
   gs_compiler_048_jerstedt:
-    image: ghcr.io/machmitgoslar/gs_crawler_048_jerstedt:latest
+    build: ./docker_instances/048_jerstedt
     volumes:
       - ./httpdocs/crawler:/app/output
     container_name: gs_compiler_048_jerstedt
@@ -78,21 +77,21 @@ services:
 
   # === COMMUNITY & VOLUNTEER CRAWLER ===
   gs_compiler_042_freiwilligen:
-    image: ghcr.io/machmitgoslar/gs_crawler_042_freiwilligen:latest
+    build: ./docker_instances/042_freiwilligen
     volumes:
       - ./httpdocs/crawler:/app/output
     container_name: gs_compiler_042_freiwilligen
     restart: unless-stopped
 
   gs_compiler_044_wiedelah:
-    image: ghcr.io/machmitgoslar/gs_crawler_044_wiedelah:latest
+    build: ./docker_instances/044_wiedelah
     volumes:
       - ./httpdocs/crawler:/app/output
     container_name: gs_compiler_044_wiedelah
     restart: unless-stopped
 
   gs_compiler_031_goslarer_geschichten:
-    image: ghcr.io/machmitgoslar/gs_crawler_031_goslarer_geschichten:latest
+    build: ./docker_instances/031_goslarer_geschichten
     volumes:
       - ./httpdocs/crawler:/app/output
     container_name: gs_compiler_031_goslarer_geschichten
@@ -100,21 +99,21 @@ services:
 
   # === ENVIRONMENTAL MONITORING ===
   gs_compiler_045_naturgefahren:
-    image: ghcr.io/machmitgoslar/gs_crawler_045_naturgefahren:latest
+    build: ./docker_instances/045_naturgefahren
     volumes:
       - ./httpdocs/crawler:/app/output
     container_name: gs_compiler_045_naturgefahren
     restart: unless-stopped
 
   gs_compiler_047_bodenwasser:
-    image: ghcr.io/machmitgoslar/gs_crawler_047_bodenwasser:latest
+    build: ./docker_instances/047_bodenwasser
     volumes:
       - ./httpdocs/crawler:/app/output
     container_name: gs_compiler_047_bodenwasser
     restart: unless-stopped
 
   gs_compiler_035_talsperren:
-    image: ghcr.io/machmitgoslar/gs_crawler_035_talsperren:latest
+    build: ./docker_instances/035_talsperren
     volumes:
       - ./httpdocs/crawler:/app/output
     container_name: gs_compiler_035_talsperren
@@ -122,35 +121,35 @@ services:
 
   # === EDUCATION CRAWLER ===
   gs_compiler_050_tschuessschule_studium:
-    image: ghcr.io/machmitgoslar/gs_crawler_050_tschuessschule_studium:latest
+    build: ./docker_instances/050_tschuessschule_studium
     volumes:
       - ./httpdocs/crawler:/app/output
     container_name: gs_compiler_050_tschuessschule_studium
     restart: unless-stopped
 
   gs_compiler_051_vhs:
-    image: ghcr.io/machmitgoslar/gs_crawler_051_vhs:latest
+    build: ./docker_instances/051_vhs
     volumes:
       - ./httpdocs/crawler:/app/output
     container_name: gs_compiler_051_vhs
     restart: unless-stopped
 
   gs_compiler_052_vhs_kinderuni:
-    image: ghcr.io/machmitgoslar/gs_crawler_052_vhs_kinderuni:latest
+    build: ./docker_instances/052_vhs_kinderuni
     volumes:
       - ./httpdocs/crawler:/app/output
     container_name: gs_compiler_052_vhs_kinderuni
     restart: unless-stopped
 
   gs_compiler_053_tschuessschule_praktikum:
-    image: ghcr.io/machmitgoslar/gs_crawler_053_tschuessschule_praktikum:latest
+    build: ./docker_instances/053_tschuessschule_praktikum
     volumes:
       - ./httpdocs/crawler:/app/output
     container_name: gs_compiler_053_tschuessschule_praktikum
     restart: unless-stopped
 
   gs_compiler_054_tschuessschule_ausbildung:
-    image: ghcr.io/machmitgoslar/gs_crawler_054_tschuessschule_ausbildung:latest
+    build: ./docker_instances/054_tschuessschule_ausbildung
     volumes:
       - ./httpdocs/crawler:/app/output
     container_name: gs_compiler_054_tschuessschule_ausbildung
@@ -158,21 +157,21 @@ services:
 
   # === SPECIALIZED CRAWLER ===
   gs_compiler_014_kunst_in_ar:
-    image: ghcr.io/machmitgoslar/gs_crawler_014_kunst_in_ar:latest
+    build: ./docker_instances/014_kunst_in_ar
     volumes:
       - ./httpdocs/crawler:/app/output
     container_name: gs_compiler_014_kunst_in_ar
     restart: unless-stopped
 
   gs_compiler_032_webcams_goslar:
-    image: ghcr.io/machmitgoslar/gs_crawler_032_webcams_goslar:latest
+    build: ./docker_instances/032_webcams_goslar
     volumes:
       - ./httpdocs/crawler:/app/output
     container_name: gs_compiler_032_webcams_goslar
     restart: unless-stopped
 
   gs_compiler_056_serviceportal:
-    image: ghcr.io/machmitgoslar/gs_crawler_056_serviceportal:latest
+    build: ./docker_instances/056_serviceportal
     volumes:
       - ./httpdocs/crawler:/app/output
     container_name: gs_compiler_056_serviceportal
