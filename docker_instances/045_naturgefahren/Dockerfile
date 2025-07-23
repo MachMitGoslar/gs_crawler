@@ -1,5 +1,5 @@
 # Migriert zu Base-Image für bessere Wartbarkeit
-FROM gs_crawler/python_selenium_crawler:latest
+FROM ghcr.io/machmitgoslar/gs_crawler_python_selenium_crawler:latest
 
 # Kopiere container-spezifische Dateien
 COPY script.py .

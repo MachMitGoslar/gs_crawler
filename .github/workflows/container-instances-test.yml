@@ -9,6 +9,10 @@ on:
       - '.github/workflows/container-instances-test.yml'
   workflow_dispatch:  # Allow manual triggering
 
+env:
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ghcr.io/machmitgoslar/gs_crawler
+
 jobs:
   detect-changes:
     runs-on: ubuntu-latest
@@ -99,36 +103,32 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
       with:
-        driver-opts: network=host
+        platforms: linux/amd64,linux/arm64
     
-    - name: Build and push base image ${{ matrix.image }}
-      run: |
-        echo "🏗️ Building base image ${{ matrix.image }}..."
-        cd base_images/${{ matrix.image }}
-        
-        # Build base image locally
-        docker buildx build \
-          --platform linux/amd64 \
-          --tag gs_crawler/${{ matrix.image }}:test \
-          --load \
-          --cache-from=type=gha \
-          --cache-to=type=gha,mode=max \
-          .
-        
-        echo "✅ Base image ${{ matrix.image }} built successfully"
-    
-    - name: Save base image as artifact
-      run: |
-        echo "💾 Saving base image ${{ matrix.image }} as artifact..."
-        docker save gs_crawler/${{ matrix.image }}:test > base_image_${{ matrix.image }}.tar
-        echo "✅ Base image saved to artifact"
-    
-    - name: Upload base image artifact
-      uses: actions/upload-artifact@v4
+    - name: Log in to Container Registry
+      uses: docker/login-action@v3
       with:
-        name: base-image-${{ matrix.image }}
-        path: base_image_${{ matrix.image }}.tar
-        retention-days: 1
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Build and push base image ${{ matrix.image }} for PR
+      uses: docker/build-push-action@v5
+      with:
+        context: ./base_images/${{ matrix.image }}
+        platforms: linux/amd64,linux/arm64
+        push: true
+        tags: |
+          ${{ env.IMAGE_PREFIX }}_${{ matrix.image }}:pr-${{ github.event.number }}
+          ${{ env.IMAGE_PREFIX }}_${{ matrix.image }}:pr-latest
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+    
+    - name: Pull base image for local use
+      run: |
+        echo "� Pulling base image for local testing..."
+        docker pull ${{ env.IMAGE_PREFIX }}_${{ matrix.image }}:pr-${{ github.event.number }}
+        docker tag ${{ env.IMAGE_PREFIX }}_${{ matrix.image }}:pr-${{ github.event.number }} gs_crawler/${{ matrix.image }}:pr-test
 
   test-container-builds:
     runs-on: ubuntu-latest
@@ -145,33 +145,18 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
       with:
-        driver-opts: network=host
+        platforms: linux/amd64,linux/arm64
     
-    - name: Download base image artifacts
-      uses: actions/download-artifact@v4
+    - name: Log in to Container Registry
+      uses: docker/login-action@v3
       with:
-        pattern: base-image-*
-        path: ./artifacts
-        merge-multiple: true
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
     
-    - name: Load base images from artifacts
+    - name: Prepare base images for testing
       run: |
-        echo "📦 Loading base images from artifacts..."
-        
-        # Load all available base image artifacts
-        for artifact in ./artifacts/base_image_*.tar; do
-          if [ -f "$artifact" ]; then
-            echo "Loading $(basename $artifact)..."
-            docker load < "$artifact"
-          fi
-        done
-        
-        echo "📋 Available base images after loading:"
-        docker images | grep gs_crawler || echo "No gs_crawler images found"
-    
-    - name: Prepare base images
-      run: |
-        echo "🔧 Verifying base image for container ${{ matrix.container }}..."
+        echo "� Preparing base images for container ${{ matrix.container }}..."
         
         # Bestimme welches Base-Image benötigt wird
         dockerfile="docker_instances/${{ matrix.container }}/Dockerfile"
@@ -184,32 +169,18 @@ jobs:
         base_image=$(grep "^FROM" "$dockerfile" | head -1 | awk '{print $2}' | cut -d':' -f1)
         echo "📦 Base image needed: $base_image"
         
-        # Map base image name to local tag
-        case "$base_image" in
-          "gs_crawler/python_basic_crawler"|"stuffdev/python_basic_crawler")
-            local_tag="gs_crawler/python_basic_crawler:test"
-            ;;
-          "gs_crawler/python_selenium_crawler"|"stuffdev/python_selenium_crawler")
-            local_tag="gs_crawler/python_selenium_crawler:test"
-            ;;
-          "gs_crawler/php_basic_crawler"|"stuffdev/php_basic_crawler")
-            local_tag="gs_crawler/php_basic_crawler:test"
-            ;;
-          "gs_crawler/flask_monitor"|"stuffdev/flask_monitor")
-            local_tag="gs_crawler/flask_monitor:test"
-            ;;
-          *)
-            echo "❌ Unknown base image: $base_image"
-            exit 1
-            ;;
-        esac
-        
+        # Pull the PR version of the base image and tag it for local use
+
+        echo "Pulling PR version of Base Container..."
+        docker pull $base_image:pr-${{ github.event.number }}
+        docker tag $base_image:pr-${{ github.event.number }} $base_image:pr-test
+
         # Verify the base image is available
-        if docker images "$base_image" | grep -q "$base_image"; then
-          echo "✅ Base image available: $base_image"
+        echo "$base_image:pr-${{ github.event.number }} available for testing"
+        if docker images "$base_image" | grep "pr-test"; then
+          echo "✅ Base image available for testing"
         else
-          echo "❌ Base image not found: $base_image"
-          echo "Available images:"
+          echo "❌ Base image not found"
           docker images | grep gs_crawler || echo "No gs_crawler images found"
           exit 1
         fi
@@ -219,19 +190,19 @@ jobs:
         echo "🏗️ Testing build for container ${{ matrix.container }}..."
         cd docker_instances/${{ matrix.container }}
         
-        # Ersetze Base-Image-Tags für Test
-        sed 's/:latest/:test/g' Dockerfile > Dockerfile.test
+        # Erstelle PR-Test Dockerfile das PR-Test Versionen der Base-Images verwendet
+        sed 's/:latest/:pr-test/g' Dockerfile > Dockerfile.pr-test
         
-        echo "📋 Dockerfile.test content:"
-        cat Dockerfile.test
+        echo "📋 Dockerfile.pr-test content:"
+        cat Dockerfile.pr-test
         
-        echo "📋 Available images before build:"
-        docker image list | grep -E "(gs_crawler|stuffdev)" || echo "No base images found"
+        echo "📋 Available base images before build:"
+        docker images | grep -E "(gs_crawler.*pr-test)" || echo "No PR test base images found"
         
-        # Verwende standard docker build statt buildx für bessere lokale Image-Kompatibilität
+        # Build the container with PR base images
         docker build \
-          --file Dockerfile.test \
-          --tag gs_crawler_test/${{ matrix.container }}:test \
+          --file Dockerfile.pr-test \
+          --tag gs_crawler_test/${{ matrix.container }}:pr-test \
           .
         
         echo "✅ Build test successful for ${{ matrix.container }}"
@@ -240,12 +211,8 @@ jobs:
       run: |
         echo "🧪 Testing container ${{ matrix.container }} functionality..."
         
-        # Grundlegende Funktionstests
-        container_type=$(basename $(dirname $(find docker_instances/${{ matrix.container }} -name "*.py" -o -name "*.php" | head -1)) 2>/dev/null || echo "unknown")
-        
-
         echo "Testing Container Health"
-        docker run --rm --name test_${{ matrix.container }} -d gs_crawler_test/${{ matrix.container }}:test
+        docker run --rm --name test_${{ matrix.container }} -d gs_crawler_test/${{ matrix.container }}:pr-test
         sleep 3
         # Prüfe ob Container läuft
         if docker ps | grep -q test_${{ matrix.container }}; then
@@ -256,7 +223,6 @@ jobs:
             docker logs test_${{ matrix.container }} || true
             exit 1
         fi
-
         
         echo "✅ Functionality test passed for ${{ matrix.container }}"
     
@@ -307,29 +273,28 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
       with:
-        driver-opts: network=host
+        platforms: linux/amd64,linux/arm64
     
-    
-    - name: Download base image artifacts
-      uses: actions/download-artifact@v4
+    - name: Log in to Container Registry
+      uses: docker/login-action@v3
       with:
-        pattern: base-image-*
-        path: ./artifacts
-        merge-multiple: true
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
     
-    - name: Load base images from artifacts
+    - name: Pull base images from registry
       run: |
-        echo "📦 Loading base images from artifacts..."
+        echo "📦 Pulling base images from GHCR..."
         
-        # Load all available base image artifacts
-        for artifact in ./artifacts/base_image_*.tar; do
-          if [ -f "$artifact" ]; then
-            echo "Loading $(basename $artifact)..."
-            docker load < "$artifact"
-          fi
+        # Pull all PR versions of base images
+        base_images=("python_basic_crawler" "python_selenium_crawler" "php_basic_crawler" "flask_monitor")
+        for image in "${base_images[@]}"; do
+          echo "Pulling $image PR version..."
+          docker pull ${{ env.IMAGE_PREFIX }}_$image:pr-${{ github.event.number }}
+          docker tag ${{ env.IMAGE_PREFIX }}_$image:pr-${{ github.event.number }} ${{ env.IMAGE_PREFIX }}_$image:pr-test
         done
         
-        echo "📋 Available base images after loading:"
+        echo "📋 Available base images after pulling:"
         docker images | grep gs_crawler || echo "No gs_crawler images found"
     
     - name: Create test output directory
@@ -351,10 +316,10 @@ jobs:
           if [ -d "docker_instances/$container" ]; then
             echo "Building container: $container"
             cd docker_instances/$container
-            sed 's/:latest/:test/g' Dockerfile > Dockerfile.test
+            sed 's/:latest/:pr-test/g' Dockerfile > Dockerfile.pr-test
             docker build \
-              --file Dockerfile.test \
-              --tag gs_crawler_test/$container:test \
+              --file Dockerfile.pr-test \
+              --tag gs_crawler_test/$container:pr-test \
               .
             cd ../..
             echo "✅ Built container: $container"
@@ -369,7 +334,7 @@ jobs:
         docker run --rm --name test_health_monitor -d \
           -v $(pwd)/test_output:/app/output \
           -p 5555:5000 \
-          gs_crawler_test/000_health_monitor:test
+          gs_crawler_test/000_health_monitor:pr-test
         
         sleep 5
         

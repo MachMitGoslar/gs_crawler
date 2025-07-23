@@ -1,5 +1,5 @@
 # Migriert zu Base-Image für bessere Wartbarkeit
-FROM gs_crawler/php_basic_crawler:latest
+FROM ghcr.io/machmitgoslar/gs_crawler_php_basic_crawler:latest
 
 # Kopiere container-spezifische Dateien
 COPY fepa_fetcher.php main.php
