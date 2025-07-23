@@ -291,7 +291,7 @@ jobs:
         for image in "${base_images[@]}"; do
           echo "Pulling $image PR version..."
           docker pull ${{ env.IMAGE_PREFIX }}_$image:pr-${{ github.event.number }}
-          docker tag ${{ env.IMAGE_PREFIX }}_$image:pr-${{ github.event.number }} gs_crawler/$image:pr-test
+          docker tag ${{ env.IMAGE_PREFIX }}_$image:pr-${{ github.event.number }} ${{ env.IMAGE_PREFIX }}_$image:pr-test
         done
         
         echo "📋 Available base images after pulling:"
