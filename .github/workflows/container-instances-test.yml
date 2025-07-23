@@ -11,7 +11,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_PREFIX: ghcr.io/${{ github.repository }}
+  IMAGE_PREFIX: ghcr.io/${{ github.repository_id}}
 
 jobs:
   detect-changes:
@@ -120,7 +120,7 @@ jobs:
         # Build and push to GHCR for sharing between jobs
         docker buildx build \
           --platform linux/amd64 \
-          --tag ghcr.io/${{ github.repository_owner }}/gs_crawler_${{ matrix.image }}:pr-${{ github.event.number || 'test' }} \
+          --tag ghcr.io/${{ github.repository_id }}/gs_crawler_${{ matrix.image }}:pr-${{ github.event.number || 'test' }} \
           --push \
           --cache-from=type=gha \
           --cache-to=type=gha,mode=max \
@@ -170,22 +170,22 @@ jobs:
         # Map base image name to GHCR image name
         case "$base_image" in
           "gs_crawler/python_basic_crawler"|"stuffdev/python_basic_crawler")
-            ghcr_image="ghcr.io/${{ github.repository_owner }}/gs_crawler_python_basic_crawler:pr-${{ github.event.number || 'test' }}"
+            ghcr_image="ghcr.io/${{ github.repository_id }}/gs_crawler_python_basic_crawler:pr-${{ github.event.number || 'test' }}"
             local_tag="gs_crawler/python_basic_crawler:test"
             base_image_dir="python_basic_crawler"
             ;;
           "gs_crawler/python_selenium_crawler"|"stuffdev/python_selenium_crawler")
-            ghcr_image="ghcr.io/${{ github.repository_owner }}/gs_crawler_python_selenium_crawler:pr-${{ github.event.number || 'test' }}"
+            ghcr_image="ghcr.io/${{ github.repository_id }}/gs_crawler_python_selenium_crawler:pr-${{ github.event.number || 'test' }}"
             local_tag="gs_crawler/python_selenium_crawler:test"
             base_image_dir="python_selenium_crawler"
             ;;
           "gs_crawler/php_basic_crawler"|"stuffdev/php_basic_crawler")
-            ghcr_image="ghcr.io/${{ github.repository_owner }}/gs_crawler_php_basic_crawler:pr-${{ github.event.number || 'test' }}"
+            ghcr_image="ghcr.io/${{ github.repository_id }}/gs_crawler_php_basic_crawler:pr-${{ github.event.number || 'test' }}"
             local_tag="gs_crawler/php_basic_crawler:test"
             base_image_dir="php_basic_crawler"
             ;;
           "gs_crawler/flask_monitor"|"stuffdev/flask_monitor")
-            ghcr_image="ghcr.io/${{ github.repository_owner }}/gs_crawler_flask_monitor:pr-${{ github.event.number || 'test' }}"
+            ghcr_image="ghcr.io/${{ github.repository_id }}/gs_crawler_flask_monitor:pr-${{ github.event.number || 'test' }}"
             local_tag="gs_crawler/flask_monitor:test"
             base_image_dir="flask_monitor"
             ;;
@@ -346,7 +346,7 @@ jobs:
             echo "Preparing base image: $image"
             
             # Try to pull from GHCR first
-            ghcr_image="ghcr.io/${{ github.repository_owner }}/gs_crawler_$image:pr-${{ github.event.number || 'test' }}"
+            ghcr_image="ghcr.io/${{ github.repository_id }}/gs_crawler_$image:pr-${{ github.event.number || 'test' }}"
             local_tag="gs_crawler/$image:test"
             
             if docker pull "$ghcr_image" 2>/dev/null; then
