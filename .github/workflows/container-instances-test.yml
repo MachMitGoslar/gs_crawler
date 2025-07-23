@@ -9,10 +9,6 @@ on:
       - '.github/workflows/container-instances-test.yml'
   workflow_dispatch:  # Allow manual triggering
 
-env:
-  REGISTRY: ghcr.io
-  IMAGE_PREFIX: ghcr.io/${{ github.repository }}
-
 jobs:
   detect-changes:
     runs-on: ubuntu-latest
@@ -105,31 +101,34 @@ jobs:
       with:
         driver-opts: network=host
     
-    - name: Login to GitHub Container Registry
-      uses: docker/login-action@v3
-      with:
-        registry: ${{ env.REGISTRY }}
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-    
     - name: Build and push base image ${{ matrix.image }}
       run: |
-        echo "🏗️ Building and pushing base image ${{ matrix.image }} to GHCR..."
+        echo "🏗️ Building base image ${{ matrix.image }}..."
         cd base_images/${{ matrix.image }}
         
-        # Convert repository owner to lowercase for registry compatibility
-        REPO_OWNER_LOWER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
-        
-        # Build and push to GHCR for sharing between jobs
+        # Build base image locally
         docker buildx build \
           --platform linux/amd64 \
-          --tag ${{ env.REGISTRY }}/${REPO_OWNER_LOWER}/gs_crawler_${{ matrix.image }}:pr-${{ github.event.number || 'test' }} \
-          --push \
+          --tag gs_crawler/${{ matrix.image }}:test \
+          --load \
           --cache-from=type=gha \
           --cache-to=type=gha,mode=max \
           .
         
-        echo "✅ Base image ${{ matrix.image }} built and pushed to GHCR successfully"
+        echo "✅ Base image ${{ matrix.image }} built successfully"
+    
+    - name: Save base image as artifact
+      run: |
+        echo "💾 Saving base image ${{ matrix.image }} as artifact..."
+        docker save gs_crawler/${{ matrix.image }}:test > base_image_${{ matrix.image }}.tar
+        echo "✅ Base image saved to artifact"
+    
+    - name: Upload base image artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: base-image-${{ matrix.image }}
+        path: base_image_${{ matrix.image }}.tar
+        retention-days: 1
 
   test-container-builds:
     runs-on: ubuntu-latest
@@ -148,19 +147,31 @@ jobs:
       with:
         driver-opts: network=host
     
-    - name: Login to GitHub Container Registry
-      uses: docker/login-action@v3
+    - name: Download base image artifacts
+      uses: actions/download-artifact@v4
       with:
-        registry: ${{ env.REGISTRY }}
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+        pattern: base-image-*
+        path: ./artifacts
+        merge-multiple: true
+    
+    - name: Load base images from artifacts
+      run: |
+        echo "📦 Loading base images from artifacts..."
+        
+        # Load all available base image artifacts
+        for artifact in ./artifacts/base_image_*.tar; do
+          if [ -f "$artifact" ]; then
+            echo "Loading $(basename $artifact)..."
+            docker load < "$artifact"
+          fi
+        done
+        
+        echo "📋 Available base images after loading:"
+        docker images | grep gs_crawler || echo "No gs_crawler images found"
     
     - name: Prepare base images
       run: |
-        echo "🔧 Preparing base images for container ${{ matrix.container }}..."
-        
-        # Convert repository owner to lowercase for registry compatibility
-        REPO_OWNER_LOWER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+        echo "🔧 Verifying base image for container ${{ matrix.container }}..."
         
         # Bestimme welches Base-Image benötigt wird
         dockerfile="docker_instances/${{ matrix.container }}/Dockerfile"
@@ -173,27 +184,19 @@ jobs:
         base_image=$(grep "^FROM" "$dockerfile" | head -1 | awk '{print $2}' | cut -d':' -f1)
         echo "📦 Base image needed: $base_image"
         
-        # Map base image name to GHCR image name
+        # Map base image name to local tag
         case "$base_image" in
           "gs_crawler/python_basic_crawler"|"stuffdev/python_basic_crawler")
-            ghcr_image="${{ env.REGISTRY }}/${REPO_OWNER_LOWER}/gs_crawler_python_basic_crawler:pr-${{ github.event.number || 'test' }}"
             local_tag="gs_crawler/python_basic_crawler:test"
-            base_image_dir="python_basic_crawler"
             ;;
           "gs_crawler/python_selenium_crawler"|"stuffdev/python_selenium_crawler")
-            ghcr_image="${{ env.REGISTRY }}/${REPO_OWNER_LOWER}/gs_crawler_python_selenium_crawler:pr-${{ github.event.number || 'test' }}"
             local_tag="gs_crawler/python_selenium_crawler:test"
-            base_image_dir="python_selenium_crawler"
             ;;
           "gs_crawler/php_basic_crawler"|"stuffdev/php_basic_crawler")
-            ghcr_image="${{ env.REGISTRY }}/${REPO_OWNER_LOWER}/gs_crawler_php_basic_crawler:pr-${{ github.event.number || 'test' }}"
             local_tag="gs_crawler/php_basic_crawler:test"
-            base_image_dir="php_basic_crawler"
             ;;
           "gs_crawler/flask_monitor"|"stuffdev/flask_monitor")
-            ghcr_image="${{ env.REGISTRY }}/${REPO_OWNER_LOWER}/gs_crawler_flask_monitor:pr-${{ github.event.number || 'test' }}"
             local_tag="gs_crawler/flask_monitor:test"
-            base_image_dir="flask_monitor"
             ;;
           *)
             echo "❌ Unknown base image: $base_image"
@@ -201,29 +204,15 @@ jobs:
             ;;
         esac
         
-        # Try to pull from GHCR first (in case base images were built in build-base-images job)
-        if docker pull "$ghcr_image" 2>/dev/null; then
-          echo "✅ Pulled base image from GHCR: $ghcr_image"
-          docker tag "$ghcr_image" "$local_tag"
-          # Verify the local tag exists
-          docker images "$local_tag"
+        # Verify the base image is available
+        if docker images "$local_tag" | grep -q "$local_tag"; then
+          echo "✅ Base image available: $local_tag"
         else
-          echo "ℹ️ Base image not found in GHCR, building locally with cache..."
-          cd "base_images/$base_image_dir"
-          docker buildx build \
-            --platform linux/amd64 \
-            --tag "$local_tag" \
-            --load \
-            --cache-from=type=gha \
-            --cache-to=type=gha,mode=max \
-            .
-          cd ../..
-          # Import the image to regular docker daemon
-          echo "Ensuring image is available in Docker daemon..."
-          docker images "$local_tag"
+          echo "❌ Base image not found: $local_tag"
+          echo "Available images:"
+          docker images | grep gs_crawler || echo "No gs_crawler images found"
+          exit 1
         fi
-        
-        echo "✅ Base image prepared successfully: $local_tag"
     
     - name: Test build ${{ matrix.container }}
       run: |
@@ -343,6 +332,28 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
     
+    - name: Download base image artifacts
+      uses: actions/download-artifact@v4
+      with:
+        pattern: base-image-*
+        path: ./artifacts
+        merge-multiple: true
+    
+    - name: Load base images from artifacts
+      run: |
+        echo "📦 Loading base images from artifacts..."
+        
+        # Load all available base image artifacts
+        for artifact in ./artifacts/base_image_*.tar; do
+          if [ -f "$artifact" ]; then
+            echo "Loading $(basename $artifact)..."
+            docker load < "$artifact"
+          fi
+        done
+        
+        echo "📋 Available base images after loading:"
+        docker images | grep gs_crawler || echo "No gs_crawler images found"
+    
     - name: Create test output directory
       run: |
         mkdir -p test_output
@@ -352,38 +363,11 @@ jobs:
       run: |
         echo "🔧 Building key containers for integration test..."
         
-        # Convert repository owner to lowercase for registry compatibility
-        REPO_OWNER_LOWER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+        # Verify base images are available
+        echo "📋 Available base images:"
+        docker images | grep gs_crawler || echo "No gs_crawler images found"
         
-        # Use cached base images when available
-        key_base_images=("python_basic_crawler" "flask_monitor")
-        for image in "${key_base_images[@]}"; do
-          if [ -d "base_images/$image" ]; then
-            echo "Preparing base image: $image"
-            
-            # Try to pull from GHCR first
-            ghcr_image="${{ env.REGISTRY }}/${REPO_OWNER_LOWER}/gs_crawler_$image:pr-${{ github.event.number || 'test' }}"
-            local_tag="gs_crawler/$image:test"
-            
-            if docker pull "$ghcr_image" 2>/dev/null; then
-              echo "✅ Pulled base image from GHCR: $ghcr_image"
-              docker tag "$ghcr_image" "$local_tag"
-            else
-              echo "ℹ️ Base image not found in GHCR, building locally with cache..."
-              cd "base_images/$image"
-              docker buildx build \
-                --platform linux/amd64 \
-                --tag "$local_tag" \
-                --load \
-                --cache-from=type=gha \
-                --cache-to=type=gha,mode=max \
-                .
-              cd ../..
-            fi
-          fi
-        done
-        
-        # Baue Test-Container mit Cache
+        # Build test containers
         key_containers=("000_health_monitor" "019_was_app" "001_senioren")
         for container in "${key_containers[@]}"; do
           if [ -d "docker_instances/$container" ]; then
@@ -395,7 +379,7 @@ jobs:
               --tag gs_crawler_test/$container:test \
               .
             cd ../..
-            echo "✅ Built container with cache: $container"
+            echo "✅ Built container: $container"
           fi
         done
     
