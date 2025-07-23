@@ -228,9 +228,10 @@ jobs:
         # Ersetze Base-Image-Tags für Test
         sed 's/:latest/:test/g' Dockerfile > Dockerfile.test
         
-        docker image list
-
-        # Build Container mit Cache
+        echo "📋 Available images before build:"
+        docker image list | grep -E "(gs_crawler|stuffdev)" || echo "No base images found"
+        
+        # Build Container mit Cache und ohne Registry-Pull für Base-Images
         docker buildx build \
           --platform linux/amd64 \
           --file Dockerfile.test \
@@ -238,6 +239,7 @@ jobs:
           --load \
           --cache-from=type=gha \
           --cache-to=type=gha,mode=max \
+          --pull=false \
           .
         
         echo "✅ Build test successful for ${{ matrix.container }}"
@@ -392,6 +394,7 @@ jobs:
               --load \
               --cache-from=type=gha \
               --cache-to=type=gha,mode=max \
+              --pull=false \
               .
             cd ../..
             echo "✅ Built container with cache: $container"
