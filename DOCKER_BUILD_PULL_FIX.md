@@ -1,40 +1,31 @@
 # Docker Build Pull Issue Fix
 
 ## Problem
-In line 234 of the GitHub Actions workflow, when building containers, Docker Buildx was trying to pull base images from docker.io even though the images were already prepared locally in the previous step.
+In line 234 of the GitHub Actions workflow, when building containers, Docker was trying to pull base images from docker.io even though the images were already prepared locally in the previous step.
 
 ## Root Cause
 - The "Prepare base images" step successfully pulls/builds base images and tags them locally (e.g., `gs_crawler/python_basic_crawler:test`)
-- However, when `docker buildx build` runs, it defaults to pulling images from registries
-- Even though we had the image locally, Docker was trying to pull `gs_crawler/python_basic_crawler:test` from docker.io
-- This caused build failures or unnecessary network calls
+- However, when using `docker buildx build` with a remote builder context, the local Docker images aren't automatically available to the buildx builder
+- Even with `--pull=false` and `--load` flags, Docker Buildx uses an isolated builder instance that doesn't have access to the local Docker daemon images
+- This caused build failures or unnecessary network calls to docker.io
 
 ## Solution
-Added the `--pull=false` flag to the `docker buildx build` commands in both:
-1. **test-container-builds job** (line ~234)
-2. **test-integration job** (line ~390)
+**Switched from Docker Buildx to regular Docker build** for container builds that depend on local base images:
 
-## What `--pull=false` does
-- Forces Docker Buildx to use locally available images instead of pulling from registries
-- Ensures that the base images we prepared in the "Prepare base images" step are actually used
-- Prevents unnecessary network calls and potential pull failures
-- Makes builds faster and more reliable
+1. **Keep Docker Buildx for base images** (they need multi-platform support and registry push)
+2. **Use regular `docker build` for container builds** (they need access to local base images)
+3. **Added verification steps** to ensure base images are properly available in the Docker daemon
 
-## Before vs After
+## Key Changes
 
-**Before:**
+### 1. Base Image Preparation (Enhanced)
 ```bash
-docker buildx build \
-  --platform linux/amd64 \
-  --file Dockerfile.test \
-  --tag gs_crawler_test/$container:test \
-  --load \
-  --cache-from=type=gha \
-  --cache-to=type=gha,mode=max \
-  .
+# Verify the local tag exists after pull/build
+docker images "$local_tag"
 ```
 
-**After:**
+### 2. Container Build Method (Changed)
+**Before:**
 ```bash
 docker buildx build \
   --platform linux/amd64 \
@@ -47,10 +38,45 @@ docker buildx build \
   .
 ```
 
-## Benefits
-✅ **Faster builds**: No unnecessary image pulls  
-✅ **More reliable**: Uses guaranteed local images  
-✅ **Reduced network usage**: No registry calls for base images  
-✅ **Consistent behavior**: Base images prepared in previous step are actually used  
+**After:**
+```bash
+docker build \
+  --file Dockerfile.test \
+  --tag gs_crawler_test/$container:test \
+  .
+```
 
-This fix ensures that the workflow uses the base images we carefully prepared (either from GHCR or built locally) instead of trying to pull them again from docker.io.
+### 3. Added Debugging
+```bash
+echo "📋 Dockerfile.test content:"
+cat Dockerfile.test
+
+echo "📋 Available images before build:"
+docker image list | grep -E "(gs_crawler|stuffdev)" || echo "No base images found"
+```
+
+## Why This Works
+
+✅ **Regular docker build** uses the local Docker daemon directly  
+✅ **No builder isolation** - has full access to locally tagged images  
+✅ **Simpler and more reliable** for local image dependencies  
+✅ **Still use buildx for base images** where we need registry features  
+
+## Architecture
+
+```
+Base Images (buildx) → GHCR Registry → Pull & Tag → Local Docker Daemon
+                                                         ↓
+Container Builds (docker build) ← ← ← ← ← ← ← ← ← ← Local Images
+```
+
+This hybrid approach uses the right tool for each job:
+- **Docker Buildx**: For base images (needs multi-platform, registry push/pull, caching)
+- **Docker Build**: For containers (needs local base image access, simpler requirements)
+
+## Benefits
+✅ **Reliable local image access**: Regular docker build sees all locally tagged images  
+✅ **No buildx isolation issues**: Direct access to Docker daemon  
+✅ **Better debugging**: Can verify images exist before build  
+✅ **Maintains performance**: Still uses buildx for base images where needed  
+✅ **Simplified troubleshooting**: Clearer error messages and logs

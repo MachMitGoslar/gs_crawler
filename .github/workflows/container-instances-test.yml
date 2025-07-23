@@ -205,6 +205,8 @@ jobs:
         if docker pull "$ghcr_image" 2>/dev/null; then
           echo "✅ Pulled base image from GHCR: $ghcr_image"
           docker tag "$ghcr_image" "$local_tag"
+          # Verify the local tag exists
+          docker images "$local_tag"
         else
           echo "ℹ️ Base image not found in GHCR, building locally with cache..."
           cd "base_images/$base_image_dir"
@@ -216,6 +218,9 @@ jobs:
             --cache-to=type=gha,mode=max \
             .
           cd ../..
+          # Import the image to regular docker daemon
+          echo "Ensuring image is available in Docker daemon..."
+          docker images "$local_tag"
         fi
         
         echo "✅ Base image prepared successfully: $local_tag"
@@ -228,18 +233,16 @@ jobs:
         # Ersetze Base-Image-Tags für Test
         sed 's/:latest/:test/g' Dockerfile > Dockerfile.test
         
+        echo "📋 Dockerfile.test content:"
+        cat Dockerfile.test
+        
         echo "📋 Available images before build:"
         docker image list | grep -E "(gs_crawler|stuffdev)" || echo "No base images found"
         
-        # Build Container mit Cache und ohne Registry-Pull für Base-Images
-        docker buildx build \
-          --platform linux/amd64 \
+        # Verwende standard docker build statt buildx für bessere lokale Image-Kompatibilität
+        docker build \
           --file Dockerfile.test \
           --tag gs_crawler_test/${{ matrix.container }}:test \
-          --load \
-          --cache-from=type=gha \
-          --cache-to=type=gha,mode=max \
-          --pull=false \
           .
         
         echo "✅ Build test successful for ${{ matrix.container }}"
@@ -387,14 +390,9 @@ jobs:
             echo "Building container: $container"
             cd docker_instances/$container
             sed 's/:latest/:test/g' Dockerfile > Dockerfile.test
-            docker buildx build \
-              --platform linux/amd64 \
+            docker build \
               --file Dockerfile.test \
               --tag gs_crawler_test/$container:test \
-              --load \
-              --cache-from=type=gha \
-              --cache-to=type=gha,mode=max \
-              --pull=false \
               .
             cd ../..
             echo "✅ Built container with cache: $container"
