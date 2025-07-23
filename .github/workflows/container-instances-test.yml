@@ -256,7 +256,6 @@ jobs:
             docker logs test_${{ matrix.container }} || true
             exit 1
         fi
-        ;;
 
         
         echo "✅ Functionality test passed for ${{ matrix.container }}"
