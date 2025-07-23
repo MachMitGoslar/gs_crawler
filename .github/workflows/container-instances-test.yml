@@ -205,10 +205,10 @@ jobs:
         esac
         
         # Verify the base image is available
-        if docker images "$local_tag" | grep -q "$local_tag"; then
-          echo "✅ Base image available: $local_tag"
+        if docker images "$base_image" | grep -q "$base_image"; then
+          echo "✅ Base image available: $base_image"
         else
-          echo "❌ Base image not found: $local_tag"
+          echo "❌ Base image not found: $base_image"
           echo "Available images:"
           docker images | grep gs_crawler || echo "No gs_crawler images found"
           exit 1
