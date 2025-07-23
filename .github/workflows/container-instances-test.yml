@@ -170,35 +170,13 @@ jobs:
         echo "📦 Base image needed: $base_image"
         
         # Pull the PR version of the base image and tag it for local use
-        case "$base_image" in
-          "gs_crawler/python_basic_crawler")
-            echo "Pulling PR version of python_basic_crawler..."
-            docker pull ${{ env.IMAGE_PREFIX }}_python_basic_crawler:pr-${{ github.event.number }}
-            docker tag ${{ env.IMAGE_PREFIX }}_python_basic_crawler:pr-${{ github.event.number }} gs_crawler/python_basic_crawler:pr-test
-            ;;
-          "gs_crawler/python_selenium_crawler")
-            echo "Pulling PR version of python_selenium_crawler..."
-            docker pull ${{ env.IMAGE_PREFIX }}_python_selenium_crawler:pr-${{ github.event.number }}
-            docker tag ${{ env.IMAGE_PREFIX }}_python_selenium_crawler:pr-${{ github.event.number }} gs_crawler/python_selenium_crawler:pr-test
-            ;;
-          "gs_crawler/php_basic_crawler")
-            echo "Pulling PR version of php_basic_crawler..."
-            docker pull ${{ env.IMAGE_PREFIX }}_php_basic_crawler:pr-${{ github.event.number }}
-            docker tag ${{ env.IMAGE_PREFIX }}_php_basic_crawler:pr-${{ github.event.number }} gs_crawler/php_basic_crawler:pr-test
-            ;;
-          "gs_crawler/flask_monitor")
-            echo "Pulling PR version of flask_monitor..."
-            docker pull ${{ env.IMAGE_PREFIX }}_flask_monitor:pr-${{ github.event.number }}
-            docker tag ${{ env.IMAGE_PREFIX }}_flask_monitor:pr-${{ github.event.number }} gs_crawler/flask_monitor:pr-test
-            ;;
-          *)
-            echo "❌ Unknown base image: $base_image"
-            exit 1
-            ;;
-        esac
-        
+
+        echo "Pulling PR version of python_basic_crawler..."
+        docker pull $base_image:pr-${{ github.event.number }}
+        docker tag $base_image:pr-${{ github.event.number }} $base_image:pr-test
+
         # Verify the base image is available
-        if docker images "gs_crawler/*:pr-test" | grep -q "pr-test"; then
+        if docker images "$base_image:pr-${{ github.event.number }}" | grep -q "pr-test"; then
           echo "✅ Base image available for testing"
         else
           echo "❌ Base image not found"
