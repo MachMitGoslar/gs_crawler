@@ -23,7 +23,7 @@ epaper_div = soup.find("div", class_="epaper")
 
 link_tag = epaper_div.find("a", href=True) if epaper_div else None
 if link_tag:
-    call_to_action_url = f"https://www.panorama-am-sonntag.de/{link_tag['href']}"
+    call_to_action_url = f"{link_tag['href']}"
     img_tag = link_tag.find("img")
     image_url = f"https://www.panorama-am-sonntag.de/{img_tag['src']}" if img_tag and img_tag.has_attr("src") else None
 
