@@ -53,8 +53,8 @@ def create_gif_from_db_images():
 
         # Datei- & URL-Namen erstellen
         slug = slugify_url(url)
-        gif_filename = f"gif_{slug}.gif"
-        json_filename = f"gif_{slug}.json"
+        gif_filename = f"033_gif_{slug}.gif"
+        json_filename = f"033_gif_{slug}.json"
         gif_path = os.path.join(output_dir, gif_filename)
         json_path = os.path.join(output_dir, json_filename)
 

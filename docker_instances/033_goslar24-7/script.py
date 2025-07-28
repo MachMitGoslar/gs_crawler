@@ -16,7 +16,6 @@ def job():
     delete_old_images()
 
 schedule.every().hour.at(":00").do(job)
-job()
 logging.info("⏳ Warte auf nächste Ausführung ...")
 while True:
     schedule.run_pending()
