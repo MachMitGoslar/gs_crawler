@@ -1,4 +1,4 @@
-FROM gs_crawler/python_basic_crawler:latest
+FROM ghcr.io/machmitgoslar/gs_crawler_python_basic_crawler:latest
 
 # Systempakete für Pillow & SQLite
 RUN apt-get update && apt-get install -y \
