@@ -314,61 +314,7 @@ jobs:
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
     
-    - name: Update docker-compose.yml with new image versions
-      run: |
-        echo "📝 Updating docker-compose.yml with version ${{ needs.prepare-version.outputs.version }}..."
-        
-        # Backup original
-        cp compose.yaml compose.yaml.backup
-        
-        # Erstelle eine Production-Version der compose.yaml
-        cat > compose.production.yaml << EOF
-        # Production Docker Compose für GS Crawler System
-        # Version: ${{ needs.prepare-version.outputs.version }}
-        # Build: ${{ needs.prepare-version.outputs.build_number }}
-        # Generated: $(date -u)
-        
-        version: '3.8'
-        
-        services:
-        EOF
-        
-        # Konvertiere lokale Images zu Registry-Images
-        containers_to_deploy='${{ needs.detect-changes.outputs.deploy-all == 'true' && needs.detect-changes.outputs.all-containers || needs.detect-changes.outputs.changed-containers }}'
-        
-        for container_json in $(echo '$containers_to_deploy' | jq -r '.[]'); do
-          echo "  gs_$container_json:" >> compose.production.yaml
-          echo "    image: ${{ env.IMAGE_PREFIX }}_$container_json:${{ needs.prepare-version.outputs.version }}" >> compose.production.yaml
-          echo "    volumes:" >> compose.production.yaml
-          echo "      - ./httpdocs/crawler:/app/output" >> compose.production.yaml
-          echo "    container_name: gs_$container_json" >> compose.production.yaml
-          echo "    restart: unless-stopped" >> compose.production.yaml
-          
-          # Spezielle Konfiguration für Health Monitor
-          if [ "$container_json" == "000_health_monitor" ]; then
-            echo "    ports:" >> compose.production.yaml
-            echo "      - \"5001:5000\"" >> compose.production.yaml
-          fi
-          
-          echo "" >> compose.production.yaml
-        done
-        
-        echo "✅ Created production compose file"
-    
-    - name: Commit compose file updates
-      run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        
-        git add compose.production.yaml
-        
-        if ! git diff --quiet --cached; then
-          git commit -m "build: update production compose with version ${{ needs.prepare-version.outputs.version }} [skip ci]"
-          git push
-          echo "✅ Pushed production compose file"
-        else
-          echo "ℹ️ No changes to commit"
-        fi
+  
 
   create-release:
     runs-on: ubuntu-latest

@@ -69,6 +69,13 @@ CONTAINERS = {
         'schedule': 'Täglich 09:00',
         'type': 'Webcam Processor'
     },
+    'gs_compiler_033_goslar24-7': {
+        'name': 'Goslar24-7 Webcams',
+        'expected_files': ['033_gif_schuhhof.json', '033_gif_schuhhof.gif', '033_gif_marktplatz_gmg.gif', '033_gif_marktplatz_gmg.json'],
+        'source': 'https://webcams.goslar.de/',
+        'schedule': 'Stündlich',
+        'type': 'Webcam Processor'
+    },
     'gs_compiler_035_talsperren': {
         'name': 'Talsperren Daten',
         'expected_files': ['035-talsperren_alle.json'],
