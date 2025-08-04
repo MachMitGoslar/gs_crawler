@@ -70,8 +70,8 @@ CONTAINERS = {
         'type': 'Webcam Processor'
     },
     'gs_compiler_033_goslar24-7': {
-        'name': 'Goslar24-7 News',
-        'expected_files': ['033_gif_schuhhof.json', '033_gif_schuhhof.gif', '033_gif_marktplatz-gmg.gif', '033_gif_marktplatz-gmg.json'],
+        'name': 'Goslar24-7 Webcams',
+        'expected_files': ['033_gif_schuhhof.json', '033_gif_schuhhof.gif', '033_gif_marktplatz_gmg.gif', '033_gif_marktplatz_gmg.json'],
         'source': 'https://webcams.goslar.de/',
         'schedule': 'Stündlich',
         'type': 'Webcam Processor'
