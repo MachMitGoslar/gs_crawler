@@ -190,6 +190,15 @@ Das GS Crawler System besteht aus 24 Docker Containern, die verschiedene Website
 - **Output:** `032_webcams_goslar.json`
 - **Technologie:** PIL (Python Imaging Library)
 
+#### 033_goslar24-7 - Goslar 24/7
+- **Container:** `gs_compiler_033_goslar24-7`
+- **Scheduled:** Jede Stunde zur vollen Uhrzeit
+- **Aufgabe:** Webcam Bilder speichern und ein Gif mit stündlichen Webcam Bildern für die letzten 7 Tage erstellen
+- **Quelle:** https://webcams.goslar.de/
+- **Output:** `033_gif_schuhhof.json`, `033_gif_gmg_marktplatz.json`
+- **Technologie:** PIL (Python Imaging Library)
+
+
 ## Cron-Job Zusammenfassung
 
 ### Häufigkeit der Ausführung

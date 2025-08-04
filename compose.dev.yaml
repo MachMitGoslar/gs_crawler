@@ -170,6 +170,13 @@ services:
     container_name: gs_compiler_032_webcams_goslar
     restart: unless-stopped
 
+  gs_compiler_033_goslar24-7:
+    build: ./docker_instances/033_goslar24-7
+    volumes:
+      - ./httpdocs/crawler:/app/output
+    container_name: gs_compiler_033_goslar_24-7
+    restart: unless-stopped
+
   gs_compiler_056_serviceportal:
     build: ./docker_instances/056_serviceportal
     volumes:

@@ -171,6 +171,13 @@ services:
     container_name: gs_compiler_032_webcams_goslar
     restart: unless-stopped
 
+  gs_compiler_033_goslar24-7:
+    image: ghcr.io/machmitgoslar/gs_crawler_033_goslar24-7:latest
+    volumes:
+      - ./httpdocs/crawler:/app/output
+    container_name: gs_compiler_033_goslar24-7
+    restart: unless-stopped
+
   gs_compiler_056_serviceportal:
     image: ghcr.io/machmitgoslar/gs_crawler_056_serviceportal:latest
     volumes:
