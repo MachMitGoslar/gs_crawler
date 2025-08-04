@@ -242,7 +242,10 @@ jobs:
             required_files+=("fepa_fetcher.php" "crontab")
             ;;
           *)
-            required_files+=("crontab")
+            # Prüfe auf Crontab-Datei
+            if [ -f "crontab" ]; then
+              required_files+=("crontab")
+            fi
             # Prüfe auf Script-Dateien
             if [ -f "script.py" ]; then
               required_files+=("script.py")
