@@ -63,7 +63,7 @@ def create_gif_from_db_images():
             gif_path,
             save_all=True,
             append_images=images[1:],
-            duration=1000,
+            duration=500,
             loop=0,
             optimize=True
         )
@@ -96,7 +96,7 @@ def add_timestamp_overlay(img, timestamp):
 
     # Schriftart und -größe
     font_path = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
-    font_size = 4
+    font_size = 28
     try:
         font = ImageFont.truetype(font_path, font_size)
     except:
@@ -107,9 +107,9 @@ def add_timestamp_overlay(img, timestamp):
     text_width = bbox[2] - bbox[0]
     text_height = bbox[3] - bbox[1]
 
-    # Position unten rechts
-    x = img.width - text_width - 6
-    y = img.height - text_height - 6
+    # Position unten mittig
+    x = (img.width - text_width) // 2
+    y = img.height - text_height - 20
 
     # Nur transparente, weiße Schrift zeichnen (ohne Hintergrund)
     draw.text((x, y), text, fill=(255, 255, 255, 10), font=font)
