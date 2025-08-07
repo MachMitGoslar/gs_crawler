@@ -15,6 +15,8 @@ def job():
     create_gif_from_db_images()
     delete_old_images()
 
+logging.info("🕒 Initiale Ausführung")
+job()
 schedule.every().hour.at(":00").do(job)
 logging.info("⏳ Warte auf nächste Ausführung ...")
 while True:
