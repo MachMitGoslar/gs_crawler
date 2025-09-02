@@ -16,7 +16,7 @@ soup = BeautifulSoup(response.text, "html.parser")
 savemepath = "output/"
 
 # nächsten Termin ermitteln
-termine = ["2025-06-06T18:00", "2025-07-04T18:00", "2025-08-01T18:00", "2025-09-06T18:00", "2025-10-10T18:00", "2025-11-07T18:00"]
+termine = ["2025-06-06T18:00", "2025-07-04T18:00", "2025-08-01T18:00", "2025-09-05T18:00", "2025-10-10T18:00", "2025-11-07T18:00"]
 # In Datetime-Objekte umwandeln
 termine_dt = [datetime.strptime(t, "%Y-%m-%dT%H:%M") for t in termine]
 
