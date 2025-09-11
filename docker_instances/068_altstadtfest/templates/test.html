@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Altstadtfest Goslar - Live Events</title>
+    
+<style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --accent-color: rgb(135, 110, 2);
+            --accent-light: rgba(135, 110, 2, 0.1);
+            --accent-dark: rgb(108, 88, 1);
+            --text-primary: #1a1a1a;
+            --text-secondary: #666;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --border-color: #e5e5e5;
+            --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.06);
+            --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.08);
+            --border-radius: 12px;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-primary);
+            min-height: 100vh;
+            color: var(--text-primary);
+            line-height: 1.6;
+            font-size: 16px;
+        }
+
+        .app-header {
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--accent-color);
+            padding: 20px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow-light);
+            text-align: center;
+        }
+
+        .app-header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .app-logo {
+            display: flex;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-color);
+        }
+
+        .app-logo::before {
+            content: "🏰";
+            margin-right: 12px;
+            font-size: 1.8rem;
+        }
+
+        .status-badge {
+            background: var(--accent-color);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        .page-hero {
+            text-align: center;
+            padding: 60px 0;
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, #f1f3f4 100%);
+        }
+
+        .page-hero h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+        }
+
+        .page-hero p {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        .content-section {
+            padding: 48px 0;
+        }
+
+        #current-event-section {
+                       background: var(--bg-primary);
+            border-radius: var(--border-radius);
+            padding: 32px;
+            margin-bottom: 32px;
+            box-shadow: var(--shadow-medium);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .current-event {
+            background: var(--bg-primary);
+            border-radius: var(--border-radius);
+            padding: 32px;
+            margin-bottom: 32px;
+            box-shadow: var(--shadow-medium);
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .current-event::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--accent-color);
+        }
+
+        .current-event h2 {
+            color: var(--text-primary);
+            font-size: 1.75rem;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+        }
+
+        .current-event h2::before {
+            content: "🎪";
+            margin-right: 12px;
+            font-size: 2rem;
+        }
+
+        .event-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 24px;
+        }
+
+        .detail-item {
+            background: var(--bg-secondary);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+        }
+
+        .detail-item:hover {
+            background: var(--accent-light);
+            border-color: var(--accent-color);
+            transform: translateY(-1px);
+        }
+
+        .detail-label {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--accent-color);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .detail-value {
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .upcoming-events {
+            background: var(--bg-primary);
+            border-radius: var(--border-radius);
+            padding: 32px;
+            box-shadow: var(--shadow-medium);
+            border: 1px solid var(--border-color);
+        }
+
+        .upcoming-events h2 {
+            font-size: 1.75rem;
+            margin-bottom: 32px;
+            color: var(--text-primary);
+            text-align: center;
+            font-weight: 600;
+            position: relative;
+            padding-bottom: 16px;
+        }
+
+        .upcoming-events h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: var(--accent-color);
+            border-radius: 2px;
+        }
+
+        .events-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 24px;
+        }
+
+        .event-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 24px;
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow-light);
+        }
+
+        .event-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-medium);
+            border-color: var(--accent-color);
+        }
+
+        .event-time {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--accent-color);
+            display: flex;
+            align-items: center;
+        }
+
+        .event-time::before {
+            content: "🕐";
+            margin-right: 8px;
+            font-size: 1.1rem;
+        }
+
+        .event-stage {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            font-weight: 500;
+        }
+
+        .event-stage::before {
+            content: "🎤";
+            margin-right: 8px;
+            font-size: 1rem;
+        }
+
+        .event-program {
+            font-size: 1.1rem;
+            font-weight: 500;
+            line-height: 1.5;
+            color: var(--text-primary);
+        }
+
+        .no-events {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .no-events h3 {
+            font-size: 1.5rem;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .refresh-info {
+            text-align: center;
+            margin-top: 48px;
+            padding: 24px;
+            background: var(--bg-secondary);
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
+        }
+
+        .refresh-info p {
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            background: var(--accent-color);
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .footer {
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 32px 0;
+            margin-top: 64px;
+            text-align: center;
+        }
+
+        .footer p {
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .page-hero h1 {
+                font-size: 2.2rem;
+            }
+            
+            .events-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .event-details {
+                grid-template-columns: 1fr;
+            }
+
+            .app-header .container {
+                flex-direction: column;
+                gap: 16px;
+            }
+
+            .app-logo {
+                font-size: 1.3rem;
+            }
+
+            .container {
+                padding: 0 16px;
+            }
+
+            .content-section {
+                padding: 32px 0;
+            }
+
+            .current-event,
+            .upcoming-events {
+                padding: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+            <div class="app-header">
+            <h1>Altstadtfest Goslar</h1>
+            </div>
+
+        <div id="current-event-section">
+
+            <h2><span class="status-indicator"></span>Live Event-Programm</h2>
+            <div id="current-event-container"></div>
+        </div>
+        <div id="upcoming-events-section"></div>
+
+        <div class="refresh-info">
+            <p>⚡ Seite aktualisiert sich alle 30 Sekunden automatisch</p>
+            <p id="last-update"></p>
+        </div>
+    </div>
+
+    <script>
+        // Event-Daten (werden von der API geladen)
+let events = "{{events}}";
+let eventsData = JSON.parse('{{ events | tojson | safe }}');
+
+function getTimestamps(event) {
+    console.log(event)
+    const date = new Date(event.Datum.split('.').reverse().join('-'));
+    const [startTime, endTime] = event["Uhrzeit"].split('-').map(t => t.trim());
+    const [startHour, startMinute] = startTime.split(':').map(Number);
+    const [endHour, endMinute] = endTime.split(':').map(Number);
+    let startDate = new Date(date);
+    startDate.setHours(startHour, startMinute, 0, 0);
+    let endDate = new Date(date);
+    endDate.setHours(endHour, endMinute, 0, 0);
+    return { start: startDate, end: endDate };  
+
+}
+
+function formatTime(timeString) {
+    return timeString.replace('-', ' - ');
+}
+
+function formatDate(dateString) {
+    const date = new Date(dateString.split('.').reverse().join('-'));
+    return date.toLocaleDateString('de-DE', { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+    });
+}
+
+function renderCurrentEvent(events) {
+    const section = document.getElementById('current-event-container');
+    if (!events || events.length === 0) {
+        section.innerHTML = `
+            <div class="current-event">
+                <h2>Keine aktuellen Veranstaltungen</h2>
+                <p>Schauen Sie sich die kommenden Veranstaltungen unten an!</p>
+            </div>
+        `;
+        return;
+    }
+
+    // Extrahiere Daten aus der Description
+    for(let event of events) {
+        const time = event["Uhrzeit"]
+        const stage = event["Bühne"]
+        const program = event["Programm"]
+        const datum = event["Datum"]
+        console.log("Event in ", event)
+        console.log("Time", time)
+
+    let element = document.createElement('div');
+    element.className = 'event-details';
+    element.innerHTML = `
+                <div class="detail-value">${stage}</div>
+                <div class="detail-item">
+                    <div class="detail-label">Programm</div>
+                    <div class="detail-value">${program}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Uhrzeit</div>
+                    <div class="detail-value">${formatTime(time)}</div>
+                </div>
+    `;
+    section.appendChild(element);
+}
+
+}
+
+function renderUpcomingEvents(events) {
+    const section = document.getElementById('upcoming-events-section');
+    
+    if (!events || events.length === 0) {
+        section.innerHTML = `
+            <div class="upcoming-events">
+                <div class="no-events">
+                    <h3>🎭 Keine weiteren Veranstaltungen</h3>
+                    <p>Das war's für heute! Vielen Dank für Ihr Interesse.</p>
+                </div>
+            </div>
+        `;
+        return;
+    }
+
+    const eventsHtml = events.map(event => {
+        const time = event["Uhrzeit"] || '';
+        const stage = event["Bühne"] || '';
+        const program = event["Programm"] || '';
+
+        return `
+            <div class="event-card">
+                <div class="event-time">${formatTime(time)}</div>
+                <div class="event-stage">${stage}</div>
+                <div class="event-program">${program}</div>
+            </div>
+        `;
+    }).join('');
+
+    section.innerHTML = `
+        <div class="upcoming-events">
+            <h2> Das wartet noch auf euch...</h2>
+            <div class="events-grid">
+                ${eventsHtml}
+            </div>
+        </div>
+    `;
+}
+
+async function loadCurrentEvent() {
+    try {
+        //eventsData.sort((a, b) =>  - new Date(b.start));
+        data = eventsData.filter(event => {
+            const now = new Date(); // Test mit festem Datum
+
+            const start = getTimestamps(event).start;
+            const end = getTimestamps(event).end;
+
+            if (start <= now && end >= now) {
+                return true;
+            }
+            return false;
+        });
+        console.log("Aktuelle Events:", data);
+        renderCurrentEvent(data);
+    } catch (error) {
+        console.error('Fehler beim Laden der aktuellen Veranstaltung:', error);
+        renderCurrentEvent({ message: 'Fehler beim Laden der Daten' });
+    }
+}
+
+async function loadUpcomingEvents() {
+    try {
+        //eventsData.sort((a, b) =>  - new Date(b.start));
+        data = eventsData.filter(event => {
+            //const now = new Date("2025-09-12T18:30:00");
+            const now = Date.now();
+            return getTimestamps(event).start > now;
+        });
+        // Entferne das erste Event (das ist das aktuelle)
+        const upcomingEvents = Array.isArray(data) ? data.slice(1) : [];
+        renderUpcomingEvents(upcomingEvents);
+    } catch (error) {
+        console.error('Fehler beim Laden der kommenden Veranstaltungen:', error);
+        renderUpcomingEvents([]);
+    }
+}
+
+function updateLastUpdateTime() {
+    const now = new Date();
+    document.getElementById('last-update').textContent = 
+        `Letztes Update: ${now.toLocaleTimeString('de-DE')}`;
+}
+
+async function refreshData() {
+    await Promise.all([
+        loadCurrentEvent(),
+        loadUpcomingEvents()
+    ]);
+    updateLastUpdateTime();
+}
+
+// Initial laden
+refreshData();
+
+// Automatische Aktualisierung alle 30 Sekunden
+setInterval(refreshData, 30000);
+
+// Update-Zeit initial setzen
+updateLastUpdateTime();
+
+    </script>
+</body>
+</html>
