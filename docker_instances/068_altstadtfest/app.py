@@ -164,7 +164,7 @@ def format_events(events):
     return results
 
 
-@app.route('/')
+@app.route('/api/card.json')
 def api_current():
     """API Endpoint für die aktuelle oder nächste Veranstaltung"""
     events = load_events()
