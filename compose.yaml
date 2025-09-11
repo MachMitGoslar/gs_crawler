@@ -185,8 +185,8 @@ services:
     container_name: gs_compiler_056_serviceportal
     restart: unless-stopped
   gs_compiler_068_serviceportal:
-    image: ghcr.io/machmitgoslar/gs_crawler_068_serviceportal:latest
-    container_name: gs_compiler_068_serviceportal
+    image: ghcr.io/machmitgoslar/gs_crawler_068_altstadtfest:latest
+    container_name: gs_compiler_068_altstadtfest
     restart: unless-stopped
 
 # Gemeinsames Volume für alle Output-Dateien
