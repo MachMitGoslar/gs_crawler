@@ -147,10 +147,14 @@ def format_event(event):
     uhrzeit = event.get("Uhrzeit", "")
     programm = event.get("Programm", "")
 
+    # uhrzeitangebe im "00:00-23:59" - Format
+    dt = datetime.strptime(datum + " " + uhrzeit.split("-")[0], "%d.%m.%Y %H:%M")
+    # Ausgabe im ISO-Format mit Minuten-Genauigkeit
+    iso_str = dt.isoformat(sep="T", timespec="minutes")
+    
     # neue Struktur
     return ({
-        "published_at": datum+"T"+uhrzeit.split("-")[0],
-
+        "published_at": iso_str,
         "title": "Empfehlung",
         "description": f"{uhrzeit} | {bühne} | {programm}",
         "call_to_action_url": "https://www.meingoslar.de/veranstaltungen/altstadtfest",
@@ -238,4 +242,5 @@ if __name__ == "__main__":
     print("  /health - Health Check")
     
     app.run(host='0.0.0.0', port=5000, debug=True)
+
 
