@@ -529,11 +529,11 @@ async function loadUpcomingEvents() {
         //eventsData.sort((a, b) =>  - new Date(b.start));
         data = eventsData.filter(event => {
             //const now = new Date("2025-09-12T18:30:00");
-            const now = new Date();
+            const now = new Date()
             return getTimestamps(event).start > now;
         });
-        // Entferne das erste Event (das ist das aktuelle)
         renderUpcomingEvents(data);
+
     } catch (error) {
         console.error('Fehler beim Laden der kommenden Veranstaltungen:', error);
         renderUpcomingEvents([]);
