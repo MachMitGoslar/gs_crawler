@@ -506,7 +506,7 @@ async function loadCurrentEvent() {
     try {
         //eventsData.sort((a, b) =>  - new Date(b.start));
         data = eventsData.filter(event => {
-            const now = new Date(); // Test mit festem Datum
+            const now = new Date();
 
             const start = getTimestamps(event).start;
             const end = getTimestamps(event).end;
@@ -529,11 +529,10 @@ async function loadUpcomingEvents() {
         //eventsData.sort((a, b) =>  - new Date(b.start));
         data = eventsData.filter(event => {
             //const now = new Date("2025-09-12T18:30:00");
-            const now = new Date();
+            const now = new Date()
             return getTimestamps(event).start > now;
         });
         // Entferne das erste Event (das ist das aktuelle)
-        const upcomingEvents = Array.isArray(data) ? data.slice(1) : [];
         renderUpcomingEvents(upcomingEvents);
     } catch (error) {
         console.error('Fehler beim Laden der kommenden Veranstaltungen:', error);
