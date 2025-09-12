@@ -228,7 +228,7 @@ def health():
 
 
 if __name__ == "__main__":
-    print("🎪 Altstadtfest API gestartet auf http://0.0.0.0:5010")
+    print("🎪 Altstadtfest API gestartet auf http://0.0.0.0:5000")
     print("Endpoints:")
     print("  / - Alle kommenden Veranstaltungen")
     print("  /api/current - Aktuelle/nächste Veranstaltung")
@@ -236,5 +236,5 @@ if __name__ == "__main__":
     print("  /api/random - Zufällige Veranstaltung")
     print("  /health - Health Check")
     
-    app.run(host='0.0.0.0', port=5010, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
 
