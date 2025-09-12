@@ -22,7 +22,7 @@ class EventStatus:
     PAST = "past"
     ERROR = "error"
 
-BASE_URL = "http://crawler.goslar.de/068_altstadtfest/"
+BASE_URL = "http://crawler.goslar.app/api/"
 
 def parse_time_safe(timestr: str):
     """Hilfsfunktion: Wandelt Zeitstring in time-Objekt, behandelt '24:00' als 23:59."""
@@ -193,7 +193,7 @@ def api_current():
         
         r_number = random.randint(0, len(formatted_events) - 1)
         selected_event = formatted_events[r_number]
-        selected_event["call_to_action_url"] = BASE_URL + "api/programm.html"
+        selected_event["call_to_action_url"] = BASE_URL + "programm.html"
         selected_event["description"] = "Empfehlung: " + selected_event["description"]
         return jsonify(selected_event)
 
