@@ -154,7 +154,7 @@ def format_event(event):
     
     # neue Struktur
     return ({
-        "published_at": published_date.isoformat(sep='T', timespec='minutes'),
+        "published_at": iso_str,
         "title": "Empfehlung",
         "description": f"{uhrzeit} | {bühne} | {programm}",
         "call_to_action_url": "https://www.meingoslar.de/veranstaltungen/altstadtfest",
