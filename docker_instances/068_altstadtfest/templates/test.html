@@ -532,8 +532,8 @@ async function loadUpcomingEvents() {
             const now = new Date()
             return getTimestamps(event).start > now;
         });
-        // Entferne das erste Event (das ist das aktuelle)
-        renderUpcomingEvents(upcomingEvents);
+        renderUpcomingEvents(data);
+
     } catch (error) {
         console.error('Fehler beim Laden der kommenden Veranstaltungen:', error);
         renderUpcomingEvents([]);
