@@ -394,6 +394,7 @@
     <script>
         // Event-Daten (werden von der API geladen)
 let events = "{{events}}";
+
 let eventsData = JSON.parse('{{ events | tojson | safe }}');
 
 function getTimestamps(event) {
@@ -426,6 +427,7 @@ function formatDate(dateString) {
 
 function renderCurrentEvent(events) {
     const section = document.getElementById('current-event-container');
+    section.innerHTML = '';
     if (!events || events.length === 0) {
         section.innerHTML = `
             <div class="current-event">
