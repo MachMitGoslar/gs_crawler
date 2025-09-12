@@ -149,7 +149,7 @@ def format_event(event):
 
     # neue Struktur
     return ({
-        "published_at": datum.isoformat(sep='T', timespec='minutes'),
+        "published_at": datum+"T"+uhrzeit.split("-")[0],
         "title": "Empfehlung",
         "description": f"{uhrzeit} | {bühne} | {programm}",
         "call_to_action_url": "https://www.meingoslar.de/veranstaltungen/altstadtfest",
@@ -236,5 +236,5 @@ if __name__ == "__main__":
     print("  /api/random - Zufällige Veranstaltung")
     print("  /health - Health Check")
     
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5010, debug=True)
 
