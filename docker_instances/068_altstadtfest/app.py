@@ -50,7 +50,7 @@ def get_events_for_checktime(events, check_datetime=None):
         return {
             "status": EventStatus.ERROR,
             "message": {
-                "published_at": check_datetime.isoformat(),
+                "published_at": check_datetime.isoformat(sep='T', timespec='minutes'),
                 "title": "Problem",
                 "description": "Aktuell gibt es Probleme bei der Anzeige der Veranstaltungen.",
                 "call_to_action_url": "https://www.meingoslar.de/veranstaltungen/altstadtfest",
@@ -69,7 +69,7 @@ def get_events_for_checktime(events, check_datetime=None):
         return {
             "status": EventStatus.PAST,
             "message": {
-                "published_at": last_day.isoformat(),
+                "published_at": last_day.isoformat(sep='T', timespec='minutes'),
                 "title": "Wir sehen uns nächstes Jahr!",
                 "description": "Das Altstadtfest in Goslar findet nächstes Jahr wieder statt. Bis dahin, bleibt gesund!",
                 "call_to_action_url": "https://www.meingoslar.de/veranstaltungen/altstadtfest",
@@ -85,7 +85,7 @@ def get_events_for_checktime(events, check_datetime=None):
         return {
                 "status": EventStatus.BEFORE,
                 "message": {
-                    "published_at": first_day.isoformat(),
+                    "published_at": first_day.isoformat(sep='T', timespec='minutes'),
                     "title": "Das Altstadtfest in Goslar startet bald!",
                     "description": "Freut euch auf tolle Veranstaltungen beim Altstadtfest in Goslar. Bis dahin, bleibt gesund!",
                     "call_to_action_url": "https://www.meingoslar.de/veranstaltungen/altstadtfest",
@@ -149,7 +149,7 @@ def format_event(event):
 
     # neue Struktur
     return ({
-        "published_at": datum,
+        "published_at": datum.isoformat(sep='T', timespec='minutes'),
         "title": "Empfehlung",
         "description": f"{uhrzeit} | {bühne} | {programm}",
         "call_to_action_url": "https://www.meingoslar.de/veranstaltungen/altstadtfest",
@@ -199,7 +199,7 @@ def api_current():
 
     if len(result_structure["events"]) == 0:
          return jsonify({
-                    "published_at": datetime.now().isoformat(),
+                    "published_at": datetime.now().isoformat(sep='T', timespec='minutes'),
                     "title": "Das Altstadtfest in Goslar ist für heute vorbei!",
                     "description": "Das Altstadtfest in Goslar ist für heute vorbei. Wir sehen uns morgen wieder! Mehr zu unserem Programm",
                     "call_to_action_url": "https://www.meingoslar.de/veranstaltungen/altstadtfest",
