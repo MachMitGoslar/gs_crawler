@@ -82,17 +82,16 @@ from PIL import Image, ImageDraw, ImageFont
 # Optional: Pfade für Datei-Outputs (wenn gewünscht)
 OUTPUT_FILE = None  # z. B. "../Hochwasser.txt"
 
+# Ausgabeordner
+output_dir = "/app/output/"
+os.makedirs(output_dir, exist_ok=True)
+
 # Logging (auskommentieren / anpassen wenn nicht gewünscht)
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s: %(message)s")
 
-# Ziel-URL
-# URL der Quelle
+# URL der Quelle und Zielpfad
 URL = "https://www.pegelonline.nlwkn.niedersachsen.de/Messwerte"
-imageurl = "./output/062-Hochwasser.png"
-
-# Ausgabeordner
-output_dir = "output/"
-os.makedirs(output_dir, exist_ok=True)
+imageurl = os.path.join(output_dir, "062-Hochwasser.png")
 
 try:
 # --- Hilfsfunktionen ---
@@ -323,8 +322,8 @@ try:
         # optional: in Dateien schreiben (falls Pfade oben gesetzt)
         maybe_write_file(OUTPUT_FILE, output + "\n")
 
-        save_block_png(symbol, hochwasser, "062-Hochwasser-Grafik.png", title="Abzucht-Pegel Oker")
-        save_text_block(out_lines, symbol, stufe, "062-Hochwasser-Text.png")
+        save_block_png(symbol, hochwasser, os.path.join(output_dir, "062-Hochwasser-Grafik.png"), title="Abzucht-Pegel Oker")
+        save_text_block(out_lines, symbol, stufe, os.path.join(output_dir, "062-Hochwasser-Text.png"))
 
 except requests.RequestException as e:
     print("❌ Fehler beim Laden der Seite:", e)
