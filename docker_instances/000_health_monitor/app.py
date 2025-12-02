@@ -173,13 +173,6 @@ CONTAINERS = {
         'source': 'https://service.goslar.de/home',
         'schedule': 'Täglich 09:00',
         'type': 'Service Portal'
-    },
-    'gs_compiler_068_altstadtfest': {
-        'name': 'Altstadtfest Goslar',
-        'expected_files': [],
-        'source': 'https://meingoslar.de/',
-        'schedule': 'API Endpoint',
-        'type': 'API Endpoint'
     }
 }
 

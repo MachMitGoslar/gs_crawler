@@ -119,6 +119,13 @@ services:
     container_name: gs_compiler_035_talsperren
     restart: unless-stopped
 
+  gs_compiler_062_abzucht_oker:
+    build: ./docker_instances/gs_compiler_062_abzucht_oker
+    volumes:
+      - ./httpdocs/crawler:/app/output
+    container_name: gs_compiler_062_abzucht_oker
+    restart: unless-stopped
+
   # === EDUCATION CRAWLER ===
   gs_compiler_050_tschuessschule_studium:
     build: ./docker_instances/050_tschuessschule_studium
