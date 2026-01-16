@@ -1,14 +1,43 @@
+# ===========================================
+# GS Crawler - Git Ignore Configuration
+# ===========================================
+
+# --- PHP Configuration ---
 .php-ini
 .php-version
+
+# --- Output Files ---
+# Crawler output directory (generated JSON/XML files)
 httpdocs/*
-docker_instances/*/.python-version
-docker_instances/*/.venv
-docker_instances/*/output
-docker_instances/*/__pycache__
+
+# --- Python Environment ---
+# Virtual environments (project-wide and per-container)
 .venv
-raw_scripts/
-.DS_Store
-__pycache__/
-*.pyc
 .venv/
+docker_instances/*/.venv
+
+# Python version files
+docker_instances/*/.python-version
+
+# Python bytecode
+__pycache__/
+docker_instances/*/__pycache__
+*.pyc
+
+# --- Container Output ---
+# Local output directories in container folders
+docker_instances/*/output
+
+# --- Development & Testing ---
+# Test output from local scraper testing
 test_output/
+
+# Raw/experimental scripts
+raw_scripts/
+
+# --- IDE & OS ---
+# macOS
+.DS_Store
+
+# Claude Code local state
+.claude
