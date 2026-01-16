@@ -7,4 +7,8 @@ docker_instances/*/output
 docker_instances/*/__pycache__
 .venv
 raw_scripts/
-.DS_Storebase_images/generic_scraper/__pycache__/
+.DS_Store
+__pycache__/
+*.pyc
+.venv/
+test_output/
