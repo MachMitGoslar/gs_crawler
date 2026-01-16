@@ -1,0 +1,243 @@
+name: Container Instances - Build Test (Optimized)
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'docker_instances/**'
+      - 'base_images/**'
+      - 'crawler_configs/**'
+      - '.github/workflows/container-instances-test-optimized.yml'
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ghcr.io/machmitgoslar/gs_crawler
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      changed-containers: ${{ steps.changes.outputs.changed-containers }}
+      base-images-changed: ${{ steps.changes.outputs.base-images-changed }}
+      generic-scraper-changed: ${{ steps.changes.outputs.generic-scraper-changed }}
+      configs-changed: ${{ steps.changes.outputs.configs-changed }}
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Detect changed files
+      id: changes
+      run: |
+        echo "Detecting changed files..."
+
+        if [ "${{ github.event_name }}" == "pull_request" ]; then
+          changed_files=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }})
+        else
+          changed_files=$(git diff --name-only HEAD~1 HEAD)
+        fi
+
+        changed_containers=()
+        base_images_changed="false"
+        generic_scraper_changed="false"
+        configs_changed="false"
+
+        echo "Changed files:"
+        echo "$changed_files"
+
+        # Check for base image changes
+        if echo "$changed_files" | grep -q "^base_images/python"; then
+          base_images_changed="true"
+        fi
+
+        # Check for generic scraper changes
+        if echo "$changed_files" | grep -q "^base_images/generic_scraper"; then
+          generic_scraper_changed="true"
+        fi
+
+        # Check for config changes
+        if echo "$changed_files" | grep -q "^crawler_configs/"; then
+          configs_changed="true"
+        fi
+
+        # Collect changed containers
+        for file in $changed_files; do
+          if [[ $file == docker_instances/*/Dockerfile ]] || [[ $file == docker_instances/*/*.py ]] || [[ $file == docker_instances/*/*.php ]] || [[ $file == docker_instances/*/crontab ]]; then
+            container=$(echo $file | cut -d'/' -f2)
+            if [[ ! " ${changed_containers[@]} " =~ " ${container} " ]]; then
+              changed_containers+=("$container")
+            fi
+          fi
+        done
+
+        if [ ${#changed_containers[@]} -eq 0 ]; then
+          echo "changed-containers=[]" >> $GITHUB_OUTPUT
+        else
+          printf -v joined '"%s",' "${changed_containers[@]}"
+          echo "changed-containers=[${joined%,}]" >> $GITHUB_OUTPUT
+        fi
+
+        echo "base-images-changed=$base_images_changed" >> $GITHUB_OUTPUT
+        echo "generic-scraper-changed=$generic_scraper_changed" >> $GITHUB_OUTPUT
+        echo "configs-changed=$configs_changed" >> $GITHUB_OUTPUT
+
+        echo "Changed containers: ${changed_containers[*]}"
+        echo "Base images changed: $base_images_changed"
+        echo "Generic scraper changed: $generic_scraper_changed"
+        echo "Configs changed: $configs_changed"
+
+  # Test generic scraper locally (fast, no Docker needed)
+  test-generic-scraper:
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.generic-scraper-changed == 'true' || needs.detect-changes.outputs.configs-changed == 'true'
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.13'
+        cache: 'pip'
+
+    - name: Install dependencies
+      run: |
+        pip install -r base_images/generic_scraper/requirements.txt
+
+    - name: Test scraper with configs
+      run: |
+        mkdir -p test_output
+        export OUTPUT_DIR=test_output
+
+        # Test each config file
+        for config in crawler_configs/simple/*.yaml crawler_configs/tschuessschule/*.yaml; do
+          if [ -f "$config" ]; then
+            echo "Testing: $config"
+            python base_images/generic_scraper/scraper.py "$config" || exit 1
+          fi
+        done
+
+        echo "All scraper tests passed!"
+        ls -la test_output/
+
+  # Build base images (single platform for testing)
+  build-base-images:
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.base-images-changed == 'true' || needs.detect-changes.outputs.generic-scraper-changed == 'true'
+    strategy:
+      matrix:
+        image:
+          - python_basic_crawler
+          - python_selenium_crawler
+          - php_basic_crawler
+          - flask_monitor
+          - generic_scraper
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Check if image directory exists
+      id: check
+      run: |
+        if [ -d "base_images/${{ matrix.image }}" ]; then
+          echo "exists=true" >> $GITHUB_OUTPUT
+        else
+          echo "exists=false" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Build base image ${{ matrix.image }} (AMD64 only for testing)
+      if: steps.check.outputs.exists == 'true'
+      uses: docker/build-push-action@v5
+      with:
+        context: ./base_images/${{ matrix.image }}
+        platforms: linux/amd64
+        push: false
+        load: true
+        tags: gs_crawler/${{ matrix.image }}:test
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+  # Test changed containers (single platform)
+  test-containers:
+    runs-on: ubuntu-latest
+    needs: [detect-changes, build-base-images]
+    if: always() && needs.detect-changes.outputs.changed-containers != '[]'
+    strategy:
+      matrix:
+        container: ${{ fromJson(needs.detect-changes.outputs.changed-containers) }}
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build and test ${{ matrix.container }}
+      run: |
+        echo "Testing container: ${{ matrix.container }}"
+        cd docker_instances/${{ matrix.container }}
+
+        # Build single platform
+        docker build --tag test/${{ matrix.container }}:test .
+
+        # Basic start test
+        docker run --rm -d --name test_${{ matrix.container }} test/${{ matrix.container }}:test
+        sleep 3
+
+        if docker ps | grep -q test_${{ matrix.container }}; then
+          echo "Container started successfully"
+          docker stop test_${{ matrix.container }} || true
+        else
+          echo "Container failed to start"
+          docker logs test_${{ matrix.container }} || true
+          exit 1
+        fi
+
+  summary:
+    runs-on: ubuntu-latest
+    needs: [detect-changes, test-generic-scraper, build-base-images, test-containers]
+    if: always()
+
+    steps:
+    - name: Test Summary
+      run: |
+        echo "# Container Test Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+
+        echo "## Changes Detected" >> $GITHUB_STEP_SUMMARY
+        echo "- Base images changed: ${{ needs.detect-changes.outputs.base-images-changed }}" >> $GITHUB_STEP_SUMMARY
+        echo "- Generic scraper changed: ${{ needs.detect-changes.outputs.generic-scraper-changed }}" >> $GITHUB_STEP_SUMMARY
+        echo "- Configs changed: ${{ needs.detect-changes.outputs.configs-changed }}" >> $GITHUB_STEP_SUMMARY
+        echo "- Changed containers: ${{ needs.detect-changes.outputs.changed-containers }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+
+        echo "## Test Results" >> $GITHUB_STEP_SUMMARY
+
+        if [ "${{ needs.test-generic-scraper.result }}" == "success" ] || [ "${{ needs.test-generic-scraper.result }}" == "skipped" ]; then
+          echo "- Generic Scraper: Passed" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "- Generic Scraper: Failed" >> $GITHUB_STEP_SUMMARY
+        fi
+
+        if [ "${{ needs.build-base-images.result }}" == "success" ] || [ "${{ needs.build-base-images.result }}" == "skipped" ]; then
+          echo "- Base Images: Passed" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "- Base Images: Failed" >> $GITHUB_STEP_SUMMARY
+        fi
+
+        if [ "${{ needs.test-containers.result }}" == "success" ] || [ "${{ needs.test-containers.result }}" == "skipped" ]; then
+          echo "- Container Tests: Passed" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "- Container Tests: Failed" >> $GITHUB_STEP_SUMMARY
+        fi

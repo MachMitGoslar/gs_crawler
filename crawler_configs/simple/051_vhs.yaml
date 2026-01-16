@@ -1,0 +1,52 @@
+# VHS Goslar - Course Listings
+id: "051_vhs"
+name: "VHS Goslar Kurse"
+
+url: "https://www.vhs-goslar.de/"
+base_url: "https://www.vhs-goslar.de/"
+
+schedule: "0 9 * * *"
+run_on_start: true
+
+selectors:
+  # First find the main container, then iterate rows
+  container: "div.kw-highlight div.kw-table-row"
+
+  title:
+    selector: "a"
+    attribute: "text"
+
+  description:
+    selector: "div.text-muted"
+    attribute: "text"
+    # Will be combined with title in post-processing
+
+  call_to_action_url:
+    selector: "a"
+    attribute: "href"
+    prefix: "https://www.vhs-goslar.de/"
+
+  image_url:
+    selector: ""  # No images on this site
+    default: null
+
+output:
+  single:
+    enabled: true
+    filename: "051_vhs.json"
+    cta_override: "https://crawler.goslar.app/crawler/051_vhs-alle.json"
+    # Custom title for single output
+    title_override: "VHS Empfehlungen"
+
+  all:
+    enabled: true
+    filename: "051_vhs-alle.json"
+
+selection:
+  strategy: "random"
+
+post_process:
+  # For single output: prepend title to description
+  single_description_template: "{title} {description}"
+  date_pattern: "\\d{2}\\.\\d{2}\\.\\d{4}"
+  date_format: "%d.%m.%Y"

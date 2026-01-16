@@ -1,0 +1,43 @@
+# Goslarsche Zeitung - Local News Crawler
+id: "002_gz"
+name: "Goslarsche Zeitung"
+
+url: "https://www.goslarsche.de/lokales/Goslar"
+base_url: "https://www.goslarsche.de/lokales/Goslar"
+
+schedule: "0 * * * *"
+run_on_start: true
+
+selectors:
+  container: "article.StoryPreviewBox"
+
+  title:
+    selector: "h2.article-heading a"
+    attribute: "text"
+
+  description:
+    selector: "div.article-preview"
+    attribute: "text"
+
+  image_url:
+    selector: "div.PictureContainer img"
+    attribute: "src"
+    prefix: "https://www.goslarsche.de/lokales/Goslar"
+
+  call_to_action_url:
+    selector: "h2.article-heading a"
+    attribute: "href"
+    prefix: "https://www.goslarsche.de/lokales/Goslar"
+
+output:
+  single:
+    enabled: true
+    filename: "002_goslarsche.json"
+    cta_override: "https://crawler.goslar.app/crawler/002_goslarsche-alle.json"
+
+  all:
+    enabled: true
+    filename: "002_goslarsche-alle.json"
+
+selection:
+  strategy: "first"

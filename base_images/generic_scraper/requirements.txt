@@ -1,0 +1,12 @@
+beautifulsoup4==4.13.4
+certifi==2025.6.15
+charset-normalizer==3.4.2
+idna==3.10
+lxml==6.0.0
+pillow==11.2.1
+requests==2.32.4
+soupsieve==2.7
+urllib3==2.5.0
+PyYAML==6.0.2
+schedule==1.2.1
+pytz==2024.1

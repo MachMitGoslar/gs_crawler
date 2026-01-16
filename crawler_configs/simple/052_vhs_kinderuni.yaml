@@ -1,0 +1,46 @@
+# VHS Goslar Kinderuni - Children's University Courses
+id: "052_vhs_kinderuni"
+name: "VHS Kinderuni"
+
+url: "https://www.vhs-goslar.de/programm/junge-vhs-kurse-fuer-kinder-und-jugendliche/kategorie/Junge+vhs+-+Kurse+fuer+Kinder+und+Jugendliche/41"
+base_url: "https://www.vhs-goslar.de"
+
+schedule: "0 9 * * *"
+run_on_start: true
+
+selectors:
+  container: "div.kw-kursuebersicht div.kw-table-row"
+
+  title:
+    selector: "div.col-sm-4"
+    attribute: "text"
+
+  description:
+    selector: ""
+    default: ""
+
+  call_to_action_url:
+    selector: "a"
+    attribute: "href"
+    prefix: "https://www.vhs-goslar.de"
+
+  image_url:
+    selector: ""
+    default: null
+
+output:
+  single:
+    enabled: true
+    filename: "052_vhs_kinderuni.json"
+    cta_override: "https://crawler.goslar.app/crawler/052_vhs_kinderuni_alle.json"
+    title_override: "VHS Kinderuni"
+
+  all:
+    enabled: true
+    filename: "052_vhs_kinderuni_alle.json"
+
+selection:
+  strategy: "random"
+
+post_process:
+  single_description_template: "{title} {description}"
