@@ -119,6 +119,16 @@ services:
     container_name: gs_compiler_056_serviceportal
     restart: unless-stopped
 
+  # === FLASK API SERVICES ===
+  gs_compiler_068_altstadtfest:
+    build: ./docker_instances/068_altstadtfest
+    volumes:
+      - ./httpdocs/crawler:/app/output
+    ports:
+      - "5016:5000"
+    container_name: gs_compiler_068_altstadtfest
+    restart: unless-stopped
+
 # Gemeinsames Volume für alle Output-Dateien
 volumes:
   crawler_output:
