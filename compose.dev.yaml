@@ -1,5 +1,6 @@
 # Development Docker Compose für GS Crawler Stack
 # Verwendet lokale Builds für Entwicklung und Tests
+# NOTE: Migrated crawlers now use compose.consolidated.yaml with generic scraper
 
 services:
   # === HEALTH MONITOR ===
@@ -14,7 +15,6 @@ services:
     depends_on:
       - gs_compiler_001_senioren
       - gs_compiler_002_fepa
-      - gs_compiler_002_gz
 
   # === NEWS & MEDIA CRAWLER ===
   gs_compiler_001_senioren:
@@ -22,13 +22,6 @@ services:
     volumes:
       - ./httpdocs/crawler:/app/output
     container_name: gs_compiler_001_senioren
-    restart: unless-stopped
-
-  gs_compiler_002_gz:
-    build: ./docker_instances/002_gz
-    volumes:
-      - ./httpdocs/crawler:/app/output
-    container_name: gs_compiler_002_gz
     restart: unless-stopped
 
   gs_compiler_040_hp:
@@ -60,34 +53,12 @@ services:
     container_name: gs_compiler_027_erster_freitag
     restart: unless-stopped
 
-  # === LOCAL NEWS CRAWLER ===
-  gs_compiler_041_immenrode:
-    build: ./docker_instances/041_immenrode
-    volumes:
-      - ./httpdocs/crawler:/app/output
-    container_name: gs_compiler_041_immenrode
-    restart: unless-stopped
-
-  gs_compiler_048_jerstedt:
-    build: ./docker_instances/048_jerstedt
-    volumes:
-      - ./httpdocs/crawler:/app/output
-    container_name: gs_compiler_048_jerstedt
-    restart: unless-stopped
-
   # === COMMUNITY & VOLUNTEER CRAWLER ===
   gs_compiler_042_freiwilligen:
     build: ./docker_instances/042_freiwilligen
     volumes:
       - ./httpdocs/crawler:/app/output
     container_name: gs_compiler_042_freiwilligen
-    restart: unless-stopped
-
-  gs_compiler_044_wiedelah:
-    build: ./docker_instances/044_wiedelah
-    volumes:
-      - ./httpdocs/crawler:/app/output
-    container_name: gs_compiler_044_wiedelah
     restart: unless-stopped
 
   gs_compiler_031_goslarer_geschichten:
@@ -117,42 +88,6 @@ services:
     volumes:
       - ./httpdocs/crawler:/app/output
     container_name: gs_compiler_035_talsperren
-    restart: unless-stopped
-
-  # === EDUCATION CRAWLER ===
-  gs_compiler_050_tschuessschule_studium:
-    build: ./docker_instances/050_tschuessschule_studium
-    volumes:
-      - ./httpdocs/crawler:/app/output
-    container_name: gs_compiler_050_tschuessschule_studium
-    restart: unless-stopped
-
-  gs_compiler_051_vhs:
-    build: ./docker_instances/051_vhs
-    volumes:
-      - ./httpdocs/crawler:/app/output
-    container_name: gs_compiler_051_vhs
-    restart: unless-stopped
-
-  gs_compiler_052_vhs_kinderuni:
-    build: ./docker_instances/052_vhs_kinderuni
-    volumes:
-      - ./httpdocs/crawler:/app/output
-    container_name: gs_compiler_052_vhs_kinderuni
-    restart: unless-stopped
-
-  gs_compiler_053_tschuessschule_praktikum:
-    build: ./docker_instances/053_tschuessschule_praktikum
-    volumes:
-      - ./httpdocs/crawler:/app/output
-    container_name: gs_compiler_053_tschuessschule_praktikum
-    restart: unless-stopped
-
-  gs_compiler_054_tschuessschule_ausbildung:
-    build: ./docker_instances/054_tschuessschule_ausbildung
-    volumes:
-      - ./httpdocs/crawler:/app/output
-    container_name: gs_compiler_054_tschuessschule_ausbildung
     restart: unless-stopped
 
   # === SPECIALIZED CRAWLER ===
