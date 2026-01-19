@@ -107,11 +107,12 @@ jobs:
           configs_changed="true"
         fi
 
-        # Collect changed containers
+        # Collect changed containers (only if they still exist - skip deleted)
         for file in $changed_files; do
           if [[ $file == docker_instances/*/Dockerfile ]] || [[ $file == docker_instances/*/*.py ]] || [[ $file == docker_instances/*/*.php ]] || [[ $file == docker_instances/*/crontab ]]; then
             container=$(echo $file | cut -d'/' -f2)
-            if [[ ! " ${changed_containers[@]} " =~ " ${container} " ]]; then
+            # Only add if container directory still exists (not deleted)
+            if [[ -d "docker_instances/$container" ]] && [[ ! " ${changed_containers[@]} " =~ " ${container} " ]]; then
               changed_containers+=("$container")
             fi
           fi
