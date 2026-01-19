@@ -15,6 +15,8 @@ services:
     depends_on:
       - gs_compiler_001_senioren
       - gs_compiler_002_fepa
+      - gs_generic_scraper_simple
+      - gs_generic_scraper_tschuessschule
 
   # === NEWS & MEDIA CRAWLER ===
   gs_compiler_001_senioren:
@@ -117,6 +119,24 @@ services:
     volumes:
       - ./httpdocs/crawler:/app/output
     container_name: gs_compiler_056_serviceportal
+    restart: unless-stopped
+
+  # === GENERIC SCRAPER (Config-Driven) ===
+  # These run the migrated YAML-based crawlers
+  gs_generic_scraper_simple:
+    build: ./base_images/generic_scraper
+    volumes:
+      - ./httpdocs/crawler:/app/output
+      - ./crawler_configs/simple:/app/configs
+    container_name: gs_generic_scraper_simple
+    restart: unless-stopped
+
+  gs_generic_scraper_tschuessschule:
+    build: ./base_images/generic_scraper
+    volumes:
+      - ./httpdocs/crawler:/app/output
+      - ./crawler_configs/tschuessschule:/app/configs
+    container_name: gs_generic_scraper_tschuessschule
     restart: unless-stopped
 
   # === FLASK API SERVICES ===

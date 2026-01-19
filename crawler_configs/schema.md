@@ -15,7 +15,7 @@ base_url: "https://example.com" # Optional: for relative URL resolution
 
 # Scheduling (cron format)
 schedule: "0 * * * *"           # Hourly
-run_on_start: true              # Execute immediately on container start
+run_on_start: true              # Execute immediately on container start (Neccassary if container crashes to execute on restart)
 
 # Selectors - CSS selectors for data extraction
 selectors:
