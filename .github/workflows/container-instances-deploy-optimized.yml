@@ -252,6 +252,83 @@ jobs:
           ${{ env.IMAGE_PREFIX }}_${{ matrix.container }}:${{ needs.prepare-version.outputs.version }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
+      
+  # Create GitHub release after successful deployment
+  create-release:
+    runs-on: ubuntu-latest
+    needs: [prepare-version, detect-changes, build-base-images, build-generic-scraper, build-containers]
+    if: always() && needs.build-containers.result == 'success'
+    permissions:
+      contents: write
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: containers-${{ needs.prepare-version.outputs.version }}
+        name: Container Release ${{ needs.prepare-version.outputs.version }}
+        body: |
+          # 🐳 GS Crawler Container Release ${{ needs.prepare-version.outputs.version }}
+
+          ## Deployment Summary
+
+          - **Version:** ${{ needs.prepare-version.outputs.version }}
+          - **Build Number:** ${{ needs.prepare-version.outputs.build_number }}
+          - **Registry:** ghcr.io
+          - **Platforms:** linux/amd64, linux/arm64
+
+          ## Deployed Containers
+
+          ${{ needs.detect-changes.outputs.deploy-all == 'true' && '🔄 **Full deployment** - All containers updated' || '📦 **Incremental deployment** - Changed containers only' }}
+
+          ### Changed Containers:
+          ${{ needs.detect-changes.outputs.changed-containers }}
+
+          ### Base Images Updated:
+          ${{ needs.detect-changes.outputs.base-images-changed == 'true' && '✅ Yes' || '❌ No' }}
+
+          ## Container Images
+
+          All containers are available at:
+          - `ghcr.io/machmitgoslar/gs_crawler_[container-name]:${{ needs.prepare-version.outputs.version }}`
+          - `ghcr.io/machmitgoslar/gs_crawler_[container-name]:latest`
+
+          ## Usage
+
+          ### Production Deployment:
+          ```bash
+          # Use the generated production compose file
+          docker compose -f compose.yaml up -d
+          ```
+
+          ### Development:
+          ```bash
+          # Pull specific version
+          docker pull ghcr.io/machmitgoslar/gs_crawler_000_health_monitor:${{ needs.prepare-version.outputs.version }}
+
+          # Or use in your compose file
+          image: ghcr.io/machmitgoslar/gs_crawler_000_health_monitor:${{ needs.prepare-version.outputs.version }}
+          ```
+
+          ## Health Check
+
+          Health Monitor available at: http://localhost:5015
+
+          ## Rollback
+
+          To rollback to previous version:
+          ```bash
+          # Find previous version in releases
+          docker compose -f compose.yaml down
+          # Edit compose.yaml to use previous version tag
+          docker compose -f compose.yaml up -d
+          ```
+        draft: false
+        prerelease: false
+
 
   deployment-summary:
     runs-on: ubuntu-latest
