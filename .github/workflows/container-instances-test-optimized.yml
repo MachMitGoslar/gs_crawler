@@ -206,13 +206,37 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
+    - name: Build required base images locally
+      run: |
+        # Extract base image from Dockerfile and build it locally
+        dockerfile="docker_instances/${{ matrix.container }}/Dockerfile"
+        if [ -f "$dockerfile" ]; then
+          base_image=$(grep "^FROM" "$dockerfile" | head -1 | awk '{print $2}')
+          echo "Container uses base image: $base_image"
+
+          # Extract the base image name (e.g., flask_monitor from ghcr.io/.../gs_crawler_flask_monitor:latest)
+          if [[ "$base_image" == ghcr.io/machmitgoslar/gs_crawler_* ]]; then
+            # Extract name: gs_crawler_flask_monitor -> flask_monitor
+            base_name=$(echo "$base_image" | sed 's|ghcr.io/machmitgoslar/gs_crawler_||' | cut -d':' -f1)
+            echo "Building base image locally: $base_name"
+
+            if [ -d "base_images/$base_name" ]; then
+              # Build and tag with the exact name the Dockerfile expects
+              docker build -t "$base_image" "./base_images/$base_name"
+              echo "Built $base_image from base_images/$base_name"
+            else
+              echo "Warning: base_images/$base_name not found, will try to pull"
+            fi
+          fi
+        fi
+
     - name: Build and test ${{ matrix.container }}
       run: |
         echo "Testing container: ${{ matrix.container }}"
         cd docker_instances/${{ matrix.container }}
 
-        # Build single platform
-        docker build --tag test/${{ matrix.container }}:test .
+        # Build single platform (use local images, don't pull)
+        docker build --pull=never --tag test/${{ matrix.container }}:test .
 
         # Basic start test
         docker run --rm -d --name test_${{ matrix.container }} test/${{ matrix.container }}:test
