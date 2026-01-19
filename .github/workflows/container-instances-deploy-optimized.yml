@@ -7,6 +7,7 @@ on:
       - 'docker_instances/**'
       - 'base_images/**'
       - 'crawler_configs/**'
+      - 'crawlers.yaml'
       - '.github/workflows/container-instances-deploy-optimized.yml'
   workflow_dispatch:
 
@@ -36,11 +37,42 @@ jobs:
         echo "version=$version" >> $GITHUB_OUTPUT
         echo "Calculated version: $version (build: $build_number)"
 
+  # Load container list from crawlers.yaml registry
+  load-registry:
+    runs-on: ubuntu-latest
+    outputs:
+      containers: ${{ steps.registry.outputs.containers }}
+      base-images: ${{ steps.registry.outputs.base-images }}
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Install PyYAML
+      run: pip install pyyaml
+
+    - name: Load registry data
+      id: registry
+      run: |
+        containers=$(python scripts/generate-workflow-matrix.py --containers)
+        base_images=$(python scripts/generate-workflow-matrix.py --base-images)
+
+        echo "containers=$containers" >> $GITHUB_OUTPUT
+        echo "base-images=$base_images" >> $GITHUB_OUTPUT
+
+        echo "Loaded from crawlers.yaml registry:"
+        echo "  Containers: $containers"
+        echo "  Base images: $base_images"
+
   detect-changes:
     runs-on: ubuntu-latest
     outputs:
       changed-containers: ${{ steps.changes.outputs.changed-containers }}
-      all-containers: ${{ steps.containers.outputs.all-containers }}
       base-images-changed: ${{ steps.changes.outputs.base-images-changed }}
       generic-scraper-changed: ${{ steps.changes.outputs.generic-scraper-changed }}
       deploy-all: ${{ steps.changes.outputs.deploy-all }}
@@ -83,8 +115,8 @@ jobs:
           echo "Generic scraper changed - will rebuild generic scraper image"
         fi
 
-        # Workflow changes trigger full deployment
-        if echo "$changed_files" | grep -q ".github/workflows/container-instances-deploy"; then
+        # Workflow or registry changes trigger full deployment
+        if echo "$changed_files" | grep -q ".github/workflows/container-instances-deploy\|^crawlers.yaml$"; then
           deploy_all="true"
         fi
 
@@ -109,40 +141,30 @@ jobs:
         echo "generic-scraper-changed=$generic_scraper_changed" >> $GITHUB_OUTPUT
         echo "deploy-all=$deploy_all" >> $GITHUB_OUTPUT
 
-    - name: List all containers
-      id: containers
-      run: |
-        containers=()
-        for dir in docker_instances/*/; do
-          if [ -f "$dir/Dockerfile" ]; then
-            container=$(basename "$dir")
-            containers+=("$container")
-          fi
-        done
-        printf -v joined '"%s",' "${containers[@]}"
-        echo "all-containers=[${joined%,}]" >> $GITHUB_OUTPUT
-
-  # Build base images only when changed
+  # Build base images only when changed (uses registry for image list)
   build-base-images:
     runs-on: ubuntu-latest
-    needs: [prepare-version, detect-changes]
+    needs: [prepare-version, load-registry, detect-changes]
     if: needs.detect-changes.outputs.base-images-changed == 'true'
     strategy:
       matrix:
-        image:
-          - python_basic_crawler
-          - python_selenium_crawler
-          - php_basic_crawler
-          - flask_monitor
+        image: ${{ fromJson(needs.load-registry.outputs.base-images) }}
+      fail-fast: false
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
 
+    - name: Skip generic_scraper in base images job
+      if: matrix.image == 'generic_scraper'
+      run: echo "Skipping generic_scraper - handled separately"
+
     - name: Set up Docker Buildx
+      if: matrix.image != 'generic_scraper'
       uses: docker/setup-buildx-action@v3
 
     - name: Log in to Container Registry
+      if: matrix.image != 'generic_scraper'
       uses: docker/login-action@v3
       with:
         registry: ${{ env.REGISTRY }}
@@ -150,6 +172,7 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Build and push base image ${{ matrix.image }}
+      if: matrix.image != 'generic_scraper'
       uses: docker/build-push-action@v5
       with:
         context: ./base_images/${{ matrix.image }}
@@ -193,14 +216,15 @@ jobs:
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
-  # Build changed containers
+  # Build changed containers (uses registry for full list when deploy-all)
   build-containers:
     runs-on: ubuntu-latest
-    needs: [prepare-version, detect-changes, build-base-images]
+    needs: [prepare-version, load-registry, detect-changes, build-base-images]
     if: always() && (needs.detect-changes.outputs.changed-containers != '[]' || needs.detect-changes.outputs.deploy-all == 'true')
     strategy:
       matrix:
-        container: ${{ fromJson(needs.detect-changes.outputs.deploy-all == 'true' && needs.detect-changes.outputs.all-containers || needs.detect-changes.outputs.changed-containers) }}
+        container: ${{ fromJson(needs.detect-changes.outputs.deploy-all == 'true' && needs.load-registry.outputs.containers || needs.detect-changes.outputs.changed-containers) }}
+      fail-fast: false
 
     steps:
     - name: Checkout repository
@@ -230,7 +254,7 @@ jobs:
 
   deployment-summary:
     runs-on: ubuntu-latest
-    needs: [prepare-version, detect-changes, build-base-images, build-generic-scraper, build-containers]
+    needs: [prepare-version, load-registry, detect-changes, build-base-images, build-generic-scraper, build-containers]
     if: always()
 
     steps:
@@ -239,6 +263,11 @@ jobs:
         echo "# Deployment Summary" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "## Version: ${{ needs.prepare-version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+
+        echo "## Registry Data (from crawlers.yaml)" >> $GITHUB_STEP_SUMMARY
+        echo "- Total containers in registry" >> $GITHUB_STEP_SUMMARY
+        echo "- Base images: ${{ needs.load-registry.outputs.base-images }}" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
 
         echo "## What was deployed" >> $GITHUB_STEP_SUMMARY

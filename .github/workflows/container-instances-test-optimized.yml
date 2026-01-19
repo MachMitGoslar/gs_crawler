@@ -7,6 +7,7 @@ on:
       - 'docker_instances/**'
       - 'base_images/**'
       - 'crawler_configs/**'
+      - 'crawlers.yaml'
       - '.github/workflows/container-instances-test-optimized.yml'
   workflow_dispatch:
 
@@ -15,6 +16,42 @@ env:
   IMAGE_PREFIX: ghcr.io/machmitgoslar/gs_crawler
 
 jobs:
+  # Load container list from crawlers.yaml registry
+  load-registry:
+    runs-on: ubuntu-latest
+    outputs:
+      containers: ${{ steps.registry.outputs.containers }}
+      config-dirs: ${{ steps.registry.outputs.config-dirs }}
+      base-images: ${{ steps.registry.outputs.base-images }}
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Install PyYAML
+      run: pip install pyyaml
+
+    - name: Load registry data
+      id: registry
+      run: |
+        containers=$(python scripts/generate-workflow-matrix.py --containers)
+        config_dirs=$(python scripts/generate-workflow-matrix.py --config-dirs)
+        base_images=$(python scripts/generate-workflow-matrix.py --base-images)
+
+        echo "containers=$containers" >> $GITHUB_OUTPUT
+        echo "config-dirs=$config_dirs" >> $GITHUB_OUTPUT
+        echo "base-images=$base_images" >> $GITHUB_OUTPUT
+
+        echo "Loaded from crawlers.yaml registry:"
+        echo "  Containers: $containers"
+        echo "  Config dirs: $config_dirs"
+        echo "  Base images: $base_images"
+
   detect-changes:
     runs-on: ubuntu-latest
     outputs:
@@ -22,6 +59,7 @@ jobs:
       base-images-changed: ${{ steps.changes.outputs.base-images-changed }}
       generic-scraper-changed: ${{ steps.changes.outputs.generic-scraper-changed }}
       configs-changed: ${{ steps.changes.outputs.configs-changed }}
+      registry-changed: ${{ steps.changes.outputs.registry-changed }}
 
     steps:
     - name: Checkout repository
@@ -44,12 +82,18 @@ jobs:
         base_images_changed="false"
         generic_scraper_changed="false"
         configs_changed="false"
+        registry_changed="false"
 
         echo "Changed files:"
         echo "$changed_files"
 
+        # Check for registry changes
+        if echo "$changed_files" | grep -q "^crawlers.yaml$"; then
+          registry_changed="true"
+        fi
+
         # Check for base image changes
-        if echo "$changed_files" | grep -q "^base_images/python"; then
+        if echo "$changed_files" | grep -q "^base_images/python\|^base_images/php\|^base_images/flask"; then
           base_images_changed="true"
         fi
 
@@ -83,16 +127,19 @@ jobs:
         echo "base-images-changed=$base_images_changed" >> $GITHUB_OUTPUT
         echo "generic-scraper-changed=$generic_scraper_changed" >> $GITHUB_OUTPUT
         echo "configs-changed=$configs_changed" >> $GITHUB_OUTPUT
+        echo "registry-changed=$registry_changed" >> $GITHUB_OUTPUT
 
-        echo "Changed containers: ${changed_containers[*]}"
-        echo "Base images changed: $base_images_changed"
-        echo "Generic scraper changed: $generic_scraper_changed"
-        echo "Configs changed: $configs_changed"
+        echo "Summary:"
+        echo "  Changed containers: ${changed_containers[*]}"
+        echo "  Base images changed: $base_images_changed"
+        echo "  Generic scraper changed: $generic_scraper_changed"
+        echo "  Configs changed: $configs_changed"
+        echo "  Registry changed: $registry_changed"
 
-  # Test generic scraper locally (fast, no Docker needed)
-  test-generic-scraper:
+  # Test config-driven crawlers using the registry-aware test script
+  test-config-crawlers:
     runs-on: ubuntu-latest
-    needs: detect-changes
+    needs: [load-registry, detect-changes]
     if: needs.detect-changes.outputs.generic-scraper-changed == 'true' || needs.detect-changes.outputs.configs-changed == 'true'
 
     steps:
@@ -107,37 +154,22 @@ jobs:
 
     - name: Install dependencies
       run: |
+        pip install pyyaml
         pip install -r base_images/generic_scraper/requirements.txt
 
-    - name: Test scraper with configs
+    - name: Test config-driven crawlers
       run: |
-        mkdir -p test_output
-        export OUTPUT_DIR=test_output
+        echo "Testing config-driven crawlers from registry..."
+        python scripts/test-crawler.py --config
 
-        # Test each config file
-        for config in crawler_configs/simple/*.yaml crawler_configs/tschuessschule/*.yaml; do
-          if [ -f "$config" ]; then
-            echo "Testing: $config"
-            python base_images/generic_scraper/scraper.py "$config" || exit 1
-          fi
-        done
-
-        echo "All scraper tests passed!"
-        ls -la test_output/
-
-  # Build base images (single platform for testing)
+  # Build base images dynamically from registry
   build-base-images:
     runs-on: ubuntu-latest
-    needs: detect-changes
+    needs: [load-registry, detect-changes]
     if: needs.detect-changes.outputs.base-images-changed == 'true' || needs.detect-changes.outputs.generic-scraper-changed == 'true'
     strategy:
       matrix:
-        image:
-          - python_basic_crawler
-          - python_selenium_crawler
-          - php_basic_crawler
-          - flask_monitor
-          - generic_scraper
+        image: ${{ fromJson(needs.load-registry.outputs.base-images) }}
 
     steps:
     - name: Checkout repository
@@ -146,17 +178,7 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
-    - name: Check if image directory exists
-      id: check
-      run: |
-        if [ -d "base_images/${{ matrix.image }}" ]; then
-          echo "exists=true" >> $GITHUB_OUTPUT
-        else
-          echo "exists=false" >> $GITHUB_OUTPUT
-        fi
-
     - name: Build base image ${{ matrix.image }} (AMD64 only for testing)
-      if: steps.check.outputs.exists == 'true'
       uses: docker/build-push-action@v5
       with:
         context: ./base_images/${{ matrix.image }}
@@ -170,7 +192,7 @@ jobs:
   # Test changed containers (single platform)
   test-containers:
     runs-on: ubuntu-latest
-    needs: [detect-changes, build-base-images]
+    needs: [load-registry, detect-changes, build-base-images]
     if: always() && needs.detect-changes.outputs.changed-containers != '[]'
     strategy:
       matrix:
@@ -206,7 +228,7 @@ jobs:
 
   summary:
     runs-on: ubuntu-latest
-    needs: [detect-changes, test-generic-scraper, build-base-images, test-containers]
+    needs: [load-registry, detect-changes, test-config-crawlers, build-base-images, test-containers]
     if: always()
 
     steps:
@@ -215,7 +237,14 @@ jobs:
         echo "# Container Test Summary" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
 
+        echo "## Registry Data (from crawlers.yaml)" >> $GITHUB_STEP_SUMMARY
+        echo "- Total containers: $(echo '${{ needs.load-registry.outputs.containers }}' | jq 'length')" >> $GITHUB_STEP_SUMMARY
+        echo "- Config directories: ${{ needs.load-registry.outputs.config-dirs }}" >> $GITHUB_STEP_SUMMARY
+        echo "- Base images: ${{ needs.load-registry.outputs.base-images }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+
         echo "## Changes Detected" >> $GITHUB_STEP_SUMMARY
+        echo "- Registry changed: ${{ needs.detect-changes.outputs.registry-changed }}" >> $GITHUB_STEP_SUMMARY
         echo "- Base images changed: ${{ needs.detect-changes.outputs.base-images-changed }}" >> $GITHUB_STEP_SUMMARY
         echo "- Generic scraper changed: ${{ needs.detect-changes.outputs.generic-scraper-changed }}" >> $GITHUB_STEP_SUMMARY
         echo "- Configs changed: ${{ needs.detect-changes.outputs.configs-changed }}" >> $GITHUB_STEP_SUMMARY
@@ -224,20 +253,20 @@ jobs:
 
         echo "## Test Results" >> $GITHUB_STEP_SUMMARY
 
-        if [ "${{ needs.test-generic-scraper.result }}" == "success" ] || [ "${{ needs.test-generic-scraper.result }}" == "skipped" ]; then
-          echo "- Generic Scraper: Passed" >> $GITHUB_STEP_SUMMARY
+        if [ "${{ needs.test-config-crawlers.result }}" == "success" ] || [ "${{ needs.test-config-crawlers.result }}" == "skipped" ]; then
+          echo "- Config Crawlers: ✅ Passed" >> $GITHUB_STEP_SUMMARY
         else
-          echo "- Generic Scraper: Failed" >> $GITHUB_STEP_SUMMARY
+          echo "- Config Crawlers: ❌ Failed" >> $GITHUB_STEP_SUMMARY
         fi
 
         if [ "${{ needs.build-base-images.result }}" == "success" ] || [ "${{ needs.build-base-images.result }}" == "skipped" ]; then
-          echo "- Base Images: Passed" >> $GITHUB_STEP_SUMMARY
+          echo "- Base Images: ✅ Passed" >> $GITHUB_STEP_SUMMARY
         else
-          echo "- Base Images: Failed" >> $GITHUB_STEP_SUMMARY
+          echo "- Base Images: ❌ Failed" >> $GITHUB_STEP_SUMMARY
         fi
 
         if [ "${{ needs.test-containers.result }}" == "success" ] || [ "${{ needs.test-containers.result }}" == "skipped" ]; then
-          echo "- Container Tests: Passed" >> $GITHUB_STEP_SUMMARY
+          echo "- Container Tests: ✅ Passed" >> $GITHUB_STEP_SUMMARY
         else
-          echo "- Container Tests: Failed" >> $GITHUB_STEP_SUMMARY
+          echo "- Container Tests: ❌ Failed" >> $GITHUB_STEP_SUMMARY
         fi
