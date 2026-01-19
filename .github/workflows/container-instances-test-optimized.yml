@@ -236,7 +236,7 @@ jobs:
         cd docker_instances/${{ matrix.container }}
 
         # Build single platform (use local images, don't pull)
-        docker build --pull=never --tag test/${{ matrix.container }}:test .
+        docker build --pull=false --tag test/${{ matrix.container }}:test .
 
         # Basic start test
         docker run --rm -d --name test_${{ matrix.container }} test/${{ matrix.container }}:test
