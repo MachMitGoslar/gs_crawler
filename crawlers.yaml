@@ -1,0 +1,365 @@
+# =============================================================================
+# GS Crawler Registry - Single Source of Truth
+# =============================================================================
+# This file defines ALL crawlers in the system. Other files are generated from it:
+#   - Health Monitor reads this directly
+#   - compose.yaml / compose.dev.yaml generated via scripts/generate-compose.py
+#   - README.md tables generated via scripts/generate-readme.py
+#
+# To add a new crawler: Add an entry here, then run ./scripts/generate-all.sh
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Global Settings
+# -----------------------------------------------------------------------------
+settings:
+  ghcr_prefix: "ghcr.io/machmitgoslar/gs_crawler"
+  output_volume: "./httpdocs/crawler:/app/output"
+  default_restart: "unless-stopped"
+
+# -----------------------------------------------------------------------------
+# Crawler Categories (for documentation grouping)
+# -----------------------------------------------------------------------------
+categories:
+  infrastructure:
+    name: "Infrastructure"
+    description: "System monitoring and management"
+  news:
+    name: "News & Media"
+    description: "Local news sources and media outlets"
+  events:
+    name: "Events"
+    description: "Event calendars and activities"
+  local:
+    name: "Local Communities"
+    description: "Village and neighborhood news"
+  community:
+    name: "Community & Volunteering"
+    description: "Community organizations and volunteer opportunities"
+  environment:
+    name: "Environmental Monitoring"
+    description: "Weather, water, and environmental data"
+  education:
+    name: "Education"
+    description: "Schools, courses, and educational opportunities"
+  specialized:
+    name: "Specialized"
+    description: "Unique data sources requiring custom processing"
+  api:
+    name: "API Services"
+    description: "API endpoints and services"
+
+# -----------------------------------------------------------------------------
+# Crawler Definitions
+# -----------------------------------------------------------------------------
+crawlers:
+  # === INFRASTRUCTURE ===
+  - id: "000_health_monitor"
+    name: "Health Monitor"
+    category: infrastructure
+    type: "flask_monitor"
+    source: "Internal"
+    schedule: "Always running"
+    expected_files: []
+    ports:
+      - "5015:5000"
+    implementation: custom  # custom = docker_instances/, config = crawler_configs/
+    notes: "Dashboard for monitoring all crawlers"
+
+  # === NEWS & MEDIA ===
+  - id: "001_senioren"
+    name: "Seniorenzeitung Goslar"
+    category: news
+    type: "XML Feed"
+    source: "https://www.goslar.de/leben-in-goslar/senioren/seniorenzeitung"
+    schedule: "0 2 * * *"
+    schedule_human: "Täglich 02:00"
+    expected_files:
+      - "001_senioren_feed.xml"
+    implementation: custom
+
+  - id: "002_gz"
+    name: "Goslarsche Zeitung"
+    category: news
+    type: "News Crawler"
+    source: "https://www.goslarsche.de/lokales/Goslar"
+    schedule: "0 * * * *"
+    schedule_human: "Stündlich"
+    expected_files:
+      - "002_goslarsche.json"
+      - "002_goslarsche-alle.json"
+    implementation: config
+    config_dir: simple
+
+  - id: "040_hp"
+    name: "Harzer Panorama"
+    category: news
+    type: "News Crawler"
+    source: "https://www.panorama-am-sonntag.de/"
+    schedule: "0 2,14 * * *"
+    schedule_human: "2x täglich (02:00, 14:00)"
+    expected_files:
+      - "040_hp.json"
+    implementation: custom
+
+  # === EVENTS ===
+  - id: "002_ferienpass"
+    name: "Ferienpass Events"
+    category: events
+    type: "JSON API"
+    source: "https://goslar.feripro.de/api/"
+    schedule: "0 2,14 * * *"
+    schedule_human: "2x täglich (02:00, 14:00)"
+    expected_files:
+      - "002_fepa_events.json"
+    implementation: custom
+    service_name: "gs_compiler_002_fepa"  # Override default service name
+
+  - id: "014_kunst_in_ar"
+    name: "Kunst in AR"
+    category: events
+    type: "Event Crawler"
+    source: "https://kunst-in-ar.de/crawler.html"
+    schedule: "0 8 * * *"
+    schedule_human: "Täglich 08:00"
+    expected_files:
+      - "017-kunst-in-ar-single.json"
+    implementation: custom
+
+  - id: "019_was_app"
+    name: "WasApp Community"
+    category: events
+    type: "Community Feed"
+    source: "https://machmit.goslar.de/wasapp"
+    schedule: "*/3 * * * *"
+    schedule_human: "Alle 3 Minuten"
+    expected_files:
+      - "019_was_app.json"
+    implementation: custom
+
+  - id: "027_erster_freitag"
+    name: "Erster Freitag Events"
+    category: events
+    type: "Event Crawler"
+    source: "https://insides.goslar-app.de/1-freitag-goslar"
+    schedule: "0 9 * * *"
+    schedule_human: "Täglich 09:00"
+    expected_files:
+      - "027-erster-freitag.json"
+    implementation: custom
+
+  # === LOCAL COMMUNITIES ===
+  - id: "041_immenrode"
+    name: "Immenrode News"
+    category: local
+    type: "Local News"
+    source: "https://immenro.de/"
+    schedule: "0 2,14 * * *"
+    schedule_human: "2x täglich (02:00, 14:00)"
+    expected_files:
+      - "041_immenrode.json"
+    implementation: config
+    config_dir: simple
+
+  - id: "044_wiedelah"
+    name: "Wiedelah Events"
+    category: local
+    type: "Community Events"
+    source: "https://dg-wiedelah.de/category/arbeitseinsaetze/"
+    schedule: "0 2,14 * * *"
+    schedule_human: "2x täglich (02:00, 14:00)"
+    expected_files:
+      - "044-wiedelah.json"
+      - "044-wiedelah_alle.json"
+    implementation: config
+    config_dir: simple
+
+  - id: "048_jerstedt"
+    name: "Jerstedt News"
+    category: local
+    type: "Local News"
+    source: "https://jerstedt.de"
+    schedule: "0 2,14 * * *"
+    schedule_human: "2x täglich (02:00, 14:00)"
+    expected_files:
+      - "048_jerstedt.json"
+    implementation: config
+    config_dir: simple
+
+  # === COMMUNITY & VOLUNTEERING ===
+  - id: "031_goslarer_geschichten"
+    name: "Goslarer Geschichten"
+    category: community
+    type: "Forum Crawler"
+    source: "https://www.goslarer-geschichten.de/forum.php"
+    schedule: "0 9 * * *"
+    schedule_human: "Täglich 09:00"
+    expected_files:
+      - "031-goslarer_geschichten.json"
+    implementation: custom
+
+  - id: "042_freiwilligen"
+    name: "Freiwilligenagentur"
+    category: community
+    type: "Volunteer Portal"
+    source: "https://www.freiwilligenagentur-goslar.de/"
+    schedule: "0 2,14 * * *"
+    schedule_human: "2x täglich (02:00, 14:00)"
+    expected_files:
+      - "042-freiwilligenagentur.json"
+      - "042-freiwilligenagentur-alle.json"
+    implementation: custom
+
+  # === ENVIRONMENTAL MONITORING ===
+  - id: "035_talsperren"
+    name: "Talsperren Daten"
+    category: environment
+    type: "Umwelt Monitor"
+    source: "https://www.harzwasserwerke.de/infoservice/aktuelle-talsperrendaten/"
+    schedule: "0 * * * *"
+    schedule_human: "Stündlich"
+    expected_files:
+      - "035-talsperren_alle.json"
+    implementation: custom
+
+  - id: "045_naturgefahren"
+    name: "Naturgefahren Monitor"
+    category: environment
+    type: "Weather Alert"
+    source: "https://www.naturgefahrenportal.de/de/alerts"
+    schedule: "*/15 * * * *"
+    schedule_human: "Alle 15 Minuten"
+    expected_files:
+      - "045_naturgefahren_de.json"
+    implementation: custom
+
+  - id: "047_bodenwasser"
+    name: "Bodenwasser Monitor"
+    category: environment
+    type: "Umwelt Monitor"
+    source: "Environmental Data"
+    schedule: "0 2,14 * * *"
+    schedule_human: "2x täglich (02:00, 14:00)"
+    expected_files:
+      - "047_bodenwasser.json"
+      - "047_bodenwasser.gif"
+    implementation: custom
+
+  # === EDUCATION ===
+  - id: "050_tschuessschule_studium"
+    name: "TschüssSchule Studium"
+    category: education
+    type: "Education Portal"
+    source: "https://tschuessschule.de/studium/"
+    schedule: "0 6 * * *"
+    schedule_human: "Täglich 06:00"
+    expected_files:
+      - "050-tschuessschule-studium.json"
+      - "050-tschuessschule-studium-alle.json"
+    implementation: config
+    config_dir: tschuessschule
+
+  - id: "051_vhs"
+    name: "VHS Kurse"
+    category: education
+    type: "Education Portal"
+    source: "https://www.vhs-goslar.de/"
+    schedule: "0 9 * * *"
+    schedule_human: "Täglich 09:00"
+    expected_files:
+      - "051_vhs.json"
+      - "051_vhs-alle.json"
+    implementation: config
+    config_dir: simple
+
+  - id: "052_vhs_kinderuni"
+    name: "VHS Kinderuni"
+    category: education
+    type: "Education Portal"
+    source: "https://www.vhs-goslar.de/"
+    schedule: "0 9 * * *"
+    schedule_human: "Täglich 09:00"
+    expected_files:
+      - "052_vhs_kinderuni.json"
+      - "052_vhs_kinderuni_alle.json"
+    implementation: config
+    config_dir: simple
+
+  - id: "053_tschuessschule_praktikum"
+    name: "TschüssSchule Praktikum"
+    category: education
+    type: "Education Portal"
+    source: "https://tschuessschule.de/praktikum/"
+    schedule: "0 6 * * *"
+    schedule_human: "Täglich 06:00"
+    expected_files:
+      - "053-tschuessschule-praktikum.json"
+      - "053-tschuessschule-praktikum-alle.json"
+    implementation: config
+    config_dir: tschuessschule
+
+  - id: "054_tschuessschule_ausbildung"
+    name: "TschüssSchule Ausbildung"
+    category: education
+    type: "Education Portal"
+    source: "https://tschuessschule.de/ausbildungsberufe/"
+    schedule: "0 6 * * *"
+    schedule_human: "Täglich 06:00"
+    expected_files:
+      - "054-tschuessschule-ausbildung.json"
+      - "054-tschuessschule-ausbildung-alle.json"
+    implementation: config
+    config_dir: tschuessschule
+
+  # === SPECIALIZED ===
+  - id: "032_webcams_goslar"
+    name: "Webcams Goslar"
+    category: specialized
+    type: "Webcam Processor"
+    source: "https://webcams.goslar.de/"
+    schedule: "0 9 * * *"
+    schedule_human: "Täglich 09:00"
+    expected_files:
+      - "032_webcams_goslar.json"
+      - "032_webcams.gif"
+    implementation: custom
+
+  - id: "033_goslar24-7"
+    name: "Goslar24-7 Webcams"
+    category: specialized
+    type: "Webcam Processor"
+    source: "https://webcams.goslar.de/"
+    schedule: "0 * * * *"
+    schedule_human: "Stündlich"
+    expected_files:
+      - "033_gif_schuhhof.json"
+      - "033_gif_schuhhof.gif"
+      - "033_gif_marktplatz_gmg.gif"
+      - "033_gif_marktplatz_gmg.json"
+    implementation: custom
+
+  - id: "056_serviceportal"
+    name: "Serviceportal Goslar"
+    category: specialized
+    type: "Service Portal"
+    source: "https://service.goslar.de/home"
+    schedule: "0 9 * * *"
+    schedule_human: "Täglich 09:00"
+    expected_files:
+      - "056-serviceportal.json"
+      - "056-serviceportal-alle.json"
+    implementation: custom
+
+  # === API SERVICES ===
+  - id: "068_altstadtfest"
+    name: "Altstadtfest Goslar"
+    category: api
+    type: "API Endpoint"
+    source: "https://meingoslar.de/"
+    schedule: "always"
+    schedule_human: "API Endpoint"
+    expected_files: []
+    ports:
+      - "5016:5000"
+    implementation: custom
+    notes: "Flask API endpoint for Altstadtfest data"

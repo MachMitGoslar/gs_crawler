@@ -82,7 +82,7 @@ try:
     plt.text(
     0.5, 0.6, f"{fuellstand_prozent:.1f}%",
     fontsize=36, ha='center', va='center',
-    color='white',
+    color='black',
     bbox=dict(facecolor=farbe, edgecolor='none', boxstyle='round,pad=0.6'))
 
     # plt.text(0.5, 0.6, f"{fuellstand_prozent:.1f}%", fontsize=36, ha='center', va='center')

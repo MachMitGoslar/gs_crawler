@@ -1,0 +1,284 @@
+name: Container Instances - Deploy (Optimized)
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'docker_instances/**'
+      - 'base_images/**'
+      - 'crawler_configs/**'
+      - 'crawlers.yaml'
+      - '.github/workflows/container-instances-deploy-optimized.yml'
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ghcr.io/machmitgoslar/gs_crawler
+
+jobs:
+  prepare-version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      build_number: ${{ steps.version.outputs.build_number }}
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Calculate version number
+      id: version
+      run: |
+        build_number=$(git rev-list --count HEAD)
+        version="v1.0.$build_number"
+        echo "build_number=$build_number" >> $GITHUB_OUTPUT
+        echo "version=$version" >> $GITHUB_OUTPUT
+        echo "Calculated version: $version (build: $build_number)"
+
+  # Load container list from crawlers.yaml registry
+  load-registry:
+    runs-on: ubuntu-latest
+    outputs:
+      containers: ${{ steps.registry.outputs.containers }}
+      base-images: ${{ steps.registry.outputs.base-images }}
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Install PyYAML
+      run: pip install pyyaml
+
+    - name: Load registry data
+      id: registry
+      run: |
+        containers=$(python scripts/generate-workflow-matrix.py --containers)
+        base_images=$(python scripts/generate-workflow-matrix.py --base-images)
+
+        echo "containers=$containers" >> $GITHUB_OUTPUT
+        echo "base-images=$base_images" >> $GITHUB_OUTPUT
+
+        echo "Loaded from crawlers.yaml registry:"
+        echo "  Containers: $containers"
+        echo "  Base images: $base_images"
+
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      changed-containers: ${{ steps.changes.outputs.changed-containers }}
+      base-images-changed: ${{ steps.changes.outputs.base-images-changed }}
+      generic-scraper-changed: ${{ steps.changes.outputs.generic-scraper-changed }}
+      deploy-all: ${{ steps.changes.outputs.deploy-all }}
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Detect changed files
+      id: changes
+      run: |
+        echo "Detecting changes for deployment..."
+
+        if [ "${{ github.event_name }}" == "push" ]; then
+          changed_files=$(git diff --name-only HEAD~1 HEAD)
+        else
+          changed_files=$(git diff --name-only HEAD~5 HEAD)
+        fi
+
+        changed_containers=()
+        base_images_changed="false"
+        generic_scraper_changed="false"
+        deploy_all="false"
+
+        echo "Changed files:"
+        echo "$changed_files"
+
+        # Check for base image changes (excluding generic_scraper)
+        if echo "$changed_files" | grep -q "^base_images/python\|^base_images/php\|^base_images/flask"; then
+          base_images_changed="true"
+          deploy_all="true"
+          echo "Base images changed - will deploy all dependent containers"
+        fi
+
+        # Check for generic scraper changes
+        if echo "$changed_files" | grep -q "^base_images/generic_scraper"; then
+          generic_scraper_changed="true"
+          echo "Generic scraper changed - will rebuild generic scraper image"
+        fi
+
+        # Workflow or registry changes trigger full deployment
+        if echo "$changed_files" | grep -q ".github/workflows/container-instances-deploy\|^crawlers.yaml$"; then
+          deploy_all="true"
+        fi
+
+        # Collect changed containers (only if they still exist - skip deleted)
+        for file in $changed_files; do
+          if [[ $file == docker_instances/*/Dockerfile ]] || [[ $file == docker_instances/*/*.py ]] || [[ $file == docker_instances/*/*.php ]] || [[ $file == docker_instances/*/crontab ]] || [[ $file == docker_instances/*/templates/* ]]; then
+            container=$(echo $file | cut -d'/' -f2)
+            # Only add if container directory still exists (not deleted)
+            if [[ -d "docker_instances/$container" ]] && [[ ! " ${changed_containers[@]} " =~ " ${container} " ]]; then
+              changed_containers+=("$container")
+            fi
+          fi
+        done
+
+        if [ ${#changed_containers[@]} -eq 0 ] && [ "$deploy_all" == "false" ]; then
+          echo "changed-containers=[]" >> $GITHUB_OUTPUT
+        else
+          printf -v joined '"%s",' "${changed_containers[@]}"
+          echo "changed-containers=[${joined%,}]" >> $GITHUB_OUTPUT
+        fi
+
+        echo "base-images-changed=$base_images_changed" >> $GITHUB_OUTPUT
+        echo "generic-scraper-changed=$generic_scraper_changed" >> $GITHUB_OUTPUT
+        echo "deploy-all=$deploy_all" >> $GITHUB_OUTPUT
+
+  # Build base images only when changed (uses registry for image list)
+  build-base-images:
+    runs-on: ubuntu-latest
+    needs: [prepare-version, load-registry, detect-changes]
+    if: needs.detect-changes.outputs.base-images-changed == 'true'
+    strategy:
+      matrix:
+        image: ${{ fromJson(needs.load-registry.outputs.base-images) }}
+      fail-fast: false
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Skip generic_scraper in base images job
+      if: matrix.image == 'generic_scraper'
+      run: echo "Skipping generic_scraper - handled separately"
+
+    - name: Set up Docker Buildx
+      if: matrix.image != 'generic_scraper'
+      uses: docker/setup-buildx-action@v3
+
+    - name: Log in to Container Registry
+      if: matrix.image != 'generic_scraper'
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build and push base image ${{ matrix.image }}
+      if: matrix.image != 'generic_scraper'
+      uses: docker/build-push-action@v5
+      with:
+        context: ./base_images/${{ matrix.image }}
+        platforms: linux/amd64,linux/arm64
+        push: true
+        tags: |
+          ${{ env.IMAGE_PREFIX }}_${{ matrix.image }}:latest
+          ${{ env.IMAGE_PREFIX }}_${{ matrix.image }}:${{ needs.prepare-version.outputs.version }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+  # Build generic scraper image when changed
+  build-generic-scraper:
+    runs-on: ubuntu-latest
+    needs: [prepare-version, detect-changes]
+    if: needs.detect-changes.outputs.generic-scraper-changed == 'true'
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Log in to Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build and push generic scraper
+      uses: docker/build-push-action@v5
+      with:
+        context: ./base_images/generic_scraper
+        platforms: linux/amd64,linux/arm64
+        push: true
+        tags: |
+          ${{ env.IMAGE_PREFIX }}_generic_scraper:latest
+          ${{ env.IMAGE_PREFIX }}_generic_scraper:${{ needs.prepare-version.outputs.version }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+  # Build changed containers (uses registry for full list when deploy-all)
+  build-containers:
+    runs-on: ubuntu-latest
+    needs: [prepare-version, load-registry, detect-changes, build-base-images]
+    if: always() && (needs.detect-changes.outputs.changed-containers != '[]' || needs.detect-changes.outputs.deploy-all == 'true')
+    strategy:
+      matrix:
+        container: ${{ fromJson(needs.detect-changes.outputs.deploy-all == 'true' && needs.load-registry.outputs.containers || needs.detect-changes.outputs.changed-containers) }}
+      fail-fast: false
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Log in to Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build and push ${{ matrix.container }}
+      uses: docker/build-push-action@v5
+      with:
+        context: ./docker_instances/${{ matrix.container }}
+        platforms: linux/amd64,linux/arm64
+        push: true
+        tags: |
+          ${{ env.IMAGE_PREFIX }}_${{ matrix.container }}:latest
+          ${{ env.IMAGE_PREFIX }}_${{ matrix.container }}:${{ needs.prepare-version.outputs.version }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+  deployment-summary:
+    runs-on: ubuntu-latest
+    needs: [prepare-version, load-registry, detect-changes, build-base-images, build-generic-scraper, build-containers]
+    if: always()
+
+    steps:
+    - name: Deployment Summary
+      run: |
+        echo "# Deployment Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "## Version: ${{ needs.prepare-version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+
+        echo "## Registry Data (from crawlers.yaml)" >> $GITHUB_STEP_SUMMARY
+        echo "- Total containers in registry" >> $GITHUB_STEP_SUMMARY
+        echo "- Base images: ${{ needs.load-registry.outputs.base-images }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+
+        echo "## What was deployed" >> $GITHUB_STEP_SUMMARY
+        echo "- Base images changed: ${{ needs.detect-changes.outputs.base-images-changed }}" >> $GITHUB_STEP_SUMMARY
+        echo "- Generic scraper changed: ${{ needs.detect-changes.outputs.generic-scraper-changed }}" >> $GITHUB_STEP_SUMMARY
+        echo "- Full deployment: ${{ needs.detect-changes.outputs.deploy-all }}" >> $GITHUB_STEP_SUMMARY
+        echo "- Changed containers: ${{ needs.detect-changes.outputs.changed-containers }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+
+        echo "## Build Results" >> $GITHUB_STEP_SUMMARY
+        echo "- Base Images: ${{ needs.build-base-images.result }}" >> $GITHUB_STEP_SUMMARY
+        echo "- Generic Scraper: ${{ needs.build-generic-scraper.result }}" >> $GITHUB_STEP_SUMMARY
+        echo "- Containers: ${{ needs.build-containers.result }}" >> $GITHUB_STEP_SUMMARY

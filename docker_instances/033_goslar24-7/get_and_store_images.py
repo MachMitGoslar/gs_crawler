@@ -4,6 +4,7 @@ from PIL import Image
 from io import BytesIO
 import sqlite3
 from datetime import datetime, timedelta
+import init_db
 
 DB_PATH = "webcam_images.db"
 
@@ -17,15 +18,20 @@ URLS = [
 TARGET_SIZE = (600, 400)
 
 def save_image_to_db(url, image_bytes):
-    conn = sqlite3.connect(DB_PATH)
-    cur = conn.cursor()
-    cur.execute(
-        "INSERT INTO webcam_images (url, image, created_at) VALUES (?, ?, ?)",
-        (url, image_bytes, datetime.now())
-    )
-    conn.commit()
-    cur.close()
-    conn.close()
+    if sqlite3.connect(DB_PATH) is None:
+        logging.info("Datenbankverbindung konnte nicht hergestellt werden.")
+        init_db.init_db()
+        return
+    else: 
+        conn = sqlite3.connect(DB_PATH)
+        cur = conn.cursor()
+        cur.execute(
+            "INSERT INTO webcam_images (url, image, created_at) VALUES (?, ?, ?)",
+            (url, image_bytes, datetime.now())
+        )
+        conn.commit()
+        cur.close()
+        conn.close()
 
 def fetch_and_store_images(max_retries=3):
     for url in URLS:

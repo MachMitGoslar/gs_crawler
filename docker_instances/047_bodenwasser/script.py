@@ -5,7 +5,7 @@ import time
 from PIL import Image, ImageDraw
 import io
 import imageio
-from helpers import ensure_directory_exists
+
 
 # URLs und Zielverzeichnis
 gif_url = "https://files.ufz.de/~drought/nFK_0_25_daily_n14.gif"
@@ -18,7 +18,7 @@ focus_gif_path = os.path.join(output_dir, "047_bodenwasser_focus.gif")
 json_path = os.path.join(output_dir, "047_bodenwasser.json")
 
 # Herunterladen und Öffnen des GIF
-gif_url = "https://files.ufz.de/~drought/nFK_0_25_daily_n14.gif"
+gif_url = "https://files.ufz.de/~drought/PAW_0_25cm_daily_n14.gif"
 response = requests.get(gif_url)
 gif_bytes = io.BytesIO(response.content)
 gif = Image.open(gif_bytes)

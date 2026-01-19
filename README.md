@@ -1,320 +1,165 @@
 [![Docker Build and Container Health Test](https://github.com/MachMitGoslar/gs_crawler/actions/workflows/docker-build-test.yml/badge.svg)](https://github.com/MachMitGoslar/gs_crawler/actions/workflows/docker-build-test.yml)
 
-# GS Crawler System - Container Übersicht
+# GS Crawler System
 
-## System Architektur
+Das GS Crawler System besteht aus Docker Containern, die verschiedene Websites und Datenquellen der Region Goslar automatisiert crawlen und als JSON-Dateien zur Verfügung stellen.
 
-Das GS Crawler System besteht aus 24 Docker Containern, die verschiedene Websites und Datenquellen automatisiert crawlen und als JSON-Dateien zur Verfügung stellen.
+## Quick Start
 
-### Health Monitor
-- **Container:** `gs_health_monitor`
-- **Port:** 5001 (Web Interface)
-- **Aufgabe:** Überwacht alle anderen Container und stellt Status-Dashboard bereit
-- **Zugriff:** `http://localhost:5001`
-
-## Container Details
-
-### 📰 News & Medien
-
-#### 001_senioren - Seniorenzeitung Goslar
-- **Container:** `gs_compiler_001_senioren`
-- **Cron:** `0 2 * * *` (täglich um 02:00 Uhr)
-- **Aufgabe:** Crawlt die Goslar Seniorenzeitung und erstellt XML-Feed
-- **Quelle:** https://www.goslar.de/leben-in-goslar/senioren/seniorenzeitung
-- **Output:** `001_senioren_feed.xml`
-
-#### 002_gz - Goslarsche Zeitung
-- **Container:** `gs_compiler_002_gz`
-- **Cron:** `0 * * * *` + `@reboot` (stündlich)
-- **Aufgabe:** Crawlt lokale Nachrichten aus der Goslarschen Zeitung
-- **Quelle:** https://www.goslarsche.de/lokales/Goslar
-- **Output:** `002_goslarsche.json`, `002_goslarsche-alle.json`
-
-#### 040_hp - Harzer Panorama
-- **Container:** `gs_compiler_040_hp`
-- **Cron:** `0 2 * * *` + `0 14 * * *` + `@reboot` (2x täglich: 02:00 & 14:00)
-- **Aufgabe:** Crawlt das Harzer Panorama Magazin
-- **Quelle:** https://www.panorama-am-sonntag.de/
-- **Output:** `040_hp.json`
-
-### 🎯 Events & Aktivitäten
-
-#### 002_fepa - Ferienpass
-- **Container:** `gs_compiler_002_fepa`
-- **Cron:** `0 2 * * *` + `0 14 * * *` (2x täglich: 02:00 & 14:00)
-- **Aufgabe:** Holt Ferienpass-Events über API
-- **Quelle:** https://goslar.feripro.de/api/
-- **Output:** `002_fepa_events.json`
-- **Technologie:** PHP
-
-#### 019_was_app - Community Vorschläge
-- **Container:** `gs_compiler_019_was_app`
-- **Cron:** `*/3 * * * *` + `0 14 * * *` + `@reboot` (alle 3 Minuten + 14:00)
-- **Aufgabe:** Community-Vorschläge der WasApp
-- **Quelle:** https://machmit.goslar.de/wasapp
-- **Output:** `019_was_app.json`
-
-#### 027_erster_freitag - Erster Freitag Events
-- **Container:** `gs_compiler_027_erster_freitag`
-- **Cron:** `0 9 * * *` (täglich um 09:00 Uhr)
-- **Aufgabe:** Events zum "Ersten Freitag" in Goslar
-- **Quelle:** https://insides.goslar-app.de/1-freitag-goslar
-- **Output:** `027_erster_freitag.json`
-
-#### 051_vhs - VHS Kurse
-- **Container:** `gs_compiler_051_vhs`
-- **Cron:** `0 9 * * *` (täglich um 09:00 Uhr)
-- **Aufgabe:** Volkshochschule Kurse
-- **Quelle:** https://www.vhs-goslar.de/
-- **Output:** `051_vhs.json`, `051_vhs-alle.json`
-
-#### 052_vhs_kinderuni - VHS Kinderuni
-- **Container:** `gs_compiler_052_vhs_kinderuni`
-- **Cron:** `0 9 * * *` (täglich um 09:00 Uhr)
-- **Aufgabe:** Kinderuni-Kurse der VHS
-- **Quelle:** https://www.vhs-goslar.de/
-- **Output:** `052_vhs_kinderuni.json`
-
-### 🎓 Bildung & Karriere
-
-#### 050_tschuessschule_studium - Studium
-- **Container:** `gs_compiler_050_tschuessschule_studium`
-- **Cron:** `0 6 * * *` (täglich um 06:00 Uhr)
-- **Aufgabe:** Studienangebote von TschüssSchule
-- **Quelle:** https://tschuessschule.de/studium/
-- **Output:** `050_tschuessschule_studium.json`, `050_tschuessschule_studium-alle.json`
-- **Technologie:** Selenium
-
-#### 053_tschuessschule_praktikum - Praktikum
-- **Container:** `gs_compiler_053_tschuessschule_praktikum`
-- **Cron:** `0 6 * * *` (täglich um 06:00 Uhr)
-- **Aufgabe:** Praktikumsangebote von TschüssSchule
-- **Quelle:** https://tschuessschule.de/praktikum/
-- **Output:** `053_tschuessschule_praktikum.json`, `053_tschuessschule_praktikum-alle.json`
-- **Technologie:** Selenium
-
-#### 054_tschuessschule_ausbildung - Ausbildung
-- **Container:** `gs_compiler_054_tschuessschule_ausbildung`
-- **Cron:** `0 6 * * *` (täglich um 06:00 Uhr)
-- **Aufgabe:** Ausbildungsangebote von TschüssSchule
-- **Quelle:** https://tschuessschule.de/ausbildungsberufe/
-- **Output:** `054_tschuessschule_ausbildung.json`, `054_tschuessschule_ausbildung-alle.json`
-- **Technologie:** Selenium
-
-### 🎨 Kultur & Veranstaltungen
-
-#### 014_kunst_in_ar - Kunst in AR
-- **Container:** `gs_compiler_014_kunst_in_ar`
-- **Cron:** `0 8 * * *` (täglich um 08:00 Uhr)
-- **Aufgabe:** Kunst-Events und Ausstellungen
-- **Quelle:** https://kunst-in-ar.de/crawler.html
-- **Output:** `014_kunst_in_ar.json`
-
-#### 031_goslarer_geschichten - Goslarer Geschichten
-- **Container:** `gs_compiler_031_goslarer_geschichten`
-- **Cron:** `0 9 * * *` (täglich um 09:00 Uhr)
-- **Aufgabe:** Forum-Beiträge zu Goslarer Geschichten
-- **Quelle:** https://www.goslarer-geschichten.de/forum.php
-- **Output:** `031_goslarer_geschichten.json`
-
-### 🏘️ Gemeinde & Lokales
-
-#### 041_immenrode - Immenrode
-- **Container:** `gs_compiler_041_immenrode`
-- **Cron:** `0 2 * * *` + `0 14 * * *` + `@reboot` (2x täglich: 02:00 & 14:00)
-- **Aufgabe:** Neuigkeiten aus Immenrode
-- **Quelle:** https://immenro.de/
-- **Output:** `041_immenrode.json`
-
-#### 042_freiwilligen - Freiwilligenagentur
-- **Container:** `gs_compiler_042_freiwilligen`
-- **Cron:** `0 2 * * *` + `0 14 * * *` + `@reboot` (2x täglich: 02:00 & 14:00)
-- **Aufgabe:** Freiwilligenangebote der Freiwilligenagentur Goslar
-- **Quelle:** https://www.freiwilligenagentur-goslar.de/
-- **Output:** `042_freiwilligenagentur.json`, `042_freiwilligenagentur-alle.json`
-
-#### 044_wiedelah - Wiedelah
-- **Container:** `gs_compiler_044_wiedelah`
-- **Cron:** `0 2 * * *` + `0 14 * * *` + `@reboot` (2x täglich: 02:00 & 14:00)
-- **Aufgabe:** Arbeitseinsätze und Events in Wiedelah
-- **Quelle:** https://dg-wiedelah.de/category/arbeitseinsaetze/
-- **Output:** `044_wiedelah.json`, `044_wiedelah_alle.json`
-
-#### 048_jerstedt - Jerstedt
-- **Container:** `gs_compiler_048_jerstedt`
-- **Cron:** `0 2 * * *` + `0 14 * * *` + `@reboot` (2x täglich: 02:00 & 14:00)
-- **Aufgabe:** Stadtteilverein Jerstedt Aktivitäten
-- **Quelle:** https://jerstedt.de
-- **Output:** `048_jerstedt.json`
-
-### 🚨 Sicherheit & Umwelt
-
-#### 045_naturgefahren - Naturgefahren
-- **Container:** `gs_compiler_045_naturgefahren`
-- **Cron:** `*/15 * * * *` (alle 15 Minuten)
-- **Aufgabe:** Wetterwarnungen und Naturgefahren für Goslar
-- **Quelle:** https://www.naturgefahrenportal.de/de/alerts
-- **Output:** `045_naturgefahren_de.json`
-- **Technologie:** Selenium (Firefox)
-
-### 💧 Umwelt & Ressourcen
-
-#### 047_bodenwasser - Bodenwasser
-- **Container:** `gs_compiler_047_bodenwasser`
-- **Cron:** `0 2 * * *` + `0 14 * * *` + `@reboot` (2x täglich: 02:00 & 14:00)
-- **Aufgabe:** Bodenwasser-Monitoring und Grafiken
-- **Output:** `047_bodenwasser.json`, `047_bodenwasser.gif`
-
-#### 035_talsperren - Talsperren
-- **Container:** `gs_compiler_035_talsperren`
-- **Cron:** `0 */1 * * *` (stündlich)
-- **Aufgabe:** Talsperren-Füllstände der Harzwasserwerke
-- **Quelle:** https://www.harzwasserwerke.de/infoservice/aktuelle-talsperrendaten/
-- **Output:** `035_talsperren.json`
-- **Technologie:** Selenium + Matplotlib
-
-### 🏛️ Verwaltung & Service
-
-#### 056_serviceportal - Serviceportal
-- **Container:** `gs_compiler_056_serviceportal`
-- **Cron:** `0 9 * * *` (täglich um 09:00 Uhr)
-- **Aufgabe:** Dienste des Goslarer Serviceportals
-- **Quelle:** https://service.goslar.de/home
-- **Output:** `056_serviceportal.json`, `056_serviceportal-alle.json`
-
-### 📷 Webcams
-
-#### 032_webcams_goslar - Webcams
-- **Container:** `gs_compiler_032_webcams_goslar`
-- **Cron:** `0 9 * * *` (täglich um 09:00 Uhr)
-- **Aufgabe:** Webcam-Bilder aus Goslar verarbeiten und optimieren
-- **Quelle:** https://webcams.goslar.de/
-- **Output:** `032_webcams_goslar.json`
-- **Technologie:** PIL (Python Imaging Library)
-
-#### 033_goslar24-7 - Goslar 24/7
-- **Container:** `gs_compiler_033_goslar24-7`
-- **Scheduled:** Jede Stunde zur vollen Uhrzeit
-- **Aufgabe:** Webcam Bilder speichern und ein Gif mit stündlichen Webcam Bildern für die letzten 7 Tage erstellen
-- **Quelle:** https://webcams.goslar.de/
-- **Output:** `033_gif_schuhhof.json`, `033_gif_gmg_marktplatz.json`
-- **Technologie:** PIL (Python Imaging Library)
-
-## Cron-Job Zusammenfassung
-
-### Häufigkeit der Ausführung
-
-| Intervall | Anzahl Container | Container |
-|-----------|------------------|-----------|
-| **Alle 3 Minuten** | 1 | 019_was_app |
-| **Alle 15 Minuten** | 1 | 045_naturgefahren |
-| **Stündlich** | 2 | 002_gz, 035_talsperren |
-| **Täglich um 02:00** | 1 | 001_senioren |
-| **2x täglich (02:00 & 14:00)** | 7 | 002_fepa, 040_hp, 041_immenrode, 042_freiwilligen, 044_wiedelah, 047_bodenwasser, 048_jerstedt |
-| **Täglich um 06:00** | 3 | 050_tschuessschule_studium, 053_tschuessschule_praktikum, 054_tschuessschule_ausbildung |
-| **Täglich um 08:00** | 1 | 014_kunst_in_ar |
-| **Täglich um 09:00** | 6 | 027_erster_freitag, 031_goslarer_geschichten, 051_vhs, 052_vhs_kinderuni, 056_serviceportal, 032_webcams_goslar |
-
-### @reboot Container
-Die folgenden Container führen ihre Scripts auch beim Container-Start aus:
-- 002_gz
-- 019_was_app  
-- 040_hp
-- 041_immenrode
-- 042_freiwilligen
-- 044_wiedelah
-- 047_bodenwasser
-- 048_jerstedt
-
-## Technologie-Stack
-
-### Python-basierte Container (21)
-- **Standard:** requests, BeautifulSoup, json, datetime
-- **Selenium:** 045_naturgefahren (Firefox), 050/053/054_tschuessschule (Chrome)
-- **Bildverarbeitung:** 032_webcams_goslar (PIL), 047_bodenwasser (matplotlib)
-- **XML:** 001_senioren (lxml)
-
-### PHP-basierte Container (1)
-- **002_fepa:** Direkter API-Zugriff
-
-### Health Monitor
-- **Technologie:** Flask, Docker API, Jinja2
-- **Features:** Web-Dashboard, Container-Management, Performance-Monitoring
-
-## Output-Verzeichnis
-
-Alle Container speichern ihre Ergebnisse in:
-```
-./httpdocs/crawler/
-```
-
-Über Docker Volume Mount verfügbar als:
-```
-/app/output (Container-intern)
-```
-
-## Management
-
-### Container starten
 ```bash
-docker-compose up -d
+# Local development
+./scripts/dev.sh setup    # First-time setup
+./scripts/dev.sh up       # Start containers
+./scripts/dev.sh logs     # View logs
+
+# Health Monitor: http://localhost:5015
 ```
 
-### Container neu bauen
+## Crawler Registry
+
+All crawlers are defined in [`crawlers.yaml`](crawlers.yaml) - the single source of truth.
+
+To add/modify a crawler:
+1. Edit `crawlers.yaml`
+2. Run `./scripts/generate-all.sh`
+3. Commit the changes
+
+<!-- CRAWLER_TABLE_START -->
+**Total Crawlers:** 25 (16 custom containers, 9 config-driven)
+
+### Infrastructure
+_System monitoring and management_
+
+| ID | Name | Type | Schedule | Output Files |
+|:---|:-----|:-----|:---------|:-------------|
+| 000_health_monitor | Health Monitor | flask_monitor | Always running | `-` |
+
+### News & Media
+_Local news sources and media outlets_
+
+| ID | Name | Type | Schedule | Output Files |
+|:---|:-----|:-----|:---------|:-------------|
+| 001_senioren | Seniorenzeitung Goslar | XML Feed | Täglich 02:00 | `001_senioren_feed.xml` |
+| 002_gz | Goslarsche Zeitung | News Crawler | Stündlich | `002_goslarsche.json, 002_goslarsche-alle.json` |
+| 040_hp | Harzer Panorama | News Crawler | 2x täglich (02:00, 14:00) | `040_hp.json` |
+
+### Events
+_Event calendars and activities_
+
+| ID | Name | Type | Schedule | Output Files |
+|:---|:-----|:-----|:---------|:-------------|
+| 002_ferienpass | Ferienpass Events | JSON API | 2x täglich (02:00, 14:00) | `002_fepa_events.json` |
+| 014_kunst_in_ar | Kunst in AR | Event Crawler | Täglich 08:00 | `017-kunst-in-ar-single.json` |
+| 019_was_app | WasApp Community | Community Feed | Alle 3 Minuten | `019_was_app.json` |
+| 027_erster_freitag | Erster Freitag Events | Event Crawler | Täglich 09:00 | `027-erster-freitag.json` |
+
+### Local Communities
+_Village and neighborhood news_
+
+| ID | Name | Type | Schedule | Output Files |
+|:---|:-----|:-----|:---------|:-------------|
+| 041_immenrode | Immenrode News | Local News | 2x täglich (02:00, 14:00) | `041_immenrode.json` |
+| 044_wiedelah | Wiedelah Events | Community Events | 2x täglich (02:00, 14:00) | `044-wiedelah.json, 044-wiedelah_alle.json` |
+| 048_jerstedt | Jerstedt News | Local News | 2x täglich (02:00, 14:00) | `048_jerstedt.json` |
+
+### Community & Volunteering
+_Community organizations and volunteer opportunities_
+
+| ID | Name | Type | Schedule | Output Files |
+|:---|:-----|:-----|:---------|:-------------|
+| 031_goslarer_geschichten | Goslarer Geschichten | Forum Crawler | Täglich 09:00 | `031-goslarer_geschichten.json` |
+| 042_freiwilligen | Freiwilligenagentur | Volunteer Portal | 2x täglich (02:00, 14:00) | `042-freiwilligenagentur.json, 042-freiwilligena...` |
+
+### Environmental Monitoring
+_Weather, water, and environmental data_
+
+| ID | Name | Type | Schedule | Output Files |
+|:---|:-----|:-----|:---------|:-------------|
+| 035_talsperren | Talsperren Daten | Umwelt Monitor | Stündlich | `035-talsperren_alle.json` |
+| 045_naturgefahren | Naturgefahren Monitor | Weather Alert | Alle 15 Minuten | `045_naturgefahren_de.json` |
+| 047_bodenwasser | Bodenwasser Monitor | Umwelt Monitor | 2x täglich (02:00, 14:00) | `047_bodenwasser.json, 047_bodenwasser.gif` |
+
+### Education
+_Schools, courses, and educational opportunities_
+
+| ID | Name | Type | Schedule | Output Files |
+|:---|:-----|:-----|:---------|:-------------|
+| 050_tschuessschule_studium | TschüssSchule Studium | Education Portal | Täglich 06:00 | `050-tschuessschule-studium.json, 050-tschuesssc...` |
+| 051_vhs | VHS Kurse | Education Portal | Täglich 09:00 | `051_vhs.json, 051_vhs-alle.json` |
+| 052_vhs_kinderuni | VHS Kinderuni | Education Portal | Täglich 09:00 | `052_vhs_kinderuni.json, 052_vhs_kinderuni_alle....` |
+| 053_tschuessschule_praktikum | TschüssSchule Praktikum | Education Portal | Täglich 06:00 | `053-tschuessschule-praktikum.json, 053-tschuess...` |
+| 054_tschuessschule_ausbildung | TschüssSchule Ausbildung | Education Portal | Täglich 06:00 | `054-tschuessschule-ausbildung.json, 054-tschues...` |
+
+### Specialized
+_Unique data sources requiring custom processing_
+
+| ID | Name | Type | Schedule | Output Files |
+|:---|:-----|:-----|:---------|:-------------|
+| 032_webcams_goslar | Webcams Goslar | Webcam Processor | Täglich 09:00 | `032_webcams_goslar.json, 032_webcams.gif` |
+| 033_goslar24-7 | Goslar24-7 Webcams | Webcam Processor | Stündlich | `033_gif_schuhhof.json, 033_gif_schuhhof.gif, 03...` |
+| 056_serviceportal | Serviceportal Goslar | Service Portal | Täglich 09:00 | `056-serviceportal.json, 056-serviceportal-alle....` |
+
+### API Services
+_API endpoints and services_
+
+| ID | Name | Type | Schedule | Output Files |
+|:---|:-----|:-----|:---------|:-------------|
+| 068_altstadtfest | Altstadtfest Goslar | API Endpoint | API Endpoint | `-` |
+
+<!-- CRAWLER_TABLE_END -->
+
+## Architecture
+
+```
+crawlers.yaml              <- Single source of truth
+     |
+     +-> Health Monitor    <- Reads crawler definitions at runtime
+     +-> compose.yaml      <- Generated via ./scripts/generate-compose.py
+     +-> compose.dev.yaml  <- Generated via ./scripts/generate-compose.py
+     +-> README.md tables  <- Generated via ./scripts/generate-readme.py
+```
+
+### Implementation Types
+
+| Type | Location | Description |
+|:-----|:---------|:------------|
+| **custom** | `docker_instances/XXX_name/` | Full Dockerfile + custom Python script |
+| **config** | `crawler_configs/simple/` | YAML config for generic scraper |
+| **config** | `crawler_configs/tschuessschule/` | YAML config for nested scraper |
+
+## Development
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed setup instructions.
+
+### Key Commands
+
 ```bash
-docker-compose up --build -d
+./scripts/dev.sh setup        # Build base images locally
+./scripts/dev.sh up           # Start all containers
+./scripts/dev.sh down         # Stop all containers
+./scripts/dev.sh logs         # Follow logs
+./scripts/dev.sh test         # Run scraper tests
+
+./scripts/generate-all.sh     # Regenerate compose files and README
 ```
 
-### Status überwachen
-- **Web-Interface:** http://localhost:5000
-- **CLI:** `docker-compose ps`
-- **Logs:** `docker-compose logs [container_name]`
+### Ports
 
-### Health Monitor Dashboard
-Das Health Monitor Dashboard bietet:
-- ✅ Real-time Status aller Crawler-Container (basierend auf Output-Dateien)
-- 📊 Datei-basierte Überwachung (Dateigröße, Alter, Gültigkeit)
-- 📝 Status-API für externe Integration
-- � Web-Interface zur Systemübersicht
-- 📡 RESTful API Endpoints
+| Port | Service |
+|:-----|:--------|
+| 5015 | Health Monitor Dashboard |
+| 5016 | Altstadtfest API |
 
-## GitHub Actions / CI/CD
+## Output
 
-### Automatisierte Tests
-Das System verfügt über umfassende GitHub Actions für kontinuierliche Integration:
+All crawlers write to `httpdocs/crawler/` (mounted as `/app/output` in containers).
 
-#### Docker Build and Container Health Test
-- **Trigger:** Push auf main/develop, Pull Requests
-- **Zweck:** Build-Tests, Container-Start, Health-Checks
-- **Features:**
-  - Baut alle 24 Container
-  - Testet Health Monitor API
-  - Validiert Output-Dateien
-  - Security-Scan mit Trivy
+## CI/CD
 
-#### Daily Health Check
-- **Trigger:** Täglich um 06:00 UTC
-- **Zweck:** Regelmäßige Systemüberwachung
-- **Features:**
-  - 3-Minuten Laufzeit für vollständige Crawler-Ausführung
-  - JSON-Validierung aller Output-Dateien
-  - Detaillierte Health-Reports als Artefakte
-  - Kritische Issue-Erkennung
-
-### Monitoring & Alerting
-- ✅ Automatische Container-Status-Prüfung
-- 📊 Output-Datei-Analyse und -Validierung
-- 🚨 Failure-Detection mit detaillierten Logs
-- � Health-Reports als downloadbare Artefakte
-
-**Workflow-Dateien:** `.github/workflows/`
-- `docker-build-test.yml` - Build & Test Pipeline
-- `daily-health-check.yml` - Tägliche Systemprüfung
-- `README.md` - Detaillierte Workflow-Dokumentation
+- **Build Test:** Validates all containers on push/PR
+- **Daily Health Check:** Runs containers daily and validates output
 
 ---
 
-**Letzte Aktualisierung:** 2. Juli 2025  
-**Gesamt Container:** 24 (23 Crawler + 1 Health Monitor)  
-**Aktive Cron Jobs:** 23  
-**GitHub Actions:** 2 (Build-Test + Daily Health Check)
+**Configuration:** [`crawlers.yaml`](crawlers.yaml)
+**Contributing:** See [CONTRIBUTING.md](CONTRIBUTING.md)

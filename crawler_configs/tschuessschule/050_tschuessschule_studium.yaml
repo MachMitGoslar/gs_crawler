@@ -1,0 +1,55 @@
+# TschüssSchule - Studienangebote (Study Offers)
+id: "050_tschuessschule_studium"
+name: "TschüssSchule Studium"
+
+url: "https://tschuessschule.de/studienangebote/"
+base_url: "https://tschuessschule.de"
+
+schedule: "0 6 * * *"
+run_on_start: true
+
+# This crawler has a nested structure requiring special handling
+type: "nested"
+
+selectors:
+  # Outer container: category groups
+  container: "div.container"
+
+  # Category title from the container
+  category_title:
+    selector: "h3"
+    attribute: "text"
+    fallback: "Studienangebote"
+
+  # Inner items within each container
+  items:
+    selector: "div.unternehmen"
+
+    # Within each item, find nested data
+    image_url:
+      selector: "div.veranstaltung:first-child img"
+      attribute: "src"
+      prefix: "https://tschuessschule.de"
+
+    call_to_action_url:
+      # Build from container URL + item ID
+      template: "{url}#{item_id}"
+      item_id_attribute: "id"
+
+output:
+  single:
+    enabled: true
+    filename: "050-tschuessschule-studium.json"
+    cta_override: "https://crawler.goslar.app/crawler/050-tschuessschule-studium-alle.json"
+    title_override: "Studienangebote"
+
+  all:
+    enabled: true
+    filename: "050-tschuessschule-studium-alle.json"
+
+selection:
+  strategy: "random"
+
+post_process:
+  # For single: show count and example
+  single_description_template: "{count} Angebote, z. B.\n\n{description}"

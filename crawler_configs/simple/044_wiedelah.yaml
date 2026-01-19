@@ -1,0 +1,42 @@
+# DG Wiedelah - Local Community News
+id: "044_wiedelah"
+name: "DG Wiedelah"
+
+url: "https://dg-wiedelah.de/category/berichte-von-veranstaltungen/"
+base_url: "https://dg-wiedelah.de"
+
+schedule: "0 2,14 * * *"
+run_on_start: true
+
+selectors:
+  container: "div#main-content div.post-listing article"
+
+  title:
+    selector: "span.tie-date"
+    attribute: "text"
+    # Date becomes the title in this case
+
+  description:
+    selector: "div.entry p"
+    attribute: "text"
+
+  image_url:
+    selector: "h2 a img"
+    attribute: "src"
+
+  call_to_action_url:
+    selector: "h2 a"
+    attribute: "href"
+    fallback: "https://dg-wiedelah.de/"
+
+output:
+  single:
+    enabled: true
+    filename: "044-wiedelah.json"
+
+  all:
+    enabled: true
+    filename: "044-wiedelah_alle.json"
+
+selection:
+  strategy: "first"

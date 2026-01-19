@@ -1,0 +1,48 @@
+# TschüssSchule - Ausbildungsangebote (Training Offers)
+id: "054_tschuessschule_ausbildung"
+name: "TschüssSchule Ausbildung"
+
+url: "https://tschuessschule.de/ausbildungsberufe/"
+base_url: "https://tschuessschule.de"
+
+schedule: "0 6 * * *"
+run_on_start: true
+
+type: "nested"
+
+selectors:
+  container: "div.container"
+
+  category_title:
+    selector: "h3"
+    attribute: "text"
+    fallback: "Ausbildungsangebote"
+
+  items:
+    selector: "div.unternehmen"
+
+    image_url:
+      selector: "div.veranstaltung:first-child img"
+      attribute: "src"
+      prefix: "https://tschuessschule.de"
+
+    call_to_action_url:
+      template: "{url}#{item_id}"
+      item_id_attribute: "id"
+
+output:
+  single:
+    enabled: true
+    filename: "054-tschuessschule-ausbildung.json"
+    cta_override: "https://crawler.goslar.app/crawler/054-tschuessschule-ausbildung-alle.json"
+    title_override: "Ausbildungsangebote"
+
+  all:
+    enabled: true
+    filename: "054-tschuessschule-ausbildung-alle.json"
+
+selection:
+  strategy: "random"
+
+post_process:
+  single_description_template: "{count} Angebote, z. B.\n\n{description}"
