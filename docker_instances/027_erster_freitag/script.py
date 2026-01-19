@@ -6,6 +6,22 @@ from urllib.parse import urljoin
 import os
 from datetime import datetime
 
+def generateDefault(message, savemepath, filename):
+    now = datetime.now()
+    default_entry = {
+        "title": "1. Freitag Goslar",
+        "image_url": "https://www.meingoslar.de/fileadmin/_processed_/7/5/csm_csm_20250404_abendshopping_bettgefluester_032__img_9909__e099172733_e9af754d10.jpg",
+        "description": "Der 1. Freitag in Goslar bietet Kunst, Kultur und Shopping bis in die Abendstunden.",
+        "call_to_action_url": "https://www.meingoslar.de/erleben-und-geniessen/erster-freitag",
+        "published_at": now.strftime("%d.%m.%Y %H:%M:%S")
+    }
+    with open(os.path.join(savemepath, filename), "w", encoding="utf-8") as f:
+        json.dump(default_entry, f, ensure_ascii=False, indent=2)
+    print(message + "\n Generiere Standard-Eintrag:")
+    print(json.dumps(default_entry, indent=2, ensure_ascii=False))
+    exit(0)
+
+
 # URL und Zielseite
 url = "https://insides.goslar-app.de/1-freitag-goslar"
 call_to_action_url = "https://www.meingoslar.de/erleben-und-geniessen/erster-freitag"
@@ -31,14 +47,14 @@ if zukuenftige:
     naechster = min(zukuenftige)
     print("📅 Nächster Termin:", naechster.strftime("%Y-%m-%d %H:%M"))
 else:
-    print("🚫 Keine zukünftigen Termine gefunden.")
+    generateDefault("Keine zukünftigen Termine gefunden.", savemepath, filename )
 
 
 
 # Start: <div id="1-freitag-goslar">
 start_div = soup.find("div", id="1-freitag-goslar")
 if not start_div:
-    print("❌ Start-DIV nicht gefunden.")
+    generateDefault("Start-Div mit ID '1-freitag-goslar' nicht gefunden.")
     exit()
 
 # Ergebnisse sammeln
@@ -80,4 +96,4 @@ if eintraege:
     print(json.dumps(zufall, indent=2, ensure_ascii=False))
 
 else:
-    print("❌ Keine passenden Einträge gefunden.")
+    generateDefault("Keine passenden Einträge gefunden.")

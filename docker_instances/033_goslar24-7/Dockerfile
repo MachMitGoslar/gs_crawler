@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y \
 RUN apt-get update && apt-get install -y fonts-dejavu-core
 
 # copy Code
-COPY .. .
+ADD .. .
 
 # SQLite-Datenbank bei Build erstellen
 RUN python init_db.py

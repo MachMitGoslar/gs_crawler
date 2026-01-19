@@ -68,7 +68,7 @@ case "${1:-help}" in
         fi
 
         echo "🚀 Starting containers..."
-        docker compose -f "$COMPOSE_FILE" up -d
+        docker compose -f "$COMPOSE_FILE" up -d --build
         echo ""
         echo -e "${GREEN}✅ Containers started${NC}"
         echo ""
