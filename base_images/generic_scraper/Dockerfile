@@ -3,6 +3,13 @@ FROM python:3.13-slim
 
 WORKDIR /app
 
+RUN rm -f /var/lib/apt/lists/lock \
+    && rm -f /var/cache/apt/archives/lock \
+    && rm -f /var/lib/dpkg/lock \
+    && apt-get update \
+    && apt-get install -y cron \
+    && rm -rf /var/lib/apt/lists/*
+    
 # Install system dependencies with cache mount
 RUN --mount=type=cache,target=/var/cache/apt \
     --mount=type=cache,target=/var/lib/apt \
