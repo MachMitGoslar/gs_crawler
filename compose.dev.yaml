@@ -1,24 +1,25 @@
-# Development Docker Compose für GS Crawler Stack
-# Verwendet lokale Builds für Entwicklung und Tests
-# NOTE: Migrated crawlers now use compose.consolidated.yaml with generic scraper
+# =============================================================================
+# Development Docker Compose for GS Crawler Stack
+# GENERATED FILE - Do not edit directly!
+# Edit crawlers.yaml and run: python scripts/generate-compose.py
+# =============================================================================
 
 services:
-  # === HEALTH MONITOR ===
+  # === INFRASTRUCTURE ===
   gs_health_monitor:
     build: ./docker_instances/000_health_monitor
     volumes:
       - ./httpdocs/crawler:/app/output
+      - ./crawlers.yaml:/app/configs/crawlers.yaml:ro
     ports:
       - "5015:5000"
     container_name: gs_health_monitor
     restart: unless-stopped
     depends_on:
-      - gs_compiler_001_senioren
-      - gs_compiler_002_fepa
       - gs_generic_scraper_simple
       - gs_generic_scraper_tschuessschule
 
-  # === NEWS & MEDIA CRAWLER ===
+  # === NEWS & MEDIA ===
   gs_compiler_001_senioren:
     build: ./docker_instances/001_senioren
     volumes:
@@ -33,12 +34,19 @@ services:
     container_name: gs_compiler_040_hp
     restart: unless-stopped
 
-  # === EVENT CRAWLER ===
+  # === EVENTS ===
   gs_compiler_002_fepa:
     build: ./docker_instances/002_ferienpass
     volumes:
       - ./httpdocs/crawler:/app/output
     container_name: gs_compiler_002_fepa
+    restart: unless-stopped
+
+  gs_compiler_014_kunst_in_ar:
+    build: ./docker_instances/014_kunst_in_ar
+    volumes:
+      - ./httpdocs/crawler:/app/output
+    container_name: gs_compiler_014_kunst_in_ar
     restart: unless-stopped
 
   gs_compiler_019_was_app:
@@ -55,14 +63,8 @@ services:
     container_name: gs_compiler_027_erster_freitag
     restart: unless-stopped
 
-  # === COMMUNITY & VOLUNTEER CRAWLER ===
-  gs_compiler_042_freiwilligen:
-    build: ./docker_instances/042_freiwilligen
-    volumes:
-      - ./httpdocs/crawler:/app/output
-    container_name: gs_compiler_042_freiwilligen
-    restart: unless-stopped
-
+  # === LOCAL COMMUNITIES ===
+  # === COMMUNITY & VOLUNTEERING ===
   gs_compiler_031_goslarer_geschichten:
     build: ./docker_instances/031_goslarer_geschichten
     volumes:
@@ -70,7 +72,21 @@ services:
     container_name: gs_compiler_031_goslarer_geschichten
     restart: unless-stopped
 
+  gs_compiler_042_freiwilligen:
+    build: ./docker_instances/042_freiwilligen
+    volumes:
+      - ./httpdocs/crawler:/app/output
+    container_name: gs_compiler_042_freiwilligen
+    restart: unless-stopped
+
   # === ENVIRONMENTAL MONITORING ===
+  gs_compiler_035_talsperren:
+    build: ./docker_instances/035_talsperren
+    volumes:
+      - ./httpdocs/crawler:/app/output
+    container_name: gs_compiler_035_talsperren
+    restart: unless-stopped
+
   gs_compiler_045_naturgefahren:
     build: ./docker_instances/045_naturgefahren
     volumes:
@@ -85,21 +101,8 @@ services:
     container_name: gs_compiler_047_bodenwasser
     restart: unless-stopped
 
-  gs_compiler_035_talsperren:
-    build: ./docker_instances/035_talsperren
-    volumes:
-      - ./httpdocs/crawler:/app/output
-    container_name: gs_compiler_035_talsperren
-    restart: unless-stopped
-
-  # === SPECIALIZED CRAWLER ===
-  gs_compiler_014_kunst_in_ar:
-    build: ./docker_instances/014_kunst_in_ar
-    volumes:
-      - ./httpdocs/crawler:/app/output
-    container_name: gs_compiler_014_kunst_in_ar
-    restart: unless-stopped
-
+  # === EDUCATION ===
+  # === SPECIALIZED ===
   gs_compiler_032_webcams_goslar:
     build: ./docker_instances/032_webcams_goslar
     volumes:
@@ -121,8 +124,18 @@ services:
     container_name: gs_compiler_056_serviceportal
     restart: unless-stopped
 
+  # === API SERVICES ===
+  gs_compiler_068_altstadtfest:
+    build: ./docker_instances/068_altstadtfest
+    volumes:
+      - ./httpdocs/crawler:/app/output
+    ports:
+      - "5016:5000"
+    container_name: gs_compiler_068_altstadtfest
+    restart: unless-stopped
+
   # === GENERIC SCRAPER (Config-Driven) ===
-  # These run the migrated YAML-based crawlers
+  # These run the YAML-based crawlers from crawler_configs/
   gs_generic_scraper_simple:
     build: ./base_images/generic_scraper
     volumes:
@@ -139,17 +152,7 @@ services:
     container_name: gs_generic_scraper_tschuessschule
     restart: unless-stopped
 
-  # === FLASK API SERVICES ===
-  gs_compiler_068_altstadtfest:
-    build: ./docker_instances/068_altstadtfest
-    volumes:
-      - ./httpdocs/crawler:/app/output
-    ports:
-      - "5016:5000"
-    container_name: gs_compiler_068_altstadtfest
-    restart: unless-stopped
-
-# Gemeinsames Volume für alle Output-Dateien
+# Shared volume for all output files
 volumes:
   crawler_output:
     driver: local
