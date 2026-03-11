@@ -4,64 +4,144 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Stand – Wochenmarkt Goslar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet" />
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f5f5f0; color: #222; min-height: 100vh; }
+    :root {
+      --color-dead-pixel-10:   #fafafaff;
+      --color-dead-pixel-25:   #f5f5f5ff;
+      --color-dead-pixel-900:  #6f6f6eff;
+      --color-dead-pixel-1300: #303030ff;
+      --color-dead-pixel-1400: #222222ff;
 
+      --color-ripe-mango-300:  #feefc3ff;
+      --color-ripe-mango-700:  #fcce4cff;
+      --color-ripe-mango-1300: #644e0cff;
+      --color-ripe-mango-1400: #433408ff;
+
+      --color-ferocious-800: #e84237ff;
+
+      --border-radius-5: 12px;
+      --border-radius-pill: 10000px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--color-dead-pixel-10);
+      color: var(--color-dead-pixel-1300);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Header ── */
     header {
-      background: #2d6a2d;
+      background: var(--color-ripe-mango-1300);
       color: #fff;
       padding: 1rem;
       display: flex;
       align-items: center;
       gap: 0.75rem;
     }
-    header a  { color: #fff; text-decoration: none; font-size: 1.3rem; line-height: 1; }
-    header h1 { font-size: 1.1rem; font-weight: 600; }
+    header a {
+      color: #fff;
+      text-decoration: none;
+      font-size: 1.25rem;
+      line-height: 1;
+      opacity: 0.85;
+      transition: opacity 0.15s;
+    }
+    header a:hover { opacity: 1; }
+    header h1 {
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
 
-    #loading, #error { text-align: center; padding: 3rem 1rem; color: #666; }
-    #error { color: #c0392b; }
+    /* ── States ── */
+    #loading {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--color-dead-pixel-900);
+      font-size: 0.875rem;
+    }
+    #error {
+      display: none;
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--color-ferocious-800);
+      font-size: 0.875rem;
+    }
+
+    /* ── Card ── */
+    #content { display: none; }
 
     .card {
       max-width: 520px;
       margin: 1.25rem auto;
       background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 1px 6px rgba(0,0,0,0.1);
+      border-radius: var(--border-radius-5);
+      border: 1px solid rgba(0, 0, 0, 0.08);
       overflow: hidden;
     }
 
     .logo-wrap {
       width: 100%;
-      background: #f0f0ea;
+      background: var(--color-dead-pixel-25);
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 1.5rem;
       min-height: 160px;
     }
-    .logo-wrap img { max-width: 100%; max-height: 160px; object-fit: contain; }
+    .logo-wrap img {
+      max-width: 100%;
+      max-height: 160px;
+      object-fit: contain;
+    }
     .logo-placeholder { font-size: 4rem; }
 
-    .body { padding: 1.25rem 1.25rem 1.5rem; }
-    .vendor-name { font-size: 1.4rem; font-weight: 700; margin-bottom: 0.5rem; }
-    .summary     { font-size: 0.9rem; color: #555; margin-bottom: 1rem; }
-    .description { font-size: 0.92rem; line-height: 1.6; color: #333; }
-    .description p { margin-bottom: 0.5rem; }
+    .card-body { padding: 1.25rem 1.25rem 1.5rem; }
 
-    .back-link {
+    .vendor-name {
+      font-size: 1.375rem;
+      font-weight: 700;
+      letter-spacing: -0.022em;
+      line-height: 1.2;
+      color: var(--color-dead-pixel-1400);
+      margin-bottom: 0.4rem;
+    }
+    .vendor-summary {
+      font-size: 0.875rem;
+      color: var(--color-dead-pixel-900);
+      margin-bottom: 1rem;
+      line-height: 1.5;
+    }
+    .vendor-description {
+      font-size: 0.9rem;
+      line-height: 1.6;
+      color: var(--color-dead-pixel-1300);
+    }
+    .vendor-description p { margin-bottom: 0.5rem; }
+
+    /* ── Back button ── */
+    .back-btn {
       display: block;
       text-align: center;
-      margin: 0 1rem 1.5rem;
-      padding: 0.75rem;
-      background: #2d6a2d;
-      color: #fff;
-      border-radius: 8px;
+      max-width: 520px;
+      margin: 0 auto 1.5rem;
+      padding: 0.625rem 1rem;
+      background: var(--color-ripe-mango-700);
+      color: var(--color-ripe-mango-1400);
+      border-radius: var(--border-radius-pill);
       text-decoration: none;
-      font-size: 0.95rem;
+      font-size: 0.875rem;
       font-weight: 600;
+      transition: background 0.15s ease;
     }
-    .back-link:hover { background: #245424; }
+    .back-btn:hover { background: var(--color-ripe-mango-300); }
   </style>
 </head>
 <body>
@@ -72,20 +152,20 @@
 </header>
 
 <div id="loading">Stand wird geladen…</div>
-<div id="error"  style="display:none"></div>
+<div id="error"></div>
 
-<div id="content" style="display:none">
+<div id="content">
   <div class="card">
     <div class="logo-wrap" id="logo-wrap">
       <div class="logo-placeholder">🏪</div>
     </div>
-    <div class="body">
-      <div class="vendor-name" id="vendor-name"></div>
-      <div class="summary"     id="vendor-summary"></div>
-      <div class="description" id="vendor-description"></div>
+    <div class="card-body">
+      <div class="vendor-name"        id="vendor-name"></div>
+      <div class="vendor-summary"     id="vendor-summary"></div>
+      <div class="vendor-description" id="vendor-description"></div>
     </div>
   </div>
-  <a class="back-link" id="back-link" href="070_wochenmarkt_index.html">← Alle Stände</a>
+  <a class="back-btn" id="back-link" href="070_wochenmarkt_index.html">← Alle Stände</a>
 </div>
 
 <script>
@@ -97,7 +177,6 @@
   document.getElementById('back-link').href = INDEX_PAGE;
 
   async function load() {
-    // Populate header with market name from card.json
     const cardRes = await fetch(CARD_JSON).catch(() => null);
     if (cardRes && cardRes.ok) {
       const card = await cardRes.json();
