@@ -63,6 +63,13 @@ services:
     container_name: gs_compiler_027_erster_freitag
     restart: unless-stopped
 
+  gs_compiler_070_wochenmarkt:
+    build: ./docker_instances/070_wochenmarkt
+    volumes:
+      - ./httpdocs/crawler:/app/output
+    container_name: gs_compiler_070_wochenmarkt
+    restart: unless-stopped
+
   # === LOCAL COMMUNITIES ===
   # === COMMUNITY & VOLUNTEERING ===
   gs_compiler_031_goslarer_geschichten:
