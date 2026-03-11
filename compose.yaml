@@ -68,6 +68,8 @@ services:
     image: ghcr.io/machmitgoslar/gs_crawler_070_wochenmarkt:latest
     volumes:
       - ./httpdocs/crawler:/app/output
+    env_file:
+      - .env
     container_name: gs_compiler_070_wochenmarkt
     restart: unless-stopped
 

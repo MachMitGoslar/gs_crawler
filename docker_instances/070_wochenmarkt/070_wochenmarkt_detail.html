@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stand – Wochenmarkt Goslar</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f5f5f0; color: #222; min-height: 100vh; }
+
+    header {
+      background: #2d6a2d;
+      color: #fff;
+      padding: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    header a  { color: #fff; text-decoration: none; font-size: 1.3rem; line-height: 1; }
+    header h1 { font-size: 1.1rem; font-weight: 600; }
+
+    #loading, #error { text-align: center; padding: 3rem 1rem; color: #666; }
+    #error { color: #c0392b; }
+
+    .card {
+      max-width: 520px;
+      margin: 1.25rem auto;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+
+    .logo-wrap {
+      width: 100%;
+      background: #f0f0ea;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      min-height: 160px;
+    }
+    .logo-wrap img { max-width: 100%; max-height: 160px; object-fit: contain; }
+    .logo-placeholder { font-size: 4rem; }
+
+    .body { padding: 1.25rem 1.25rem 1.5rem; }
+    .vendor-name { font-size: 1.4rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .summary     { font-size: 0.9rem; color: #555; margin-bottom: 1rem; }
+    .description { font-size: 0.92rem; line-height: 1.6; color: #333; }
+    .description p { margin-bottom: 0.5rem; }
+
+    .back-link {
+      display: block;
+      text-align: center;
+      margin: 0 1rem 1.5rem;
+      padding: 0.75rem;
+      background: #2d6a2d;
+      color: #fff;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+    .back-link:hover { background: #245424; }
+  </style>
+</head>
+<body>
+
+<header>
+  <a id="back-btn" href="070_wochenmarkt_index.html">←</a>
+  <h1 id="market-name">Stand Details</h1>
+</header>
+
+<div id="loading">Stand wird geladen…</div>
+<div id="error"  style="display:none"></div>
+
+<div id="content" style="display:none">
+  <div class="card">
+    <div class="logo-wrap" id="logo-wrap">
+      <div class="logo-placeholder">🏪</div>
+    </div>
+    <div class="body">
+      <div class="vendor-name" id="vendor-name"></div>
+      <div class="summary"     id="vendor-summary"></div>
+      <div class="description" id="vendor-description"></div>
+    </div>
+  </div>
+  <a class="back-link" id="back-link" href="070_wochenmarkt_index.html">← Alle Stände</a>
+</div>
+
+<script>
+  const BASE       = location.href.substring(0, location.href.lastIndexOf('/') + 1);
+  const INDEX_PAGE = BASE + '070_wochenmarkt_index.html';
+  const CARD_JSON  = BASE + '070_wochenmarkt_card.json';
+
+  document.getElementById('back-btn').href  = INDEX_PAGE;
+  document.getElementById('back-link').href = INDEX_PAGE;
+
+  async function load() {
+    // Populate header with market name from card.json
+    const cardRes = await fetch(CARD_JSON).catch(() => null);
+    if (cardRes && cardRes.ok) {
+      const card = await cardRes.json();
+      if (card.title) document.getElementById('market-name').textContent = card.title;
+    }
+
+    const params = new URLSearchParams(location.search);
+    const id = params.get('id');
+
+    if (!id) {
+      showError('Kein Stand angegeben. Bitte gehe zurück zur Übersicht.');
+      return;
+    }
+
+    try {
+      const res = await fetch(BASE + '070_wochenmarkt_' + id + '.json');
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const v = await res.json();
+
+      document.title = (v.title ?? 'Stand') + ' – Wochenmarkt Goslar';
+      document.getElementById('vendor-name').textContent    = v.title   ?? '';
+      document.getElementById('vendor-summary').textContent = v.summary ?? '';
+
+      if (v.description) {
+        document.getElementById('vendor-description').innerHTML = v.description;
+      }
+
+      const imgs = v.images ?? [];
+      if (imgs.length && imgs[0].url) {
+        const img = document.createElement('img');
+        img.src = imgs[0].url;
+        img.alt = v.title ?? 'Logo';
+        img.onerror = () => img.replaceWith(makePlaceholder());
+        const wrap = document.getElementById('logo-wrap');
+        wrap.innerHTML = '';
+        wrap.appendChild(img);
+      }
+
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('content').style.display = 'block';
+
+    } catch (e) {
+      showError('Stand konnte nicht geladen werden: ' + e.message);
+    }
+  }
+
+  function showError(msg) {
+    document.getElementById('loading').style.display = 'none';
+    const el = document.getElementById('error');
+    el.style.display = 'block';
+    el.textContent = msg;
+  }
+
+  function makePlaceholder() {
+    const d = document.createElement('div');
+    d.className = 'logo-placeholder';
+    d.textContent = '🏪';
+    return d;
+  }
+
+  load();
+</script>
+</body>
+</html>

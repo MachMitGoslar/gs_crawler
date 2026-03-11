@@ -344,10 +344,10 @@ jobs:
         username: ${{ secrets.SERVER_USER }}
         key: ${{ secrets.SERVER_SSH_KEY }}
         script: |
-          cat > ~/gs_crawler/.env <<'EOF'
-          WOCHENMARKT_CLIENT_ID=${{ secrets.WOCHENMARKT_CLIENT_ID }}
-          WOCHENMARKT_CLIENT_SECRET=${{ secrets.WOCHENMARKT_CLIENT_SECRET }}
-          EOF
+          printf 'WOCHENMARKT_CLIENT_ID=%s\nWOCHENMARKT_CLIENT_SECRET=%s\n' \
+            '${{ secrets.WOCHENMARKT_CLIENT_ID }}' \
+            '${{ secrets.WOCHENMARKT_CLIENT_SECRET }}' \
+            > ~/gs_crawler/.env
           echo ".env updated on server"
 
   deployment-summary:

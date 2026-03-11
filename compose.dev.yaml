@@ -67,6 +67,8 @@ services:
     build: ./docker_instances/070_wochenmarkt
     volumes:
       - ./httpdocs/crawler:/app/output
+    env_file:
+      - .env
     container_name: gs_compiler_070_wochenmarkt
     restart: unless-stopped
 
