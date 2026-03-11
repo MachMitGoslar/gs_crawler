@@ -238,6 +238,13 @@ if CONTAINERS is None:
             'source': 'https://meingoslar.de/',
             'schedule': 'API Endpoint',
             'type': 'API Endpoint'
+        },
+        'gs_compiler_070_wochenmarkt': {
+            'name': 'Wochenmarkt Goslar',
+            'expected_files': ['070_wochenmarkt_card.json', '070_wochenmarkt_alle.json'],
+            'source': 'HSP Markets API',
+            'schedule': 'Alle 2 Stunden',
+            'type': 'Market Crawler'
         }
     }
 

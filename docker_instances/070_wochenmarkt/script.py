@@ -1,12 +1,12 @@
 import requests
 import json
 import os
-from datetime import datetime, timezone
+from datetime import datetime
 
 # ── Config ─────────────────────────────────────────────────────────────────────
 TOKEN_URL      = "https://backend.goslar-id.ceconsoft.de/connect/token"
-CLIENT_ID      = "gmg.client"
-CLIENT_SECRET  = "0uAQBew9XARxC90D"
+CLIENT_ID      = os.environ["WOCHENMARKT_CLIENT_ID"]
+CLIENT_SECRET  = os.environ["WOCHENMARKT_CLIENT_SECRET"]
 SCOPE          = "markets.read"
 
 EVENTS_URL      = "https://hsp-external-gateway-linux-cfethubabxayf7aq.westeurope-01.azurewebsites.net/api/external/market-events/upcoming"
@@ -22,13 +22,17 @@ MONTHS = ["Januar", "Februar", "März", "April", "Mai", "Juni",
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
 def get_token() -> str:
+    print(f"Requesting token for client_id={CLIENT_ID!r} scope={SCOPE!r}")
     resp = requests.post(TOKEN_URL, data={
         "grant_type":    "client_credentials",
         "client_id":     CLIENT_ID,
         "client_secret": CLIENT_SECRET,
         "scope":         SCOPE,
     })
-    resp.raise_for_status()
+    if not resp.ok:
+        print(f"Token request failed: HTTP {resp.status_code}")
+        print(f"Response body: {resp.text}")
+        resp.raise_for_status()
     return resp.json()["access_token"]
 
 
@@ -64,7 +68,7 @@ def write_json(path: str, data) -> None:
 
 
 def vendor_address(vendor: dict) -> tuple[str, str]:
-    """Return (address_line, city_line) for a vendor dict."""
+    """Return (street_line, city_line) for a vendor dict."""
     street = " ".join(p for p in [vendor.get("street", ""), vendor.get("houseNumber", "")] if p).strip()
     city   = " ".join(p for p in [vendor.get("zip", ""),    vendor.get("city", "")]          if p).strip()
     return street, city
@@ -93,11 +97,11 @@ def main():
         return
 
     # Take the nearest upcoming event (API returns them sorted ascending)
-    event      = events[0]
-    event_id   = event["id"]
-    market     = event.get("market") or {}
-    start_dt   = parse_dt(event["start"])
-    end_dt     = parse_dt(event["end"])
+    event     = events[0]
+    event_id  = event["id"]
+    market    = event.get("market") or {}
+    start_dt  = parse_dt(event["start"])
+    end_dt    = parse_dt(event["end"])
 
     market_name  = market.get("name")        or "Wochenmarkt Goslar"
     market_image = market.get("imageFileUrl")
@@ -107,8 +111,8 @@ def main():
     time_range = f"{start_dt.strftime('%H:%M')}–{end_dt.strftime('%H:%M')} Uhr"
 
     print(f"Fetching attendances for event {event_id}...")
-    attendances   = get_attendances(token, event_id)
-    vendor_count  = len(attendances)
+    attendances  = get_attendances(token, event_id)
+    vendor_count = len(attendances)
 
     # ── Card ───────────────────────────────────────────────────────────────────
     card_desc = f"{market_name} am {date_label}, {time_range} auf dem {market_loc}."
@@ -119,7 +123,7 @@ def main():
         "title":              f"{market_name} – {date_label}",
         "description":        card_desc,
         "image_url":          market_image,
-        "call_to_action_url": f"{BASE_URL}/070_wochenmarkt_alle.json",
+        "call_to_action_url": f"{BASE_URL}/070_wochenmarkt_index.html",
         "published_at":       now_str,
     })
 
@@ -136,14 +140,14 @@ def main():
             "title":              vendor_name,
             "description":        description,
             "image_url":          vendor.get("logoFileUrl"),
-            "call_to_action_url": f"{BASE_URL}/070_wochenmarkt_{vendor_id}.json",
+            "call_to_action_url": f"{BASE_URL}/070_wochenmarkt_detail.html?id={vendor_id}",
             "published_at":       now_str,
         })
 
     write_json(os.path.join(OUTPUT_DIR, "070_wochenmarkt_alle.json"), index)
 
     # ── Detail files (one per vendor) ─────────────────────────────────────────
-    for vendor in attendances:
+    for i, vendor in enumerate(attendances, start=1):
         vendor_id   = vendor["id"]
         vendor_name = vendor.get("name") or "Unbekannter Stand"
         street, city = vendor_address(vendor)
@@ -157,7 +161,7 @@ def main():
         images = [{"url": vendor["logoFileUrl"]}] if vendor.get("logoFileUrl") else []
 
         write_json(os.path.join(OUTPUT_DIR, f"070_wochenmarkt_{vendor_id}.json"), {
-            "id":                 vendor_id,
+            "id":                 i,
             "title":              vendor_name,
             "summary":            summary,
             "description":        desc,

@@ -120,6 +120,12 @@ def generate_dev_compose(registry):
                 for port in crawler['ports']:
                     lines.append(f'      - "{port}"')
 
+            # Env file
+            if 'env_file' in crawler:
+                lines.append("    env_file:")
+                for ef in crawler['env_file']:
+                    lines.append(f"      - {ef}")
+
             lines.append(f"    container_name: {container_name}")
             lines.append("    restart: unless-stopped")
 
@@ -239,6 +245,12 @@ def generate_prod_compose(registry):
                 lines.append("    ports:")
                 for port in crawler['ports']:
                     lines.append(f'      - "{port}"')
+
+            # Env file
+            if 'env_file' in crawler:
+                lines.append("    env_file:")
+                for ef in crawler['env_file']:
+                    lines.append(f"      - {ef}")
 
             lines.append(f"    container_name: {container_name}")
             lines.append("    restart: unless-stopped")

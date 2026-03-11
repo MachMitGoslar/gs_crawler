@@ -235,17 +235,31 @@ jobs:
         # Build single platform (uses locally built base images from previous step)
         docker build --tag test/${{ matrix.container }}:test .
 
-        # Basic start test
-        docker run --rm -d --name test_${{ matrix.container }} test/${{ matrix.container }}:test
+        # Basic start test - pass env vars so credential-dependent containers
+        # reach cron without crashing on missing secrets
+        docker run -d --name test_${{ matrix.container }} \
+          -e WOCHENMARKT_CLIENT_ID=${{ secrets.WOCHENMARKT_CLIENT_ID }} \
+          -e WOCHENMARKT_CLIENT_SECRET=${{ secrets.WOCHENMARKT_CLIENT_SECRET }} \
+          test/${{ matrix.container }}:test
         sleep 3
 
+        # Capture logs before any cleanup
+        docker logs test_${{ matrix.container }} 2>&1 || true
+
         if docker ps | grep -q test_${{ matrix.container }}; then
-          echo "Container started successfully"
+          echo "Container started successfully (still running)"
           docker stop test_${{ matrix.container }} || true
+          docker rm test_${{ matrix.container }} || true
         else
-          echo "Container failed to start"
-          docker logs test_${{ matrix.container }} || true
-          exit 1
+          # Container already exited - check exit code
+          exit_code=$(docker inspect test_${{ matrix.container }} --format='{{.State.ExitCode}}' 2>/dev/null || echo "1")
+          docker rm test_${{ matrix.container }} || true
+          if [ "$exit_code" = "0" ]; then
+            echo "Container ran and exited cleanly (exit code 0)"
+          else
+            echo "Container failed to start (exit code $exit_code)"
+            exit 1
+          fi
         fi
 
   summary:

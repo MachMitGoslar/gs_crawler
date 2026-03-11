@@ -361,8 +361,10 @@ crawlers:
     expected_files:
       - "070_wochenmarkt_card.json"
       - "070_wochenmarkt_alle.json"
+    env_file:
+      - .env
     implementation: custom
-    notes: "Fetches next market event and vendor attendances via OAuth client credentials"
+    notes: "Fetches next market event and vendor attendances via OAuth client credentials. Requires WOCHENMARKT_CLIENT_ID and WOCHENMARKT_CLIENT_SECRET in .env"
 
   # === API SERVICES ===
   - id: "068_altstadtfest"

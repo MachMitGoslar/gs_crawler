@@ -35,6 +35,9 @@ test_output/
 # Raw/experimental scripts
 raw_scripts/
 
+# --- Secrets ---
+.env
+
 # --- IDE & OS ---
 # macOS
 .DS_Store
