@@ -25,7 +25,7 @@ To add/modify a crawler:
 3. Commit the changes
 
 <!-- CRAWLER_TABLE_START -->
-**Total Crawlers:** 25 (16 custom containers, 9 config-driven)
+**Total Crawlers:** 26 (17 custom containers, 9 config-driven)
 
 ### Infrastructure
 _System monitoring and management_
@@ -52,6 +52,7 @@ _Event calendars and activities_
 | 014_kunst_in_ar | Kunst in AR | Event Crawler | Täglich 08:00 | `017-kunst-in-ar-single.json` |
 | 019_was_app | WasApp Community | Community Feed | Alle 3 Minuten | `019_was_app.json` |
 | 027_erster_freitag | Erster Freitag Events | Event Crawler | Täglich 09:00 | `027-erster-freitag.json` |
+| 070_wochenmarkt | Wochenmarkt Goslar | Market Crawler | Alle 2 Stunden | `070_wochenmarkt_card.json, 070_wochenmarkt_alle...` |
 
 ### Local Communities
 _Village and neighborhood news_

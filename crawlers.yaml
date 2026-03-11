@@ -350,6 +350,20 @@ crawlers:
       - "056-serviceportal-alle.json"
     implementation: custom
 
+  # === MARKET DATA ===
+  - id: "070_wochenmarkt"
+    name: "Wochenmarkt Goslar"
+    category: events
+    type: "Market Crawler"
+    source: "HSP Markets API"
+    schedule: "0 */2 * * *"
+    schedule_human: "Alle 2 Stunden"
+    expected_files:
+      - "070_wochenmarkt_card.json"
+      - "070_wochenmarkt_alle.json"
+    implementation: custom
+    notes: "Fetches next market event and vendor attendances via OAuth client credentials"
+
   # === API SERVICES ===
   - id: "068_altstadtfest"
     name: "Altstadtfest Goslar"

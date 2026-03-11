@@ -1,0 +1,2 @@
+# Run every 2 hours to keep vendor list up to date
+0 */2 * * * cd /app ; python /app/script.py >> /proc/1/fd/1 2>&1
