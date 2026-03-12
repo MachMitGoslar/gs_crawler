@@ -187,6 +187,11 @@
       if (cardRes.ok) {
         const card = await cardRes.json();
         if (card.title) document.getElementById('market-title').textContent = card.title;
+        if (card.description) {
+          // Extract "Freitag, 13. März 2026, 07:00–12:00 Uhr" from card description
+          const m = card.description.match(/am\s+(\w+,\s+\d+\.\s+\w+\s+\d{4}(?:,\s+[\d:–]+\s+Uhr)?)/);
+          if (m) document.getElementById('market-subtitle').textContent = m[1];
+        }
       }
 
       const res = await fetch(INDEX_JSON);
