@@ -409,17 +409,17 @@ def update_status_cache():
 
         time.sleep(30)  # Alle 30 Sekunden aktualisieren
 
-@app.route('/')
+@app.route('/health')
 def index():
     """Hauptseite mit Container Status"""
     return render_template('index.html', status=container_status_cache)
 
-@app.route('/api/status')
+@app.route('/health/status')
 def api_status():
     """API Endpoint für Container Status"""
     return jsonify(container_status_cache)
 
-@app.route('/api/container/<container_name>')
+@app.route('/health/container/<container_name>')
 def api_container_detail(container_name):
     """API Endpoint für Details eines spezifischen Containers"""
     for container in container_status_cache.get('containers', []):
@@ -427,7 +427,7 @@ def api_container_detail(container_name):
             return jsonify(container)
     return jsonify({'error': 'Container nicht gefunden'}), 404
 
-@app.route('/api/restart/<container_name>')
+@app.route('/health/restart/<container_name>')
 def api_restart_container(container_name):
     """API Endpoint zum Neustarten eines Containers - Nicht verfügbar ohne Docker Socket"""
     return jsonify({
@@ -436,7 +436,7 @@ def api_restart_container(container_name):
         'message': 'Diese Funktion benötigt direkten Zugriff auf Docker, der in dieser Umgebung nicht verfügbar ist.'
     }), 503
 
-@app.route('/api/files/<container_name>')
+@app.route('/health/files/<container_name>')
 def api_container_files(container_name):
     """API Endpoint für Dateien eines spezifischen Containers"""
     for container in container_status_cache.get('containers', []):
@@ -450,7 +450,7 @@ def api_container_files(container_name):
             })
     return jsonify({'error': 'Container nicht gefunden'}), 404
 
-@app.route('/api/health')
+@app.route('/health/system')
 def api_health():
     """API Endpoint für System Health Check"""
     stats = container_status_cache

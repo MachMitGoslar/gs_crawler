@@ -18,5 +18,5 @@ ENV PYTHONUNBUFFERED=1
 
 RUN mkdir -p /app/output
 
-# Copy static HTML to the output volume, then run the script once, then start cron
-CMD ["sh", "-c", "cp /app/static/*.html /app/output/ && python script.py && cron -f"]
+# Dump env vars for cron, copy static HTML, run once, then start cron
+CMD ["sh", "-c", "printenv | sed 's/^/export /' > /app/env.sh && cp /app/static/*.html /app/output/ && python script.py && cron -f"]

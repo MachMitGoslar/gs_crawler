@@ -111,7 +111,26 @@
       letter-spacing: -0.022em;
       line-height: 1.2;
       color: var(--color-dead-pixel-1400);
-      margin-bottom: 0.4rem;
+      margin-bottom: 0.5rem;
+    }
+    .market-event {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+      background: var(--color-ripe-mango-100);
+      border-left: 3px solid var(--color-ripe-mango-700);
+      border-radius: 0 4px 4px 0;
+      padding: 0.6rem 0.75rem;
+      margin-bottom: 1rem;
+    }
+    .market-event-date {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--color-ripe-mango-1300);
+    }
+    .market-event-location {
+      font-size: 0.8125rem;
+      color: var(--color-ripe-mango-1200);
     }
     .vendor-summary {
       font-size: 0.875rem;
@@ -161,6 +180,10 @@
     </div>
     <div class="card-body">
       <div class="vendor-name"        id="vendor-name"></div>
+      <div class="market-event" id="market-event" style="display:none">
+        <div class="market-event-date"     id="market-event-date"></div>
+        <div class="market-event-location" id="market-event-location"></div>
+      </div>
       <div class="vendor-summary"     id="vendor-summary"></div>
       <div class="vendor-description" id="vendor-description"></div>
     </div>
@@ -202,6 +225,16 @@
 
       if (v.description) {
         document.getElementById('vendor-description').innerHTML = v.description;
+
+        // Extract date and location from description text
+        // Pattern: "am Freitag, 13. März 2026 in Jakobikirchhof Goslar dabei"
+        const text = v.description.replace(/<[^>]+>/g, ' ');
+        const m = text.match(/am\s+(\w+,\s+\d+\.\s+\w+\s+\d{4})\s+in\s+([^\.]+?)\s+dabei/);
+        if (m) {
+          document.getElementById('market-event-date').textContent     = m[1];
+          document.getElementById('market-event-location').textContent = m[2].trim();
+          document.getElementById('market-event').style.display        = 'flex';
+        }
       }
 
       const imgs = v.images ?? [];
