@@ -85,6 +85,8 @@ services:
     build: ./docker_instances/042_freiwilligen
     volumes:
       - ./httpdocs/crawler:/app/output
+    env_file:
+      - .env
     container_name: gs_compiler_042_freiwilligen
     restart: unless-stopped
 
