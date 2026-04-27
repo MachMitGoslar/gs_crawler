@@ -193,6 +193,7 @@ jobs:
   # Test changed containers (single platform)
   test-containers:
     runs-on: ubuntu-latest
+    environment: Freiwilligenagentur
     needs: [load-registry, detect-changes, build-base-images]
     if: always() && needs.detect-changes.outputs.changed-containers != '[]'
     strategy:
@@ -238,6 +239,7 @@ jobs:
         # Basic start test - pass env vars so credential-dependent containers
         # reach cron without crashing on missing secrets
         docker run -d --name test_${{ matrix.container }} \
+          -e FREIWILLIGEN_AGENTUR_API_KEY=${{ secrets.FREIWILLIGEN_AGENTUR_API_KEY }} \
           -e WOCHENMARKT_CLIENT_ID=${{ secrets.WOCHENMARKT_CLIENT_ID }} \
           -e WOCHENMARKT_CLIENT_SECRET=${{ secrets.WOCHENMARKT_CLIENT_SECRET }} \
           test/${{ matrix.container }}:test
