@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Karriereangebote im Landkreis Goslar</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --color-dead-pixel-10: #fafafaff;
+      --color-dead-pixel-25: #f5f5f5ff;
+      --color-dead-pixel-100: #f1f1f1ff;
+      --color-dead-pixel-300: #d9d9d9ff;
+      --color-dead-pixel-900: #6f6f6eff;
+      --color-dead-pixel-1200: #3f3f3eff;
+      --color-dead-pixel-1300: #303030ff;
+      --color-dead-pixel-1400: #222222ff;
+      --color-ripe-mango-300: #feefc3ff;
+      --color-ripe-mango-700: #fcce4cff;
+      --color-ripe-mango-1200: #866811ff;
+      --color-ripe-mango-1300: #644e0cff;
+      --color-ripe-mango-1400: #433408ff;
+      --color-ferocious-800: #e84237ff;
+      --border-radius-5: 12px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--color-dead-pixel-10);
+      color: var(--color-dead-pixel-1300);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    header {
+      background: var(--color-ripe-mango-1300);
+      color: #fff;
+      padding: 1.5rem 1rem 1.25rem;
+      text-align: center;
+    }
+    header h1 {
+      font-size: 1.375rem;
+      font-weight: 700;
+      line-height: 1.2;
+      letter-spacing: -0.022em;
+    }
+    header p {
+      font-size: 0.875rem;
+      font-weight: 400;
+      opacity: 0.8;
+      margin-top: 0.3rem;
+    }
+
+    .status-message {
+      display: none;
+      text-align: center;
+      padding: 1rem 0 0.25rem;
+      font-size: 0.875rem;
+    }
+    #loading { color: var(--color-dead-pixel-900); }
+    #error { color: var(--color-ferocious-800); }
+
+    #count {
+      display: none;
+      padding: 0.6rem 1rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--color-ripe-mango-1400);
+      background: var(--color-ripe-mango-700);
+      text-align: center;
+      letter-spacing: 0.01em;
+    }
+
+    .toolbar-wrap {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 1rem;
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto auto;
+      gap: 0.75rem;
+      align-items: center;
+    }
+
+    .toolbar input,
+    .modal-grid input,
+    .modal-grid select,
+    .multi-select-toggle {
+      width: 100%;
+      border: 1px solid rgba(0, 0, 0, 0.12);
+      border-radius: 10px;
+      background: #fff;
+      color: var(--color-dead-pixel-1300);
+      font: inherit;
+      padding: 0.85rem 0.95rem;
+      min-height: 52px;
+    }
+
+    .toolbar input:focus,
+    .modal-grid input:focus,
+    .modal-grid select:focus,
+    .multi-select-toggle:focus,
+    .multi-select-toggle.show {
+      outline: none;
+      border-color: var(--color-ripe-mango-1200);
+      box-shadow: 0 0 0 3px rgba(252, 206, 76, 0.22);
+    }
+
+    .modal-grid select {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background-image:
+        linear-gradient(45deg, transparent 50%, var(--color-dead-pixel-900) 50%),
+        linear-gradient(135deg, var(--color-dead-pixel-900) 50%, transparent 50%);
+      background-position:
+        calc(100% - 21px) calc(50% - 3px),
+        calc(100% - 14px) calc(50% - 3px);
+      background-size: 7px 7px, 7px 7px;
+      background-repeat: no-repeat;
+      padding-right: 2.7rem;
+    }
+
+    .toolbar button,
+    .modal-actions button {
+      border: 0;
+      border-radius: 10px;
+      padding: 0.85rem 1rem;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    #search-button {
+      background: var(--color-ripe-mango-1200);
+      color: #fff;
+    }
+
+    #filter-button,
+    #reset-button {
+      background: #fff;
+      color: var(--color-dead-pixel-1300);
+      border: 1px solid rgba(0, 0, 0, 0.12);
+    }
+
+    .filter-summary {
+      margin-top: 0.75rem;
+      font-size: 0.82rem;
+      color: var(--color-dead-pixel-900);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem;
+      padding: 1.25rem 1rem;
+      max-width: 1040px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: var(--border-radius-5);
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      text-decoration: none;
+      color: inherit;
+      transition: box-shadow 0.15s ease, border-color 0.15s ease;
+    }
+    .card:hover {
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      border-color: rgba(0, 0, 0, 0.12);
+    }
+
+    .card-logo {
+      width: 100%;
+      height: 140px;
+      object-fit: contain;
+      background: var(--color-dead-pixel-25);
+      padding: 1rem;
+    }
+
+    .card-logo-placeholder {
+      width: 100%;
+      height: 140px;
+      background: var(--color-dead-pixel-100);
+    }
+
+    .card-body {
+      padding: 0.875rem 1rem 1rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .card-name {
+      font-size: 0.9375rem;
+      font-weight: 600;
+      color: var(--color-dead-pixel-1400);
+      line-height: 1.3;
+    }
+
+    .card-address,
+    .card-meta {
+      font-size: 0.8125rem;
+      color: var(--color-dead-pixel-900);
+      line-height: 1.4;
+    }
+
+    .card-cta {
+      margin-top: auto;
+      padding-top: 0.75rem;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--color-ripe-mango-1200);
+    }
+
+    .modal-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0.9rem;
+    }
+
+    .modal-field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .modal-field label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--color-dead-pixel-1200);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .multi-select {
+      position: relative;
+    }
+
+    .multi-select-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .multi-select-toggle::after {
+      content: "";
+      width: 10px;
+      height: 10px;
+      border-right: 2px solid var(--color-dead-pixel-900);
+      border-bottom: 2px solid var(--color-dead-pixel-900);
+      transform: rotate(45deg) translateY(-2px);
+      flex: 0 0 auto;
+      margin-right: 2px;
+    }
+
+    .multi-select-menu {
+      width: 100%;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 14px;
+      padding: 0.45rem;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.14);
+    }
+
+    .multi-select-option {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.55rem 0.65rem;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 0.94rem;
+    }
+
+    .multi-select-option:hover {
+      background: var(--color-dead-pixel-25);
+    }
+
+    .multi-select-option input {
+      width: 1rem;
+      height: 1rem;
+      margin: 0;
+      accent-color: var(--color-ripe-mango-1200);
+      flex: 0 0 auto;
+    }
+
+    .multi-select-summary {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .modal-hint {
+      margin-top: 0.8rem;
+      font-size: 0.78rem;
+      color: var(--color-dead-pixel-900);
+    }
+
+    .modal-content {
+      border: 0;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 22px 60px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-header {
+      padding: 1rem 1.1rem;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .modal-body {
+      padding: 0;
+    }
+
+    .filter-hero {
+      background: linear-gradient(135deg, var(--color-ripe-mango-1300), #8c6a09 58%, #b78614 100%);
+      color: white;
+      padding: 1.1rem 1.1rem 1.2rem;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 120px;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .filter-hero h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.35rem;
+    }
+
+    .filter-hero p {
+      margin: 0;
+      font-size: 0.88rem;
+      opacity: 0.9;
+      line-height: 1.45;
+    }
+
+    .filter-hero-visual {
+      width: 120px;
+      height: 120px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(6px);
+    }
+
+    .filter-hero-visual svg {
+      width: 88px;
+      height: 88px;
+    }
+
+    .modal-fields {
+      padding: 1rem 1.1rem 1.1rem;
+    }
+
+    .modal-actions {
+      padding: 1rem 1.1rem;
+      border-top: 1px solid rgba(0, 0, 0, 0.08);
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      background: #fff;
+    }
+
+    #save-filters.btn {
+      background: var(--color-ripe-mango-1200);
+      border-color: var(--color-ripe-mango-1200);
+      color: #fff;
+    }
+
+    @media (max-width: 640px) {
+      .toolbar {
+        grid-template-columns: 1fr;
+      }
+
+      .filter-hero {
+        grid-template-columns: 1fr;
+      }
+
+      .filter-hero-visual {
+        width: 100%;
+        height: 92px;
+      }
+    }
+  </style>
+</head>
+<body>
+<header>
+  <h1 id="jobs-title">Karriereangebote im Landkreis Goslar</h1>
+  <p id="jobs-subtitle">Jobs, Ausbildungsstellen, Studium und Praxisangebote</p>
+</header>
+
+<div class="toolbar-wrap">
+  <form class="toolbar" id="search-form">
+    <input id="search-input" type="search" placeholder="Suchbegriff, z. B. Entwickler, Verwaltung, Pflege" />
+    <button id="search-button" type="submit">Suchen</button>
+    <button id="filter-button" type="button">Filter</button>
+  </form>
+  <div class="status-message" id="loading">Stellenangebote werden geladen…</div>
+  <div class="status-message" id="error"></div>
+  <div class="filter-summary" id="filter-summary"></div>
+</div>
+
+<div id="count"></div>
+<div class="grid" id="grid"></div>
+
+<div class="modal fade" id="filter-modal" tabindex="-1" aria-labelledby="filter-title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div>
+          <h2 id="filter-title" class="h5 mb-0">Filter festlegen</h2>
+        </div>
+        <button class="btn-close" id="close-modal" type="button" data-bs-dismiss="modal" aria-label="Schließen"></button>
+      </div>
+      <div class="modal-body">
+        <div class="filter-hero">
+          <div>
+            <h3>Stellensuche schärfen</h3>
+            <p>Nutze Filter für Kategorien, Quellen, Arbeitgeber und Veröffentlichungszeitraum im Landkreis Goslar.</p>
+          </div>
+          <div class="filter-hero-visual" aria-hidden="true">
+            <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="18" y="24" width="84" height="64" rx="16" fill="rgba(255,255,255,0.2)"/>
+              <path d="M44 40V34C44 28.477 48.477 24 54 24H66C71.523 24 76 28.477 76 34V40" stroke="white" stroke-width="6" stroke-linecap="round"/>
+              <path d="M32 56H88" stroke="white" stroke-width="6" stroke-linecap="round"/>
+              <circle cx="60" cy="72" r="8" fill="white"/>
+            </svg>
+          </div>
+        </div>
+        <div class="modal-fields">
+          <div class="modal-grid">
+        <div class="modal-field">
+          <label for="filter-employer">Arbeitgeber</label>
+          <input id="filter-employer" type="text" placeholder="z. B. Stadt Goslar" />
+        </div>
+        <div class="modal-field">
+          <label for="filter-berufsfeld">Berufsfeld</label>
+          <input id="filter-berufsfeld" type="text" placeholder="z. B. Informatik" />
+        </div>
+        <div class="modal-field">
+          <label for="filter-arbeitszeit">Arbeitszeit</label>
+          <div class="dropdown multi-select">
+            <button class="multi-select-toggle" id="filter-arbeitszeit" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+              <span class="multi-select-summary">Beliebig</span>
+            </button>
+            <div class="dropdown-menu multi-select-menu" aria-labelledby="filter-arbeitszeit">
+              <label class="multi-select-option"><input type="checkbox" value="vz" data-multi-select="arbeitszeit" /> Vollzeit</label>
+              <label class="multi-select-option"><input type="checkbox" value="tz" data-multi-select="arbeitszeit" /> Teilzeit</label>
+              <label class="multi-select-option"><input type="checkbox" value="ho" data-multi-select="arbeitszeit" /> Homeoffice</label>
+              <label class="multi-select-option"><input type="checkbox" value="mj" data-multi-select="arbeitszeit" /> Minijob</label>
+              <label class="multi-select-option"><input type="checkbox" value="snw" data-multi-select="arbeitszeit" /> Schicht/Nacht/Wochenende</label>
+            </div>
+          </div>
+        </div>
+        <div class="modal-field">
+          <label for="filter-befristung">Befristung</label>
+          <div class="dropdown multi-select">
+            <button class="multi-select-toggle" id="filter-befristung" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+              <span class="multi-select-summary">Beliebig</span>
+            </button>
+            <div class="dropdown-menu multi-select-menu" aria-labelledby="filter-befristung">
+              <label class="multi-select-option"><input type="checkbox" value="1" data-multi-select="befristung" /> Befristet</label>
+              <label class="multi-select-option"><input type="checkbox" value="2" data-multi-select="befristung" /> Unbefristet</label>
+            </div>
+          </div>
+        </div>
+        <div class="modal-field">
+          <label for="filter-published">Veröffentlicht seit</label>
+          <input id="filter-published" type="date" />
+        </div>
+        <div class="modal-field">
+          <label for="filter-categories">Kategorie</label>
+          <div class="dropdown multi-select">
+            <button class="multi-select-toggle" id="filter-categories" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+              <span class="multi-select-summary">Alle Kategorien</span>
+            </button>
+            <div class="dropdown-menu multi-select-menu" aria-labelledby="filter-categories">
+              <label class="multi-select-option"><input type="checkbox" value="jobs" data-multi-select="categories" /> Jobs</label>
+              <label class="multi-select-option"><input type="checkbox" value="studium" data-multi-select="categories" /> Studium</label>
+              <label class="multi-select-option"><input type="checkbox" value="ausbildung" data-multi-select="categories" /> Ausbildungsstellen</label>
+              <label class="multi-select-option"><input type="checkbox" value="selbststaendigkeit" data-multi-select="categories" /> Selbständigkeit</label>
+              <label class="multi-select-option"><input type="checkbox" value="praktikum" data-multi-select="categories" /> Praktikum/Trainee/Werkstudent</label>
+            </div>
+          </div>
+        </div>
+        <div class="modal-field">
+          <label for="filter-sort">Sortierung</label>
+          <select id="filter-sort">
+            <option value="title">Titel A-Z</option>
+            <option value="employer">Arbeitgeber A-Z</option>
+            <option value="location">Ort A-Z</option>
+            <option value="published">Neueste zuerst</option>
+          </select>
+        </div>
+          </div>
+          <div class="modal-hint">
+            Ort und Umkreis sind fest auf den Landkreis Goslar begrenzt. Zusatzkategorien werden aus den passenden Jobsuche-Angebotsarten oder spezialisierten BA-Schnittstellen geladen.
+          </div>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button id="reset-button" class="btn btn-outline-secondary" type="button">Zurücksetzen</button>
+        <button id="save-filters" class="btn" type="button">Filter speichern</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  const DEFAULT_LOCATION = __DEFAULT_LOCATION__;
+  const SEARCH_PARAMS = new URLSearchParams(location.search);
+  const FILTER_MODAL = new bootstrap.Modal(document.getElementById('filter-modal'));
+  const state = {
+    allJobs: [],
+  };
+
+  document.getElementById('jobs-title').textContent = 'Karriereangebote im Landkreis Goslar';
+
+  initToolbar();
+  load();
+
+  async function load() {
+    try {
+      showLoading('Stellenangebote werden geladen…');
+      const apiParams = buildApiParamsFromUrl();
+      const res = await fetch('/jobs?' + apiParams.toString());
+      if (!res.ok && res.status !== 207) throw new Error('HTTP ' + res.status);
+      const payload = await res.json();
+
+      hideLoading();
+
+      if (payload.errors && payload.errors.length) {
+        showError(payload.errors.map(x => x.source + ': ' + x.message).join(' | '));
+      } else {
+        hideError();
+      }
+
+      const jobs = payload.results || [];
+      state.allJobs = jobs;
+      renderJobs();
+    } catch (e) {
+      hideLoading();
+      showError('Daten konnten nicht geladen werden: ' + e.message);
+    }
+  }
+
+  function initToolbar() {
+    const searchText = SEARCH_PARAMS.get('was') || '';
+    document.getElementById('search-input').value = searchText;
+
+    document.getElementById('search-form').addEventListener('submit', event => {
+      event.preventDefault();
+      applySearchFromToolbar();
+    });
+
+    document.getElementById('filter-button').addEventListener('click', openModal);
+    document.getElementById('close-modal').addEventListener('click', closeModal);
+    document.getElementById('save-filters').addEventListener('click', saveFilters);
+    document.getElementById('reset-button').addEventListener('click', resetFilters);
+    document.getElementById('filter-modal').addEventListener('click', event => {
+      if (event.target.id === 'filter-modal') closeModal();
+    });
+
+    bindMultiSelects();
+    hydrateModalFromUrl();
+  }
+
+  function buildApiParamsFromUrl() {
+    const params = new URLSearchParams();
+    params.set('location', DEFAULT_LOCATION);
+    params.set('wo', DEFAULT_LOCATION);
+
+    for (const key of ['was', 'berufsfeld', 'arbeitgeber', 'veroeffentlichtseit', 'arbeitszeit', 'befristung']) {
+      const value = SEARCH_PARAMS.get(key);
+      if (value) params.set(key, value);
+    }
+    for (const key of ['categories', 'sort']) {
+      const value = SEARCH_PARAMS.get(key);
+      if (value) params.set(key, value);
+    }
+    return params;
+  }
+
+  function hydrateModalFromUrl() {
+    document.getElementById('filter-employer').value = SEARCH_PARAMS.get('arbeitgeber') || '';
+    document.getElementById('filter-berufsfeld').value = SEARCH_PARAMS.get('berufsfeld') || '';
+    setMultiSelectValues('arbeitszeit', getMultiParam('arbeitszeit'));
+    setMultiSelectValues('befristung', getMultiParam('befristung'));
+    document.getElementById('filter-published').value = convertDaysParamToDate(SEARCH_PARAMS.get('veroeffentlichtseit'));
+    setMultiSelectValues('categories', getMultiParam('categories'));
+    document.getElementById('filter-sort').value = SEARCH_PARAMS.get('sort') || 'title';
+  }
+
+  function applySearchFromToolbar() {
+    const params = new URLSearchParams(location.search);
+    const searchValue = document.getElementById('search-input').value.trim();
+    if (searchValue) params.set('was', searchValue);
+    else params.delete('was');
+    navigateWithParams(params);
+  }
+
+  function openModal() {
+    FILTER_MODAL.show();
+  }
+
+  function closeModal() {
+    FILTER_MODAL.hide();
+  }
+
+  function saveFilters() {
+    const params = new URLSearchParams(location.search);
+    setOrDelete(params, 'wo', DEFAULT_LOCATION);
+    setOrDelete(params, 'location', DEFAULT_LOCATION);
+    setOrDelete(params, 'was', document.getElementById('search-input').value.trim());
+    setOrDelete(params, 'arbeitgeber', document.getElementById('filter-employer').value.trim());
+    setOrDelete(params, 'berufsfeld', document.getElementById('filter-berufsfeld').value.trim());
+    setOrDelete(params, 'arbeitszeit', getMultiSelectValue('arbeitszeit'));
+    setOrDelete(params, 'befristung', getMultiSelectValue('befristung'));
+    setOrDelete(params, 'veroeffentlichtseit', convertDateToDaysParam(document.getElementById('filter-published').value));
+    setOrDelete(params, 'categories', getMultiSelectValue('categories'));
+    setOrDelete(params, 'sort', document.getElementById('filter-sort').value);
+    navigateWithParams(params);
+  }
+
+  function resetFilters() {
+    navigateWithParams(new URLSearchParams('location=' + encodeURIComponent(DEFAULT_LOCATION) + '&wo=' + encodeURIComponent(DEFAULT_LOCATION)));
+  }
+
+  function navigateWithParams(params) {
+    location.search = params.toString();
+  }
+
+  function setOrDelete(params, key, value) {
+    if (value) params.set(key, value);
+    else params.delete(key);
+  }
+
+  function renderJobs() {
+    let jobs = [...state.allJobs];
+    const categories = getMultiParam('categories');
+    const sort = SEARCH_PARAMS.get('sort') || 'title';
+
+    if (categories.length) jobs = jobs.filter(job => categories.includes(job.category));
+
+    jobs.sort((a, b) => sortValue(a, sort).localeCompare(sortValue(b, sort), 'de'));
+    if (sort === 'published') jobs.reverse();
+
+    updateCount(jobs.length, state.allJobs.length);
+    updateFilterSummary(jobs.length, state.allJobs.length);
+
+    const grid = document.getElementById('grid');
+    grid.innerHTML = '';
+
+    if (!jobs.length) {
+      showEmptyState();
+      return;
+    }
+
+    hideError();
+
+    for (const job of jobs) {
+      const card = document.createElement(job.click_url ? 'a' : 'div');
+      card.className = 'card';
+      if (job.click_url) {
+        card.href = job.click_url;
+        card.target = '_blank';
+        card.rel = 'noopener noreferrer';
+      }
+
+      const logoHtml = job.logo_url
+        ? '<img class="card-logo" src="' + esc(job.logo_url) + '" alt="' + esc(job.employer || job.title) + '" loading="lazy" onerror="this.replaceWith(placeholder())">'
+        : '<div class="card-logo-placeholder"></div>';
+
+      const meta = [job.category_label, buildLocation(job)].filter(Boolean).join(' · ');
+      card.innerHTML = logoHtml
+        + '<div class="card-body">'
+        + '<div class="card-name">' + esc(job.title || 'Ohne Titel') + '</div>'
+        + '<div class="card-address">' + esc(job.employer || 'Kein Arbeitgeber hinterlegt') + '</div>'
+        + '<div class="card-meta">' + esc(meta) + '</div>'
+        + '<div class="card-cta">' + (job.detail_url ? 'Externes Angebot öffnen →' : job.click_url ? 'Interne Detailansicht öffnen →' : 'Kein Link verfügbar') + '</div>'
+        + '</div>';
+      grid.appendChild(card);
+    }
+  }
+
+  function updateCount(visible, total) {
+    const countEl = document.getElementById('count');
+    countEl.style.display = 'block';
+    countEl.textContent = visible + ' von ' + total + ' ' + (total === 1 ? 'Angebot' : 'Angeboten');
+  }
+
+  function updateFilterSummary(visible, total) {
+    const active = ['Gebiet: Landkreis Goslar'];
+    for (const key of ['was', 'arbeitgeber', 'berufsfeld', 'arbeitszeit', 'befristung', 'veroeffentlichtseit', 'categories']) {
+      const value = SEARCH_PARAMS.get(key);
+      if (value) active.push(key + ': ' + value);
+    }
+    active.push('Sortierung: ' + (SEARCH_PARAMS.get('sort') || 'title'));
+    document.getElementById('filter-summary').textContent = visible + '/' + total + ' sichtbar | ' + active.join(' | ');
+  }
+
+  function showLoading(message) {
+    const el = document.getElementById('loading');
+    el.textContent = message;
+    el.style.display = 'block';
+  }
+
+  function hideLoading() {
+    document.getElementById('loading').style.display = 'none';
+  }
+
+  function showError(message) {
+    const el = document.getElementById('error');
+    el.textContent = message;
+    el.style.display = 'block';
+  }
+
+  function hideError() {
+    document.getElementById('error').style.display = 'none';
+  }
+
+  function showEmptyState() {
+    const categories = getMultiParam('categories');
+    const noResults = getNoResultCategoryLabels(categories);
+
+    if (!categories.length) {
+      showError('Keine Angebote passen zu den gewählten Filtern.');
+      return;
+    }
+
+    const parts = [];
+    if (noResults.length) {
+      parts.push('Für ' + noResults.join(', ') + ' gibt es aktuell keine Treffer im Landkreis Goslar.');
+    }
+    showError(parts.join(' '));
+  }
+
+  function getNoResultCategoryLabels(categories) {
+    const mapping = {
+      studium: 'Studium',
+      ausbildung: 'Ausbildungsstellen',
+      selbststaendigkeit: 'Selbständigkeit',
+      praktikum: 'Praktikum/Trainee/Werkstudent',
+      jobs: 'Jobs',
+    };
+    return categories
+      .filter(category => mapping[category] && !state.allJobs.some(job => job.category === category))
+      .map(category => mapping[category]);
+  }
+
+  function sortValue(job, sort) {
+    if (sort === 'employer') return String(job.employer || '').toLowerCase();
+    if (sort === 'location') return buildLocation(job).toLowerCase();
+    if (sort === 'published') return String(job.published_at || '');
+    return String(job.title || '').toLowerCase();
+  }
+
+  function buildLocation(job) {
+    const location = job.location || {};
+    return [location.postal_code, location.city].filter(Boolean).join(' · ');
+  }
+
+  function esc(str) {
+    return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function placeholder() {
+    const d = document.createElement('div');
+    d.className = 'card-logo-placeholder';
+    return d;
+  }
+
+  function getMultiParam(key) {
+    const value = SEARCH_PARAMS.get(key) || '';
+    return value ? value.split(';').filter(Boolean) : [];
+  }
+
+  function getMultiSelectValue(name) {
+    return [...document.querySelectorAll('[data-multi-select="' + name + '"]')]
+      .filter(input => input.checked)
+      .map(input => input.value)
+      .join(';');
+  }
+
+  function setMultiSelectValues(name, values) {
+    const selected = new Set(values);
+    for (const input of document.querySelectorAll('[data-multi-select="' + name + '"]')) {
+      input.checked = selected.has(input.value);
+    }
+    updateMultiSelectSummary(name);
+  }
+
+  function bindMultiSelects() {
+    for (const input of document.querySelectorAll('[data-multi-select]')) {
+      input.addEventListener('change', () => updateMultiSelectSummary(input.dataset.multiSelect));
+    }
+  }
+
+  function updateMultiSelectSummary(name) {
+    const labels = [...document.querySelectorAll('[data-multi-select="' + name + '"]:checked')]
+      .map(input => input.parentElement.textContent.trim());
+    const button = document.getElementById('filter-' + name);
+    if (!button) return;
+    const target = button.querySelector('.multi-select-summary');
+    if (!target) return;
+    if (!labels.length) {
+      target.textContent = defaultMultiSelectSummary(name);
+      return;
+    }
+    target.textContent = labels.join(', ');
+  }
+
+  function defaultMultiSelectSummary(name) {
+    if (name === 'categories') return 'Alle Kategorien';
+    return 'Beliebig';
+  }
+
+  function convertDateToDaysParam(dateString) {
+    if (!dateString) return '';
+    const selected = new Date(dateString + 'T00:00:00');
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const diffMs = today.getTime() - selected.getTime();
+    const diffDays = Math.floor(diffMs / 86400000);
+    return diffDays >= 0 ? String(diffDays) : '0';
+  }
+
+  function convertDaysParamToDate(daysValue) {
+    if (!daysValue) return '';
+    const days = Number(daysValue);
+    if (Number.isNaN(days)) return '';
+    const date = new Date();
+    date.setHours(0, 0, 0, 0);
+    date.setDate(date.getDate() - days);
+    return date.toISOString().slice(0, 10);
+  }
+</script>
+</body>
+</html>

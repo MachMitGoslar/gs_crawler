@@ -25,7 +25,7 @@ To add/modify a crawler:
 3. Commit the changes
 
 <!-- CRAWLER_TABLE_START -->
-**Total Crawlers:** 26 (17 custom containers, 9 config-driven)
+**Total Crawlers:** 27 (18 custom containers, 9 config-driven)
 
 ### Infrastructure
 _System monitoring and management_
@@ -106,6 +106,7 @@ _API endpoints and services_
 | ID | Name | Type | Schedule | Output Files |
 |:---|:-----|:-----|:---------|:-------------|
 | 068_altstadtfest | Altstadtfest Goslar | API Endpoint | API Endpoint | `-` |
+| 072-karriere | Karriere Goslar | Job Portal | Alle 2 Stunden | `072_karriere_jobs.json` |
 
 <!-- CRAWLER_TABLE_END -->
 
@@ -150,6 +151,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed setup instructions.
 |:-----|:--------|
 | 5015 | Health Monitor Dashboard |
 | 5016 | Altstadtfest API |
+| 5017 | Karriere Goslar |
 
 ## Output
 

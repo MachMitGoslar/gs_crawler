@@ -143,6 +143,15 @@ services:
     container_name: gs_compiler_068_altstadtfest
     restart: unless-stopped
 
+  gs_compiler_072-karriere:
+    build: ./docker_instances/072_karriere
+    volumes:
+      - ./httpdocs/crawler:/app/output
+    ports:
+      - "5017:8000"
+    container_name: gs_compiler_072-karriere
+    restart: unless-stopped
+
   # === GENERIC SCRAPER (Config-Driven) ===
   # These run the YAML-based crawlers from crawler_configs/
   gs_generic_scraper_simple:

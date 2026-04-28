@@ -144,6 +144,15 @@ services:
     container_name: gs_compiler_068_altstadtfest
     restart: unless-stopped
 
+  gs_compiler_072-karriere:
+    image: ghcr.io/machmitgoslar/gs_crawler_072-karriere:latest
+    volumes:
+      - ./httpdocs/crawler:/app/output
+    ports:
+      - "5017:8000"
+    container_name: gs_compiler_072-karriere
+    restart: unless-stopped
+
   # === GENERIC SCRAPER (Config-Driven) ===
   gs_generic_scraper_simple:
     image: ghcr.io/machmitgoslar/gs_crawler_generic_scraper:latest

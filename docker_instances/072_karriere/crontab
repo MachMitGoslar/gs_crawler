@@ -1,0 +1,2 @@
+# Refresh cached Karriere job export every 2 hours
+0 */2 * * * . /app/env.sh ; cd /app ; python3 /app/refresh_jobs.py >> /proc/1/fd/1 2>&1
