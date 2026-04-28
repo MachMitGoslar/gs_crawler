@@ -8,6 +8,7 @@ itsdangerous==2.2.0
 Jinja2==3.1.6
 MarkupSafe==3.0.2
 pillow==11.3.0
+PyYAML==6.0.2
 requests==2.32.5
 urllib3==2.5.0
 Werkzeug==3.1.3

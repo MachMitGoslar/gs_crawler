@@ -245,6 +245,13 @@ if CONTAINERS is None:
             'source': 'HSP Markets API',
             'schedule': 'Alle 2 Stunden',
             'type': 'Market Crawler'
+        },
+        'gs_compiler_072-karriere': {
+            'name': 'Karriere Goslar',
+            'expected_files': ['072_karriere_card.json'],
+            'source': 'https://rest.arbeitsagentur.de/',
+            'schedule': 'Alle 2 Stunden',
+            'type': 'Job Portal'
         }
     }
 
