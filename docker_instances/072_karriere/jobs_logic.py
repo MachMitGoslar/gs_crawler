@@ -320,7 +320,7 @@ def build_bundesapi_job_detail_payload(refnr: str) -> dict[str, Any]:
     return {
         "id": refnr,
         "title": detail.get("stellenangebotsTitel") or refnr,
-        "employer": detail.get("arbeitgeberName") or detail.get("arbeitgeber") or "BundesAPI",
+        "employer": detail.get("arbeitgeberName") or detail.get("arbeitgeber") or "",
         "summary": detail.get("beruf") or detail.get("titel") or "",
         "description_html": str(detail.get("stellenangebotsBeschreibung") or "Keine Detailbeschreibung vorhanden."),
         "published_at": detail.get("aktuelleVeroeffentlichungsdatum"),

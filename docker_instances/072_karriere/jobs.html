@@ -282,6 +282,11 @@
       display: flex;
       align-items: center;
       gap: 0.65rem;
+      width: 100%;
+      border: 0;
+      background: transparent;
+      color: inherit;
+      text-align: left;
       padding: 0.55rem 0.65rem;
       border-radius: 10px;
       cursor: pointer;
@@ -290,6 +295,17 @@
 
     .multi-select-option:hover {
       background: var(--color-dead-pixel-25);
+    }
+
+    .multi-select-option.is-typeahead-target {
+      background: var(--color-ripe-mango-300);
+      outline: 1px solid rgba(134, 104, 17, 0.28);
+    }
+
+    .multi-select-option.is-selected-option {
+      background: var(--color-ripe-mango-300);
+      color: var(--color-ripe-mango-1400);
+      font-weight: 700;
     }
 
     .multi-select-option input {
@@ -304,6 +320,158 @@
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+    }
+
+    .calendar-toggle {
+      position: relative;
+      padding-right: 2.8rem;
+    }
+
+    .calendar-toggle::before {
+      content: "";
+      position: absolute;
+      right: 0.95rem;
+      top: 50%;
+      transform: translateY(-52%);
+      width: 1rem;
+      height: 1rem;
+      border: 2px solid #111;
+      border-radius: 0.28rem;
+      background:
+        linear-gradient(#111, #111) 0 0 / 100% 28% no-repeat,
+        linear-gradient(#111, #111) 26% 18% / 2px 24% no-repeat,
+        linear-gradient(#111, #111) 74% 18% / 2px 24% no-repeat;
+      opacity: 0.92;
+    }
+
+    .calendar-toggle::after {
+      display: none;
+    }
+
+    .calendar-menu {
+      width: min(100%, 320px);
+      min-width: 320px;
+      padding: 0.8rem;
+    }
+
+    .calendar-shell {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .calendar-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    .calendar-month-label {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--color-dead-pixel-1400);
+    }
+
+    .calendar-nav {
+      width: 2.2rem;
+      height: 2.2rem;
+      border-radius: 999px;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      background: #fff;
+      color: var(--color-dead-pixel-1300);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    .calendar-nav:hover {
+      background: var(--color-dead-pixel-25);
+    }
+
+    .calendar-weekdays,
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 0.35rem;
+    }
+
+    .calendar-weekday {
+      text-align: center;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--color-dead-pixel-900);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding-bottom: 0.15rem;
+    }
+
+    .calendar-day,
+    .calendar-day-empty {
+      aspect-ratio: 1 / 1;
+    }
+
+    .calendar-day {
+      border: 0;
+      border-radius: 12px;
+      background: #fff;
+      color: var(--color-dead-pixel-1300);
+      font: inherit;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+    }
+
+    .calendar-day:hover {
+      background: var(--color-dead-pixel-25);
+      transform: translateY(-1px);
+    }
+
+    .calendar-day.is-today {
+      box-shadow: inset 0 0 0 1px var(--color-ripe-mango-1200);
+      color: var(--color-ripe-mango-1300);
+    }
+
+    .calendar-day.is-selected {
+      background: var(--color-ripe-mango-700);
+      color: var(--color-ripe-mango-1400);
+    }
+
+    .calendar-day-empty {
+      border-radius: 12px;
+      background: transparent;
+    }
+
+    .calendar-quick-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+    }
+
+    .calendar-chip {
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 999px;
+      background: #fff;
+      color: var(--color-dead-pixel-1300);
+      font: inherit;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 0.45rem 0.7rem;
+      cursor: pointer;
+    }
+
+    .calendar-chip:hover {
+      background: var(--color-dead-pixel-25);
+    }
+
+    .calendar-footnote {
+      font-size: 0.76rem;
+      color: var(--color-dead-pixel-900);
+      line-height: 1.4;
     }
 
     .modal-hint {
@@ -436,7 +604,7 @@
         <div class="filter-hero">
           <div>
             <h3>Stellensuche schärfen</h3>
-            <p>Nutze Filter für Kategorien, Quellen, Arbeitgeber und Veröffentlichungszeitraum im Landkreis Goslar.</p>
+            <p>Nutze Filter für Kategorien, Arbeitgeber, Berfufsfelder, etc.</p>
           </div>
           <div class="filter-hero-visual" aria-hidden="true">
             <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -451,11 +619,25 @@
           <div class="modal-grid">
         <div class="modal-field">
           <label for="filter-employer">Arbeitgeber</label>
-          <input id="filter-employer" type="text" placeholder="z. B. Stadt Goslar" />
+          <div class="dropdown multi-select">
+            <button class="multi-select-toggle" id="filter-employer" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+              <span class="multi-select-summary">Alle Arbeitgeber</span>
+            </button>
+            <div class="dropdown-menu multi-select-menu" id="filter-employer-menu" aria-labelledby="filter-employer">
+              <div class="multi-select-option">Lade Arbeitgeber…</div>
+            </div>
+          </div>
         </div>
         <div class="modal-field">
           <label for="filter-berufsfeld">Berufsfeld</label>
-          <input id="filter-berufsfeld" type="text" placeholder="z. B. Informatik" />
+          <div class="dropdown multi-select">
+            <button class="multi-select-toggle" id="filter-berufsfeld" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+              <span class="multi-select-summary">Alle Berufsfelder</span>
+            </button>
+            <div class="dropdown-menu multi-select-menu" id="filter-berufsfeld-menu" aria-labelledby="filter-berufsfeld">
+              <div class="multi-select-option">Lade Berufsfelder…</div>
+            </div>
+          </div>
         </div>
         <div class="modal-field">
           <label for="filter-arbeitszeit">Arbeitszeit</label>
@@ -486,7 +668,38 @@
         </div>
         <div class="modal-field">
           <label for="filter-published">Veröffentlicht seit</label>
-          <input id="filter-published" type="date" />
+          <div class="dropdown">
+            <button class="multi-select-toggle calendar-toggle" id="filter-published-toggle" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+              <span class="multi-select-summary" id="filter-published-summary">Beliebiger Zeitraum</span>
+            </button>
+            <div class="dropdown-menu calendar-menu" aria-labelledby="filter-published-toggle">
+              <div class="calendar-shell">
+                <div class="calendar-header">
+                  <button class="calendar-nav" id="calendar-prev" type="button" aria-label="Vorheriger Monat">‹</button>
+                  <div class="calendar-month-label" id="calendar-month-label">April 2026</div>
+                  <button class="calendar-nav" id="calendar-next" type="button" aria-label="Nächster Monat">›</button>
+                </div>
+                <div class="calendar-weekdays" aria-hidden="true">
+                  <div class="calendar-weekday">Mo</div>
+                  <div class="calendar-weekday">Di</div>
+                  <div class="calendar-weekday">Mi</div>
+                  <div class="calendar-weekday">Do</div>
+                  <div class="calendar-weekday">Fr</div>
+                  <div class="calendar-weekday">Sa</div>
+                  <div class="calendar-weekday">So</div>
+                </div>
+                <div class="calendar-grid" id="calendar-grid"></div>
+                <div class="calendar-quick-actions">
+                  <button class="calendar-chip" data-calendar-preset="0" type="button">Heute</button>
+                  <button class="calendar-chip" data-calendar-preset="7" type="button">7 Tage</button>
+                  <button class="calendar-chip" data-calendar-preset="30" type="button">30 Tage</button>
+                  <button class="calendar-chip" data-calendar-action="clear" type="button">Zurücksetzen</button>
+                </div>
+                <div class="calendar-footnote">Der Filter sucht Angebote, die seit dem gewählten Datum veröffentlicht wurden.</div>
+              </div>
+            </div>
+          </div>
+          <input id="filter-published" type="hidden" />
         </div>
         <div class="modal-field">
           <label for="filter-categories">Kategorie</label>
@@ -505,16 +718,22 @@
         </div>
         <div class="modal-field">
           <label for="filter-sort">Sortierung</label>
-          <select id="filter-sort">
-            <option value="title">Titel A-Z</option>
-            <option value="employer">Arbeitgeber A-Z</option>
-            <option value="location">Ort A-Z</option>
-            <option value="published">Neueste zuerst</option>
-          </select>
+          <div class="dropdown multi-select">
+            <button class="multi-select-toggle" id="filter-sort-toggle" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+              <span class="multi-select-summary" id="filter-sort-summary">Titel A-Z</span>
+            </button>
+            <div class="dropdown-menu multi-select-menu" aria-labelledby="filter-sort-toggle" id="filter-sort-menu">
+              <button class="multi-select-option" data-sort-option="title" type="button">Titel A-Z</button>
+              <button class="multi-select-option" data-sort-option="employer" type="button">Arbeitgeber A-Z</button>
+              <button class="multi-select-option" data-sort-option="location" type="button">Ort A-Z</button>
+              <button class="multi-select-option" data-sort-option="published" type="button">Neueste zuerst</button>
+            </div>
+          </div>
+          <input id="filter-sort" type="hidden" value="title" />
         </div>
           </div>
           <div class="modal-hint">
-            Ort und Umkreis sind fest auf den Landkreis Goslar begrenzt. Zusatzkategorien werden aus den passenden Jobsuche-Angebotsarten oder spezialisierten BA-Schnittstellen geladen.
+            Ort und Umkreis sind fest auf den Landkreis Goslar begrenzt.
           </div>
         </div>
       </div>
@@ -533,9 +752,12 @@
   const FILTER_MODAL = new bootstrap.Modal(document.getElementById('filter-modal'));
   const state = {
     allJobs: [],
+    calendarMonth: startOfMonth(new Date()),
+    typeaheadBuffer: {},
+    typeaheadTimer: {},
   };
 
-  document.getElementById('jobs-title').textContent = 'Karriereangebote im Landkreis Goslar';
+  document.getElementById('jobs-title').textContent = 'Karriereangebote';
 
   initToolbar();
   load();
@@ -558,6 +780,8 @@
 
       const jobs = payload.results || [];
       state.allJobs = jobs;
+      populateDynamicMultiSelect('employer', collectEmployerOptions(jobs));
+      populateDynamicMultiSelect('berufsfeld', collectBerufsfeldOptions(jobs));
       renderJobs();
     } catch (e) {
       hideLoading();
@@ -583,6 +807,11 @@
     });
 
     bindMultiSelects();
+    bindMultiSelectTypeahead('categories');
+    bindMultiSelectTypeahead('employer');
+    bindMultiSelectTypeahead('berufsfeld');
+    initSortPicker();
+    initPublishedPicker();
     hydrateModalFromUrl();
   }
 
@@ -591,7 +820,7 @@
     params.set('location', DEFAULT_LOCATION);
     params.set('wo', DEFAULT_LOCATION);
 
-    for (const key of ['was', 'berufsfeld', 'arbeitgeber', 'veroeffentlichtseit', 'arbeitszeit', 'befristung']) {
+    for (const key of ['was', 'veroeffentlichtseit', 'arbeitszeit', 'befristung']) {
       const value = SEARCH_PARAMS.get(key);
       if (value) params.set(key, value);
     }
@@ -603,13 +832,12 @@
   }
 
   function hydrateModalFromUrl() {
-    document.getElementById('filter-employer').value = SEARCH_PARAMS.get('arbeitgeber') || '';
-    document.getElementById('filter-berufsfeld').value = SEARCH_PARAMS.get('berufsfeld') || '';
     setMultiSelectValues('arbeitszeit', getMultiParam('arbeitszeit'));
     setMultiSelectValues('befristung', getMultiParam('befristung'));
     document.getElementById('filter-published').value = convertDaysParamToDate(SEARCH_PARAMS.get('veroeffentlichtseit'));
+    syncPublishedPicker();
     setMultiSelectValues('categories', getMultiParam('categories'));
-    document.getElementById('filter-sort').value = SEARCH_PARAMS.get('sort') || 'title';
+    setSortValue(SEARCH_PARAMS.get('sort') || 'title');
   }
 
   function applySearchFromToolbar() {
@@ -633,8 +861,8 @@
     setOrDelete(params, 'wo', DEFAULT_LOCATION);
     setOrDelete(params, 'location', DEFAULT_LOCATION);
     setOrDelete(params, 'was', document.getElementById('search-input').value.trim());
-    setOrDelete(params, 'arbeitgeber', document.getElementById('filter-employer').value.trim());
-    setOrDelete(params, 'berufsfeld', document.getElementById('filter-berufsfeld').value.trim());
+    setOrDelete(params, 'arbeitgeber', getMultiSelectValue('employer'));
+    setOrDelete(params, 'berufsfeld', getMultiSelectValue('berufsfeld'));
     setOrDelete(params, 'arbeitszeit', getMultiSelectValue('arbeitszeit'));
     setOrDelete(params, 'befristung', getMultiSelectValue('befristung'));
     setOrDelete(params, 'veroeffentlichtseit', convertDateToDaysParam(document.getElementById('filter-published').value));
@@ -659,9 +887,13 @@
   function renderJobs() {
     let jobs = [...state.allJobs];
     const categories = getMultiParam('categories');
+    const employers = getMultiParam('arbeitgeber');
+    const berufsfelder = getMultiParam('berufsfeld');
     const sort = SEARCH_PARAMS.get('sort') || 'title';
 
     if (categories.length) jobs = jobs.filter(job => categories.includes(job.category));
+    if (employers.length) jobs = jobs.filter(job => employers.includes(String(job.employer || '').trim()));
+    if (berufsfelder.length) jobs = jobs.filter(job => berufsfelder.includes(getBerufsfeldValue(job)));
 
     jobs.sort((a, b) => sortValue(a, sort).localeCompare(sortValue(b, sort), 'de'));
     if (sort === 'published') jobs.reverse();
@@ -803,6 +1035,31 @@
       .join(';');
   }
 
+  function populateDynamicMultiSelect(name, values) {
+    const menu = document.getElementById('filter-' + name + '-menu');
+    if (!menu) return;
+
+    if (!values.length) {
+      menu.innerHTML = '<div class="multi-select-option">Keine Optionen verfügbar</div>';
+      updateMultiSelectSummary(name);
+      return;
+    }
+
+    menu.innerHTML = values.map(value =>
+      '<label class="multi-select-option">'
+      + '<input type="checkbox" value="' + esc(value) + '" data-multi-select="' + name + '" /> '
+      + esc(value)
+      + '</label>'
+    ).join('');
+
+    for (const input of menu.querySelectorAll('[data-multi-select]')) {
+      input.addEventListener('change', () => updateMultiSelectSummary(input.dataset.multiSelect));
+    }
+
+    const paramName = name === 'employer' ? 'arbeitgeber' : name;
+    setMultiSelectValues(name, getMultiParam(paramName));
+  }
+
   function setMultiSelectValues(name, values) {
     const selected = new Set(values);
     for (const input of document.querySelectorAll('[data-multi-select="' + name + '"]')) {
@@ -815,6 +1072,90 @@
     for (const input of document.querySelectorAll('[data-multi-select]')) {
       input.addEventListener('change', () => updateMultiSelectSummary(input.dataset.multiSelect));
     }
+  }
+
+  function bindMultiSelectTypeahead(name) {
+    const button = document.getElementById('filter-' + name);
+    const menu = button ? button.nextElementSibling : null;
+    if (!button || !menu) return;
+
+    const handler = event => {
+      if (event.key.length !== 1 || event.ctrlKey || event.metaKey || event.altKey) return;
+      const char = event.key.toLocaleLowerCase('de-DE');
+      if (!/[a-zA-ZäöüÄÖÜß]/.test(char)) return;
+
+      event.preventDefault();
+      bootstrap.Dropdown.getOrCreateInstance(button).show();
+      queueMultiSelectTypeahead(name, char, menu);
+    };
+
+    button.addEventListener('keydown', handler);
+    menu.addEventListener('keydown', handler);
+  }
+
+  function queueMultiSelectTypeahead(name, char, menu) {
+    clearTimeout(state.typeaheadTimer[name]);
+    state.typeaheadBuffer[name] = (state.typeaheadBuffer[name] || '') + char;
+    jumpToMultiSelectOption(name, state.typeaheadBuffer[name], menu);
+    state.typeaheadTimer[name] = setTimeout(() => {
+      state.typeaheadBuffer[name] = '';
+    }, 650);
+  }
+
+  function jumpToMultiSelectOption(name, query, menu) {
+    const options = [...menu.querySelectorAll('.multi-select-option')];
+    if (!options.length) return;
+
+    const normalizedQuery = normalizeTypeaheadText(query);
+    const match = options.find(option =>
+      normalizeTypeaheadText(option.textContent).startsWith(normalizedQuery)
+    );
+    if (!match) return;
+
+    for (const option of options) option.classList.remove('is-typeahead-target');
+    match.classList.add('is-typeahead-target');
+    match.scrollIntoView({ block: 'nearest' });
+
+    const input = match.querySelector('input');
+    if (input) input.focus();
+
+    setTimeout(() => match.classList.remove('is-typeahead-target'), 700);
+  }
+
+  function normalizeTypeaheadText(value) {
+    return String(value || '')
+      .toLocaleLowerCase('de-DE')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/ß/g, 'ss')
+      .trim();
+  }
+
+  function initSortPicker() {
+    for (const option of document.querySelectorAll('[data-sort-option]')) {
+      option.addEventListener('click', () => {
+        setSortValue(option.dataset.sortOption || 'title');
+        bootstrap.Dropdown.getOrCreateInstance(document.getElementById('filter-sort-toggle')).hide();
+      });
+    }
+  }
+
+  function setSortValue(value) {
+    const normalized = ['title', 'employer', 'location', 'published'].includes(value) ? value : 'title';
+    document.getElementById('filter-sort').value = normalized;
+
+    for (const option of document.querySelectorAll('[data-sort-option]')) {
+      option.classList.toggle('is-selected-option', option.dataset.sortOption === normalized);
+    }
+
+    document.getElementById('filter-sort-summary').textContent = sortLabel(normalized);
+  }
+
+  function sortLabel(value) {
+    if (value === 'employer') return 'Arbeitgeber A-Z';
+    if (value === 'location') return 'Ort A-Z';
+    if (value === 'published') return 'Neueste zuerst';
+    return 'Titel A-Z';
   }
 
   function updateMultiSelectSummary(name) {
@@ -833,7 +1174,151 @@
 
   function defaultMultiSelectSummary(name) {
     if (name === 'categories') return 'Alle Kategorien';
+    if (name === 'employer') return 'Alle Arbeitgeber';
+    if (name === 'berufsfeld') return 'Alle Berufsfelder';
     return 'Beliebig';
+  }
+
+  function collectEmployerOptions(jobs) {
+    return uniqueSortedValues(jobs.map(job => String(job.employer || '').trim()).filter(Boolean));
+  }
+
+  function collectBerufsfeldOptions(jobs) {
+    return uniqueSortedValues(jobs.map(getBerufsfeldValue).filter(Boolean));
+  }
+
+  function uniqueSortedValues(values) {
+    return [...new Set(values)].sort((left, right) => left.localeCompare(right, 'de'));
+  }
+
+  function getBerufsfeldValue(job) {
+    return String((job.raw && job.raw.beruf) || '').trim();
+  }
+
+  function initPublishedPicker() {
+    document.getElementById('calendar-prev').addEventListener('click', () => {
+      state.calendarMonth = addMonths(state.calendarMonth, -1);
+      renderPublishedCalendar();
+    });
+    document.getElementById('calendar-next').addEventListener('click', () => {
+      state.calendarMonth = addMonths(state.calendarMonth, 1);
+      renderPublishedCalendar();
+    });
+
+    for (const button of document.querySelectorAll('[data-calendar-preset]')) {
+      button.addEventListener('click', () => {
+        const days = Number(button.dataset.calendarPreset);
+        const date = new Date();
+        date.setHours(0, 0, 0, 0);
+        date.setDate(date.getDate() - days);
+        setPublishedDate(formatDateForInput(date), true);
+      });
+    }
+
+    for (const button of document.querySelectorAll('[data-calendar-action="clear"]')) {
+      button.addEventListener('click', () => setPublishedDate('', true));
+    }
+  }
+
+  function syncPublishedPicker() {
+    const value = document.getElementById('filter-published').value;
+    const selectedDate = parseInputDate(value);
+    state.calendarMonth = startOfMonth(selectedDate || new Date());
+    updatePublishedSummary();
+    renderPublishedCalendar();
+  }
+
+  function updatePublishedSummary() {
+    const value = document.getElementById('filter-published').value;
+    const target = document.getElementById('filter-published-summary');
+    if (!value) {
+      target.textContent = 'Beliebiger Zeitraum';
+      return;
+    }
+    const date = parseInputDate(value);
+    target.textContent = date ? formatDateForDisplay(date) : 'Beliebiger Zeitraum';
+  }
+
+  function renderPublishedCalendar() {
+    const month = state.calendarMonth;
+    const monthLabel = document.getElementById('calendar-month-label');
+    const grid = document.getElementById('calendar-grid');
+    const selectedValue = document.getElementById('filter-published').value;
+    const selectedDate = selectedValue ? parseInputDate(selectedValue) : null;
+    const today = startOfDay(new Date());
+
+    monthLabel.textContent = month.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
+    grid.innerHTML = '';
+
+    const firstDayOffset = (month.getDay() + 6) % 7;
+    for (let i = 0; i < firstDayOffset; i += 1) {
+      const empty = document.createElement('div');
+      empty.className = 'calendar-day-empty';
+      grid.appendChild(empty);
+    }
+
+    const daysInMonth = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate();
+    for (let day = 1; day <= daysInMonth; day += 1) {
+      const date = new Date(month.getFullYear(), month.getMonth(), day);
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'calendar-day';
+      button.textContent = String(day);
+
+      if (isSameDate(date, today)) button.classList.add('is-today');
+      if (selectedDate && isSameDate(date, selectedDate)) button.classList.add('is-selected');
+
+      button.addEventListener('click', () => setPublishedDate(formatDateForInput(date), true));
+      grid.appendChild(button);
+    }
+  }
+
+  function setPublishedDate(value, shouldClose) {
+    document.getElementById('filter-published').value = value;
+    const selectedDate = parseInputDate(value);
+    if (selectedDate) state.calendarMonth = startOfMonth(selectedDate);
+    updatePublishedSummary();
+    renderPublishedCalendar();
+    if (shouldClose) {
+      bootstrap.Dropdown.getOrCreateInstance(document.getElementById('filter-published-toggle')).hide();
+    }
+  }
+
+  function startOfMonth(date) {
+    return new Date(date.getFullYear(), date.getMonth(), 1);
+  }
+
+  function startOfDay(date) {
+    const copy = new Date(date);
+    copy.setHours(0, 0, 0, 0);
+    return copy;
+  }
+
+  function addMonths(date, offset) {
+    return new Date(date.getFullYear(), date.getMonth() + offset, 1);
+  }
+
+  function parseInputDate(value) {
+    if (!value) return null;
+    const date = new Date(value + 'T00:00:00');
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+
+  function formatDateForInput(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return year + '-' + month + '-' + day;
+  }
+
+  function formatDateForDisplay(date) {
+    return date.toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' });
+  }
+
+  function isSameDate(left, right) {
+    return left.getFullYear() === right.getFullYear()
+      && left.getMonth() === right.getMonth()
+      && left.getDate() === right.getDate();
   }
 
   function convertDateToDaysParam(dateString) {
