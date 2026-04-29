@@ -72,6 +72,37 @@ def write_json(path: str, data) -> None:
     print(f"Written: {path}")
 
 
+def cleanup_vendor_detail_files() -> None:
+    """Remove vendor detail JSON files from previous runs."""
+    if not os.path.isdir(OUTPUT_DIR):
+        return
+
+    for filename in os.listdir(OUTPUT_DIR):
+        if not filename.startswith("070_wochenmarkt_") or not filename.endswith(".json"):
+            continue
+        if filename in {"070_wochenmarkt_card.json", "070_wochenmarkt_alle.json"}:
+            continue
+
+        path = os.path.join(OUTPUT_DIR, filename)
+        if os.path.isfile(path):
+            os.remove(path)
+            print(f"Removed stale file: {path}")
+
+
+def write_unavailable_fallback(now_str: str, description: str) -> None:
+    """Replace existing output with an explicit unavailable state."""
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    cleanup_vendor_detail_files()
+    write_json(os.path.join(OUTPUT_DIR, "070_wochenmarkt_card.json"), {
+        "title": "Wochenmarkt Goslar",
+        "description": description,
+        "image_url": None,
+        "call_to_action_url": None,
+        "published_at": now_str,
+    })
+    write_json(os.path.join(OUTPUT_DIR, "070_wochenmarkt_alle.json"), [])
+
+
 def vendor_address(vendor: dict) -> tuple[str, str]:
     """Return (street_line, city_line) for a vendor dict."""
     street = " ".join(p for p in [vendor.get("street", ""), vendor.get("houseNumber", "")] if p).strip()
@@ -82,47 +113,54 @@ def vendor_address(vendor: dict) -> tuple[str, str]:
 # ── Main ───────────────────────────────────────────────────────────────────────
 def main():
     now_str = datetime.now().isoformat(sep="T", timespec="minutes")
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-    print("Fetching OAuth token...")
-    token = get_token()
+    try:
+        print("Fetching OAuth token...")
+        token = get_token()
 
-    print("Fetching upcoming market events...")
-    events = get_upcoming_events(token)
+        print("Fetching upcoming market events...")
+        events = get_upcoming_events(token)
 
-    if not events:
-        print("No upcoming events — writing empty fallback.")
-        write_json(os.path.join(OUTPUT_DIR, "070_wochenmarkt_card.json"), {
-            "title":              "Wochenmarkt Goslar",
-            "description":        "Aktuell sind keine kommenden Markttermine verfügbar.",
-            "image_url":          None,
-            "call_to_action_url": None,
-            "published_at":       now_str,
-        })
-        write_json(os.path.join(OUTPUT_DIR, "070_wochenmarkt_alle.json"), [])
+        if not events:
+            print("No upcoming events — writing empty fallback.")
+            write_unavailable_fallback(
+                now_str,
+                "Aktuell sind keine kommenden Markttermine verfügbar.",
+            )
+            return
+
+        # Take the nearest upcoming event (API returns them sorted ascending)
+        event = events[0]
+        event_id = event["id"]
+        market = event.get("market") or {}
+        start_dt = parse_dt(event["start"])
+        end_dt = parse_dt(event["end"])
+
+        market_name = market.get("name") or "Wochenmarkt Goslar"
+        market_image = market.get("imageFileUrl")
+        market_loc = market.get("location") or "Goslar"
+
+        date_label = german_date(start_dt)
+        time_range = f"{start_dt.strftime('%H:%M')}–{end_dt.strftime('%H:%M')} Uhr"
+
+        print(f"Fetching attendances for event {event_id}...")
+        attendances = get_attendances(token, event_id)
+        vendor_count = len(attendances)
+    except Exception as exc:
+        print(f"Failed to refresh market data: {exc}")
+        write_unavailable_fallback(
+            now_str,
+            "Aktuell konnten keine frischen Wochenmarkt-Daten geladen werden.",
+        )
         return
-
-    # Take the nearest upcoming event (API returns them sorted ascending)
-    event     = events[0]
-    event_id  = event["id"]
-    market    = event.get("market") or {}
-    start_dt  = parse_dt(event["start"])
-    end_dt    = parse_dt(event["end"])
-
-    market_name  = market.get("name")        or "Wochenmarkt Goslar"
-    market_image = market.get("imageFileUrl")
-    market_loc   = market.get("location")    or "Goslar"
-
-    date_label = german_date(start_dt)
-    time_range = f"{start_dt.strftime('%H:%M')}–{end_dt.strftime('%H:%M')} Uhr"
-
-    print(f"Fetching attendances for event {event_id}...")
-    attendances  = get_attendances(token, event_id)
-    vendor_count = len(attendances)
 
     # ── Card ───────────────────────────────────────────────────────────────────
     card_desc = f"{market_name} am {date_label}, {time_range} auf dem {market_loc}."
     if vendor_count:
         card_desc += f" {vendor_count} Stände erwarten euch."
+
+    cleanup_vendor_detail_files()
 
     write_json(os.path.join(OUTPUT_DIR, "070_wochenmarkt_card.json"), {
         "title":              f"{market_name} – {date_label}",
