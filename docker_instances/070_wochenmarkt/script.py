@@ -9,8 +9,8 @@ CLIENT_ID      = os.environ["WOCHENMARKT_CLIENT_ID"]
 CLIENT_SECRET  = os.environ["WOCHENMARKT_CLIENT_SECRET"]
 SCOPE          = "markets.read"
 
-EVENTS_URL      = "https://hsp-external-gateway-linux-cfethubabxayf7aq.westeurope-01.azurewebsites.net/api/external/market-events/upcoming"
-ATTENDANCES_URL = "https://hsp-external-gateway-linux-cfethubabxayf7aq.westeurope-01.azurewebsites.net/api/external/market-events/{id}/attendances"
+EVENTS_URL      = "https://external-gateway.hsp.ceconsoft.de/api/external/market-events/upcoming"
+ATTENDANCES_URL = "https://external-gateway.hsp.ceconsoft.de/api/external/market-events/{id}/attendances"
 
 BASE_URL   = "https://crawler.goslar.app/crawler"
 OUTPUT_DIR = "/app/output"
@@ -31,22 +31,27 @@ def get_token() -> str:
     })
     if not resp.ok:
         print(f"Token request failed: HTTP {resp.status_code}")
-        print(f"Response body: {resp.text}")
         resp.raise_for_status()
     return resp.json()["access_token"]
 
 
 def get_upcoming_events(token: str) -> list:
     resp = requests.get(EVENTS_URL, headers={"Authorization": f"Bearer {token}"})
+    print(f"Upcoming events response: HTTP {resp.status_code}")
     resp.raise_for_status()
-    return resp.json()
+    events = resp.json()
+    print(f"Upcoming events payload count: {len(events)}")
+    return events
 
 
 def get_attendances(token: str, event_id: str) -> list:
     url = ATTENDANCES_URL.replace("{id}", event_id)
     resp = requests.get(url, headers={"Authorization": f"Bearer {token}"})
+    print(f"Attendances response for event {event_id}: HTTP {resp.status_code}")
     resp.raise_for_status()
-    return resp.json()
+    attendances = resp.json()
+    print(f"Attendances payload count for event {event_id}: {len(attendances)}")
+    return attendances
 
 
 def parse_dt(iso_str: str) -> datetime:
