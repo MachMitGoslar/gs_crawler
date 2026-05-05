@@ -333,6 +333,7 @@ jobs:
   # Write runtime secrets to .env on the production server
   deploy-env:
     runs-on: ubuntu-latest
+    environment: Freiwilligenagentur
     needs: [build-containers]
     if: always() && needs.build-containers.result == 'success'
 
@@ -344,7 +345,8 @@ jobs:
         username: ${{ secrets.SERVER_USER }}
         key: ${{ secrets.SERVER_SSH_KEY }}
         script: |
-          printf 'WOCHENMARKT_CLIENT_ID=%s\nWOCHENMARKT_CLIENT_SECRET=%s\n' \
+          printf 'FREIWILLIGEN_AGENTUR_API_KEY=%s\nWOCHENMARKT_CLIENT_ID=%s\nWOCHENMARKT_CLIENT_SECRET=%s\n' \
+            '${{ secrets.FREIWILLIGEN_AGENTUR_API_KEY }}' \
             '${{ secrets.WOCHENMARKT_CLIENT_ID }}' \
             '${{ secrets.WOCHENMARKT_CLIENT_SECRET }}' \
             > ~/gs_crawler/.env
