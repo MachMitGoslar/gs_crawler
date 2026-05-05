@@ -106,7 +106,7 @@ _API endpoints and services_
 | ID | Name | Type | Schedule | Output Files |
 |:---|:-----|:-----|:---------|:-------------|
 | 068_altstadtfest | Altstadtfest Goslar | API Endpoint | API Endpoint | `-` |
-| 072-karriere | Karriere Goslar | Job Portal | Alle 2 Stunden | `072_karriere_card.json` |
+| 072_karriere | Karriere Goslar | Job Portal | Alle 2 Stunden | `072_karriere_card.json` |
 
 <!-- CRAWLER_TABLE_END -->
 

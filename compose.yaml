@@ -144,13 +144,13 @@ services:
     container_name: gs_compiler_068_altstadtfest
     restart: unless-stopped
 
-  gs_compiler_072-karriere:
-    image: ghcr.io/machmitgoslar/gs_crawler_072-karriere:latest
+  gs_compiler_072_karriere:
+    image: ghcr.io/machmitgoslar/gs_crawler_072_karriere:latest
     volumes:
       - ./httpdocs/crawler:/app/output
     ports:
       - "5017:8000"
-    container_name: gs_compiler_072-karriere
+    container_name: gs_compiler_072_karriere
     restart: unless-stopped
 
   # === GENERIC SCRAPER (Config-Driven) ===

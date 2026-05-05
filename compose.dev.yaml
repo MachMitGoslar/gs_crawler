@@ -143,13 +143,13 @@ services:
     container_name: gs_compiler_068_altstadtfest
     restart: unless-stopped
 
-  gs_compiler_072-karriere:
+  gs_compiler_072_karriere:
     build: ./docker_instances/072_karriere
     volumes:
       - ./httpdocs/crawler:/app/output
     ports:
       - "5017:8000"
-    container_name: gs_compiler_072-karriere
+    container_name: gs_compiler_072_karriere
     restart: unless-stopped
 
   # === GENERIC SCRAPER (Config-Driven) ===

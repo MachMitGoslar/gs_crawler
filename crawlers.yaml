@@ -385,7 +385,7 @@ crawlers:
     name: "Karriere Goslar"
     category: api
     type: "Job Portal"
-    source: "https://rest.arbeitsagentur.de/"
+    source: "https://github.com/bundesAPI"
     schedule: "0 */2 * * *"
     schedule_human: "Alle 2 Stunden"
     expected_files:
