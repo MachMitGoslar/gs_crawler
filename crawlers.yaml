@@ -368,6 +368,7 @@ crawlers:
     implementation: custom
     notes: "Fetches next market event and vendor attendances via OAuth client credentials. Requires WOCHENMARKT_CLIENT_ID and WOCHENMARKT_CLIENT_SECRET in .env"
 
+
   # === API SERVICES ===
   - id: "068_altstadtfest"
     name: "Altstadtfest Goslar"
@@ -381,3 +382,17 @@ crawlers:
       - "5016:5000"
     implementation: custom
     notes: "Flask API endpoint for Altstadtfest data"
+
+  - id: "072_karriere"
+    name: "Karriere Goslar"
+    category: api
+    type: "Job Portal"
+    source: "https://github.com/bundesAPI"
+    schedule: "0 */2 * * *"
+    schedule_human: "Alle 2 Stunden"
+    expected_files:
+      - "072_karriere_card.json"
+    ports:
+      - "5017:8000"
+    implementation: custom
+    notes: "Lokales Job-Portal fuer Landkreis Goslar. Schreibt alle 2 Stunden eine zufaellige Job-Card als JSON und stellt eine HTTP-Oberflaeche bereit."
