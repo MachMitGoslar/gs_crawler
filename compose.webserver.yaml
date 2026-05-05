@@ -1,0 +1,19 @@
+# Dev webserver for testing httpdocs output.
+# Mirrors the production path: http://localhost:8888/crawler/
+#
+# Usage:
+#   docker compose -f compose.webserver.yaml up -d
+#   open http://localhost:8888/crawler/070_wochenmarkt_index.html
+#
+# Stop:
+#   docker compose -f compose.webserver.yaml down
+
+services:
+  gs_dev_webserver:
+    image: nginx:alpine
+    container_name: gs_dev_webserver
+    volumes:
+      - ./httpdocs:/usr/share/nginx/html:ro
+    ports:
+      - "8888:80"
+    restart: unless-stopped
