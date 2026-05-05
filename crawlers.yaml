@@ -208,6 +208,8 @@ crawlers:
     expected_files:
       - "042-freiwilligenagentur.json"
       - "042-freiwilligenagentur-alle.json"
+    env_file:
+      - .env
     implementation: custom
 
   # === ENVIRONMENTAL MONITORING ===
