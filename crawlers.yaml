@@ -359,7 +359,7 @@ crawlers:
     schedule: "0 6 * * *"
     schedule_human: "Täglich 06:00"
     expected_files:
-        - "070-defi-katater.json"
+        - "060-defi-kataster.json"
     implementation: custom
 
 
