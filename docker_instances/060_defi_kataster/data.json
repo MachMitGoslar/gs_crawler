@@ -1,0 +1,571 @@
+[
+  {
+    "title": "Verwaltungsgebäude Stadt Goslar-Charly",
+    "description":  "Öffnungszeiten: Mo, 08:00-13:00 Uhr & 13:45-16:00 Uhr, Di + Do 08:00-13:00 Uhr & 14:00-18:00 Uhr. Goslar - Charly-Jacob-Str. 3",
+    "city": "Goslar",
+    "Defi": "Haupteingang, vor dem Bürgerbüro Flur\nrechts, neben den Toiletten an der\nWand gegenüber vom Fahrstuhl",
+    "phone": "05321 704-372",
+    "lat": 51.906361,
+    "lng": 10.4302014,
+    "opening_hours": {
+      "mo": [["08:00","13:00"], ["13:45","16:00"]],
+      "di": [["08:00","13:00"], ["14:00","18:00"]],
+      "mi": [["08:00","13:00"]],
+      "do": [["08:00","13:00"], ["14:00","18:00"]],
+      "fr": [["08:00","13:00"]],
+      "sa": [],
+      "so": []
+
+    }
+  },
+  {
+    "title": "Verwaltungsgebäude Stadt Goslar-Wallstraße",
+    "description": "Öffnungszeiten: Mo-Fr 08:00-13:00 Uhr, Do 14:00-18:00 Uhr. Goslar - Wallstr. 1B",
+    "city": "Goslar",
+    "Defi": "Haupteingang Eingangsbereich rechts \nneben Eingang Einwohnermeldeamt",
+    "phone": "05321 704-372",
+    "lat": 51.901576,
+    "lng": 10.427549,
+    "opening_hours": {
+      "mo": [["08:00","13:00"]],
+      "di": [["08:00","13:00"]],
+      "mi": [["08:00","13:00"]],
+      "do": [["14:00","18:00"]],
+      "fr": [["08:00","13:00"]],
+      "sa": [],
+      "so": []
+    }
+  },
+  {
+    "title": "Kulturmarktplatz (KUMA)",
+    "description": "Öffnungszeiten: Di, Mi, Fr, So 10:00 - 17:00, Do 10:00-18:00 Uhr, Sa 10:00 - 13:00. Goslar - Am Museumsufer 2",
+    "city": "Goslar",
+    "Defi": "Im Kassenbereich im EG",
+    "phone": "05321 704-372",
+    "lat": 51.904435,
+    "lng": 10.429490,
+    "opening_hours": {
+      "mo": [],
+      "di": [["10:00","17:00"]],
+      "mi": [["10:00","17:00"]],
+      "do": [["10:00","18:00"]],
+      "fr": [["10:00","17:00"]],
+      "sa": [["10:00","13:00"]],
+      "so": [["10:00","17:00"]]
+    }
+  },
+  {
+    "title": "Rammelsberghaus",
+    "description": "Öffnungszeiten: Goslar - Rammelsberger Str. 2",
+    "city": "Goslar",
+    "Defi": "Bei der Bauverwaltung im 2. OG",
+    "phone": "05321 704-372",
+    "lat": 51.901555,
+    "lng": 10.419040,
+    "opening_hours": {
+      "mo": [],
+      "di": [],
+      "mi": [],
+      "do": [],
+      "fr": [],
+      "sa": [],
+      "so": []
+    }
+  },
+  {
+    "title": "Restaurant Tim's (Kaiserpassage)",
+    "description": "Öffnungszeiten: Mo-Sa 09:00-21:00 Uhr, So 10:00-21:00 Uhr. Goslar - Breite Str. 98",
+    "city": "Goslar",
+    "Defi": "Eingangsbereich in der Kaiserpassage",
+    "phone": "0171 8860224",
+    "lat": 51.906988,
+    "lng": 10.429605,
+    "opening_hours": {
+      "mo": [["09:00","21:00"]],
+      "di": [["09:00","21:00"]],
+      "mi": [["09:00","21:00"]],
+      "do": [["09:00","21:00"]],
+      "fr": [["09:00","21:00"]],
+      "sa": [["09:00","21:00"]],
+      "so": [["10:00","21:00"]]
+    }
+  },
+  {
+    "title": "Restaurant Schiefer (Marktplatz)",
+    "description": "Öffnungszeiten: Mo-So 07:00-10:00 Uhr, 12:00-22:00 Uhr. Goslar - Markt 6",
+    "city": "Goslar",
+    "Defi": "Im Restaurant links vom Ausgang Innenhof",
+    "phone": "0171 8860224",
+    "lat": 51.906025,
+    "lng": 10.429560,
+    "opening_hours": {
+      "mo": [["07:00","10:00"], ["12:00","22:00"]],
+      "di": [["07:00","10:00"], ["12:00","22:00"]],
+      "mi": [["07:00","10:00"], ["12:00","22:00"]],
+      "do": [["07:00","10:00"], ["12:00","22:00"]],
+      "fr": [["07:00","10:00"], ["12:00","22:00"]],
+      "sa": [["07:00","10:00"], ["12:00","22:00"]],
+      "so": [["07:00","10:00"], ["12:00","22:00"]]
+    }
+  },
+  {
+    "title": "Feuerwache Goslar",
+    "description": "Öffnungszeiten: täglich 24 Stunden. Goslar - Okerstr. 40",
+    "city": "Goslar",
+    "Defi": "außen an der großen Fahrzeughalle",
+    "phone": "05321 319063",
+    "lat": 51.911247,
+    "lng": 10.440649,
+	"opening_hours": "24/7"
+  },
+  {
+    "title": "Touristen-Information Goslar",
+    "description": "Öffnungszeiten: täglich 10:00-17:00 Uhr. Goslar - Markt 1",
+    "city": "Goslar",
+    "Defi": "im Eingangsbereich",
+    "phone": "05321 704-372",
+    "lat": 51.905744,
+    "lng": 10.428514,
+    "opening_hours": {
+      "mo": [["10:00","17:00"]],
+      "di": [["10:00","17:00"]],
+      "mi": [["10:00","17:00"]],
+      "do": [["10:00","17:00"]],
+      "fr": [["10:00","17:00"]],
+      "sa": [["10:00","17:00"]],
+      "so": [["10:00","17:00"]]
+    }
+  },
+  {
+    "title": "Kaiserpfalz Goslar",
+    "description": "Öffnungszeiten: täglich 10:00-17:00 Uhr. Goslar - Kaiserbleek 6",
+    "city": "Goslar",
+    "Defi": "im Kassenbereich",
+    "phone": "05321 704437",
+    "lat": 51.902950,
+    "lng": 10.425403,
+    "opening_hours": {
+    "mo": [["10:00","17:00"]],
+    "di": [["10:00","17:00"]],
+    "mi": [["10:00","17:00"]],
+    "do": [["10:00","17:00"]],
+    "fr": [["10:00","17:00"]],
+    "sa": [["10:00","17:00"]],
+    "so": [["10:00","17:00"]]
+	}
+  },
+  {
+    "title": "Cineplex Goslar",
+    "description": "Öffnungszeiten: Mo - Do, So 14:30-20:15 Uhr, Fr + Sa 14:30-20:30 Uhr. Goslar - Baßgeige, Carl-Zeiß-Str. 1",
+    "city": "Goslar",
+    "Defi": "an der Hauptkasse",
+    "phone": "05321 377377",
+    "lat": 51.932646,
+    "lng": 10.408071,
+    "opening_hours": {
+    "mo": [["14:30","20:15"]],
+    "di": [["14:30","20:15"]],
+    "mi": [["14:30","20:15"]],
+    "do": [["14:30","20:15"]],
+    "fr": [["14:30","20:30"]],
+    "sa": [["14:30","20:30"]],
+    "so": []
+    }
+  },
+  {
+    "title": "Down Under",
+    "description": "Öffnungszeiten: Di - Do 14:30-22:00 Uhr, Fr + Sa 14:30-00:00 Uhr. Goslar - Baßgeige, Carl-Zeiß-Str. 1",
+    "city": "Goslar",
+    "Defi": "an der Hauptkasse",
+    "phone": "05321 389697",
+    "lat": 51.933044,
+    "lng": 10.407953,
+     "opening_hours": {
+    "mo": [["14:30","22:00"]],
+    "di": [["14:30","22:00"]],
+    "mi": [["14:30","22:00"]],
+    "do": [["14:30","22:00"]],
+    "fr": [["14:30","00:00"]],
+    "sa": [["14:30","00:00"]],
+    "so": []
+     }
+  },
+  {
+    "title": "Stöbich Brandschutz GmbH",
+    "description": "Öffnungszeiten: Mo - Do 08:00-16:00 Uhr, Fr 08:00-13:00 Uhr. Goslar - Baßgeige, Pracherstieg 6",
+    "city": "Goslar",
+    "Defi": "Haupteingang, hinter der 2. Eingangstür\nlinks an der Wand, gegenüber dem\nSekretariat",
+    "phone": "05321 57080",
+    "lat": 51.929199,
+    "lng": 10.415919,
+    "opening_hours": {
+    "mo": [["08:00","16:00"]],
+    "di": [["08:00","16:00"]],
+    "mi": [["08:00","16:00"]],
+    "do": [["08:00","16:00"]],
+    "fr": [["08:00","13:00"]],
+    "sa": [],
+    "so": []
+    }
+  },
+  {
+    "title": "Vitawell",
+    "description": "Öffnungszeiten: Mo - Fr 08:00-22:00 Uhr, Sa + So 10:00-18:00 Uhr, Feiertags 10:00-16:00 Uhr. Goslar - Baßgeige, Carl-Zeiß-Str. 1",
+    "city": "Goslar",
+    "Defi": "Am Empfang melden (Technikraum am Bistro Richtung Kursräume)",
+    "phone": "05321 689999",
+    "lat": 51.930989,
+    "lng": 10.409149,
+    "opening_hours": {
+    "mo": [["08:00","22:00"]],
+    "di": [["08:00","22:00"]],
+    "mi": [["08:00","22:00"]],
+    "do": [["08:00","22:00"]],
+    "fr": [["08:00","22:00"]],
+    "sa": [["10:00","18:00"]],
+    "so": [["10:00","18:00"]]
+    }
+  },
+  {
+    "title": "Berufsbildende Schulen 1",
+    "description": "Öffnungszeiten: Mo - Fr 07:30-13:15 Uhr, Mo - Fr 16:00-20:00 Uhr(bei Stattfinden der Volkshochschulkurse). Goslar - Georgenberg, Heinrich-Pieper-Str. 1-7",
+    "city": "Goslar",
+    "Defi": "in der Eingangshalle",
+    "phone": "05321 37100",
+    "lat": 51.914595,
+    "lng": 10.426149,
+    "opening_hours": {
+    "mo": [["07:30","13:15"]],
+    "di": [["07:30","13:15"]],
+    "mi": [["07:30","13:15"]],
+    "do": [["07:30","13:15"]],
+    "fr": [["07:30","13:15"]],
+    "sa": [],
+    "so": []
+    }
+  },
+  {
+    "title": "HSP Steuer Gleye + Poppe PartG mbB Steuerberatungsgesellschaft",
+    "description": "Öffnungszeiten: Mo - Do 08:00-16:00 Uhr, Fr 08:00-13:00 Uhr. Goslar - Georgenberg, Wittenstr. 1",
+    "city": "Goslar",
+    "Defi": "am Eingang klingeln",
+    "phone": "05321 34440",
+    "lat": 51.918061,
+    "lng": 10.422002,
+    "opening_hours": {
+    "mo": [["08:00","16:00"]],
+    "di": [["08:00","16:00"]],
+    "mi": [["08:00","16:00"]],
+    "do": [["08:00","16:00"]],
+    "fr": [["08:00","13:00"]],
+    "sa": [],
+    "so": []
+    }
+  },
+  {
+    "title": "Lebenshilfe Goslar gemeinnützige GmbH Frühförderstelle",
+    "description": "Öffnungszeiten: täglich 24 Stunden. Goslar - Georgenberg, Wittenstr. 1 A",
+    "city": "Goslar",
+    "Defi": "außen am Gebäude",
+    "phone": "05321 7095320",
+    "lat": 51.918120,
+    "lng": 10.422313,
+	"opening_hours": "24/7"
+  },
+  {
+    "title": "Praxis Dr. med. Gesa Kaufholz, Dr. med. Horst Ische-Kaufholz",
+    "description": "Öffnungszeiten: Mo - Fr 08:30-11:30 Uhr, Di + Do 16:00-18:00 Uhr. Goslar - Jürgenohl, Karlsbader Str. 2",
+    "city": "Jürgenohl",
+    "Defi": "an der Anmeldung melden",
+    "phone": "05321 81125",
+    "lat": 51.924152,
+    "lng": 10.438042,
+    "opening_hours": {
+    "mo": [["08:30","11:30"]],
+    "di": [["16:00","18:00"]],
+    "mi": [["08:30","11:30"]],
+    "do": [["16:00","18:00"]],
+    "fr": [["08:30","11:30"]],
+    "sa": [],
+    "so": []
+    }
+  },
+  {
+    "title": "Praxis Dr. med. Gesa Kaufholz, Dr. med. Horst Ische-Kaufholz",
+    "description": "Öffnungszeiten: täglich 24 Stunden. Goslar - Jürgenohl, Karlsbader Str. 2",
+    "city": "Jürgenohl",
+    "Defi": "draußen neben dem Praxiseingang (alarmgesichert)",
+    "phone": "05321 81125",
+    "lat": 51.924152,
+    "lng": 10.438042,
+	"opening_hours": "24/7"
+  },
+  {
+    "title": "fluidXlab GmbH",
+    "description": "Öffnungszeiten: Mo - Fr 09:00-17:00. Goslar - Rammelsberg, Am Stollen 19B",
+    "city": "Rammelsberg",
+    "Defi": "2. OG über Treppenhaus, Flur links",
+    "phone": "05321 3947767",
+    "lat": 51.899978,
+    "lng": 10.431808,
+    "opening_hours": {
+    "mo": [["09:00","17:00"]],
+    "di": [["09:00","17:00"]],
+    "mi": [["09:00","17:00"]],
+    "do": [["09:00","17:00"]],
+    "fr": [["09:00","17:00"]],
+    "sa": [],
+    "so": []
+    }
+  },
+  {
+    "title": "INN-tegrativ gGmbH",
+    "description": "Öffnungszeiten: täglich 24 Stunden. Goslar - Rammelsberg, Schützenallee 6-9",
+    "city": "Rammelsberg",
+    "Defi": "an der Pforte (24h besetzt)",
+    "phone": "0511 898440-110",
+    "lat": 51.900700,
+    "lng": 10.445536,
+	"opening_hours": "24/7"
+  },
+  {
+    "title": "Aquantic",
+    "description": "Öffnungszeiten: Mo - Fr 06:00 - 20:00 Uhr, Sa + So 08:00 - 19:00 Uhr. Goslar - Rammelsberg, Osterfeld 11",
+    "city": "Rammelsberg",
+    "Defi": "beim Schwimmmeister melden ",
+    "phone": "05321 75820",
+    "lat": 51.90612,
+    "lng": 10.44529,
+    "opening_hours": {
+    "mo": [["06:00","20:00"]],
+    "di": [["06:00","20:00"]],
+    "mi": [["06:00","20:00"]],
+    "do": [["06:00","20:00"]],
+    "fr": [["06:00","20:00"]],
+    "sa": [["08:00","19:00"]],
+    "so": [["08:00","19:00"]]
+    }
+  },
+  {
+    "title": "Marion & Stefan Kruse",
+    "description": "Öffnungszeiten: privat wenn jemand zu Hause ist. Goslar - Sudmerberg, Doktorsbusch 15",
+    "city": "Sudmerberg",
+    "Defi": "",
+    "phone": "05321 42840",
+    "lat": 51.923953,
+    "lng": 10.470786,
+    "opening_hours": {
+    "mo": [["00:00","00:00"]],
+    "di": [["00:00","00:00"]],
+    "mi": [["00:00","00:00"]],
+    "do": [["00:00","00:00"]],
+    "fr": [["00:00","00:00"]],
+    "sa": [],
+    "so": []
+    }
+  },
+  {
+    "title": "ErlebnisBocksBerg Hahnenklee GmbH & Co. KG Kabinenbahn Talstation",
+    "description": "Öffnungszeiten: Mo - So 09:30-17:30 Uhr, ab 26. Oktober tgl. 09:30-16:30 Uhr, 03.11. - 24.12. geschlossen ab 25. Dezember tgl. 09:30-16:30 Uhr. Hahnenklee - Bockswiese, Rathausstr. 6",
+    "city": "Hahnenklee",
+    "Defi": "Kassenbereich, neben dem Kassenhäuschen ",
+    "phone": "05325 2576",
+    "lat": 51.859127,
+    "lng": 10.341160,
+    "opening_hours": {
+    "mo": [["09:30","17:30"]],
+    "di": [["09:30","17:30"]],
+    "mi": [["09:30","17:30"]],
+    "do": [["09:30","17:30"]],
+    "fr": [["09:30","17:30"]],
+    "sa": [],
+    "so": []
+    }
+  },
+  {
+    "title": "ErlebnisBocksBerg Hahnenklee GmbH & Co. KG Kabinenbahn Bergstation",
+    "description": "Öffnungszeiten: Mo - So 09:30-17:30 Uhr, ab 26. Oktober tgl. 09:30-16:30 Uhr, 03.11. - 24.12. geschlossen ab 25. Dezember tgl. 09:30-16:30 Uhr. Hahnenklee - Bockswiese, Rathausstr. 6",
+    "city": "Hahnenklee",
+    "Defi": "Aufenthaltsraum Bergwacht",
+    "phone": "05325 2576",
+    "lat": 51.859127,
+    "lng": 10.341160,
+    "opening_hours": {
+    "mo": [["09:30","17:30"]],
+    "di": [["09:30","17:30"]],
+    "mi": [["09:30","17:30"]],
+    "do": [["09:30","17:30"]],
+    "fr": [["09:30","17:30"]],
+    "sa": [],
+    "so": []
+    }
+  },
+  {
+    "title": "Rathausstraße am Straßenrand",
+    "description": "Öffnungszeiten: täglich 24 Stunden. Hahnenklee - Bockswiese, Rathausstr. 9",
+    "city": "Hahnenklee",
+    "Defi": "an der Straße neben dem Glasschaukasten vor Hausnummer 9",
+    "phone": "",
+    "lat": 51.859591,
+    "lng": 10.340597,
+	"opening_hours": "24/7"
+  },
+  {
+    "title": "Lebenshilfe Goslar gemeinnützige GmbH Verwaltungsgebäude",
+    "description": "Öffnungszeiten: Mo - Fr 07:30 - 15:30 Uhr. Immenrode, Probsteiburg",
+    "city": "Immenrode",
+    "Defi": "Verwaltungsgebäude",
+    "phone": "05321 3371-0",
+    "lat": 51.934544,
+    "lng": 10.498166,
+    "opening_hours": {
+    "mo": [["07:30","15:30"]],
+    "di": [["07:30","15:30"]],
+    "mi": [["07:30","15:30"]],
+    "do": [["07:30","15:30"]],
+    "fr": [["07:30","15:30"]],
+    "sa": [],
+    "so": []
+    }
+  },
+  {
+    "title": "Lebenshilfe Goslar gemeinnützige GmbH Tagesförderstätte",
+    "description": "Öffnungszeiten: Mo - Fr 07:30 - 15:30 Uhr. Immenrode, Probsteiburg",
+    "city": "Immenrode",
+    "Defi": "Tagesförderstätte",
+    "phone": "05321 3371-0",
+    "lat": 51.933532,
+    "lng": 10.497726,
+    "opening_hours": {
+    "mo": [["07:30","15:30"]],
+    "di": [["07:30","15:30"]],
+    "mi": [["07:30","15:30"]],
+    "do": [["07:30","15:30"]],
+    "fr": [["07:30","15:30"]],
+    "sa": [],
+    "so": []
+    }
+  },
+  {
+    "title": "(Ehemalige) Freiwillige Feuerwehr Immenrode",
+    "description": "Öffnungszeiten: täglich 24 Stunden. Immenrode, Harlingeröder Str. 16",
+    "city": "Immenrode",
+    "Defi": "außen am alten Feuerwehrgebäude neben dem Glasschaukasten",
+    "lat": 51.95869,
+    "lng": 10.48588,
+	"opening_hours": "24/7"
+  },
+  {
+    "title": "Sportplatz",
+    "description": "Öffnungszeiten: täglich 24 Stunden. Jerstedt, Am Sportplatz 16",
+    "city": "Jerstedt",
+    "Defi": "außen am Gebäude",
+    "phone": "",
+    "lat": 51.951691,
+    "lng": 10.396816,
+	"opening_hours": "24/7"
+  },
+  {
+    "title": "Freiwillige Feuerwehr Lengde",
+    "description": "Öffnungszeiten: täglich 24 Stunden. Lengde, Zehntstr. 12a",
+    "city": "Lengde",
+    "Defi": "außen am Gebäude",
+    "phone": "",
+    "lat": 51.981163,
+    "lng": 10.555319,
+	"opening_hours": "24/7"
+  },
+  {
+    "title": "Freiwillige Feuerwehr Lochtum",
+    "description": "Öffnungszeiten: täglich 24 Stunden. Lochtum, Am Gemeindehof 4c",
+   "city": "Lochtum",
+   "Defi": "außen am Gebäude",
+   "phone": "05324 2031",
+    "lat": 51.930430,
+    "lng": 10.596008,
+	"opening_hours": "24/7"
+  },
+  {
+    "title": "Begegnungsstätte",
+    "description": "Öffnungszeiten: täglich 24 Stunden. Oker, Talstr. 3",
+    "city": "Oker",
+    "Defi": "am Eingang vom Altbau vom Parkplatz Höhlenweg aus",
+    "phone": "01522 4660804",
+    "lat": 51.899594,
+    "lng": 10.481880,
+	"opening_hours": "24/7"
+  },
+  {
+    "title": "ehemaliges Rathaus",
+    "description": "Öffnungszeiten: täglich 24 Stunden. Vienenburg, Goslarer Str. 9",
+    "city": "Vienenburg",
+    "Defi": "test",
+    "phone": "05321 704-0",
+    "lat": 51.953473,
+    "lng": 10.561386,
+	"opening_hours": "24/7"
+  },
+  {
+    "title": "Harzer Schrott und Recycling GmbH (HSR GmbH)",
+    "description": "Öffnungszeiten: Mo - Fr 07:00-16:30 Uhr. Vienenburg, Wiedelaher Str. 14",
+    "city": "Vienenburg",
+    "Defi": "im Büro melden",
+    "phone": "05324 1038",
+    "lat": 51.956227,
+    "lng": 10.570870,
+    "opening_hours": {
+    "mo": [["07:00","16:30"]],
+    "di": [["07:00","16:30"]],
+    "mi": [["07:00","16:30"]],
+    "do": [["07:00","16:30"]],
+    "fr": [["07:00","16:30"]],
+    "sa": [],
+    "so": []
+    }
+  },
+  {
+    "title": "Freibad Vienenburg",
+    "description": "Öffnungszeiten: in der Freibadsaison täglich 09:00 - 19:00 Uhr. Vienenburg, Steinweg 16",
+    "city": "Vienenburg",
+    "Defi": "beim Schwimmmeister melden",
+    "phone": "05324 787596",
+    "lat": 51.956759,
+    "lng": 10.557582,
+    "opening_hours": {
+    "mo": [["09:00","19:00"]],
+    "di": [["09:00","19:00"]],
+    "mi": [["09:00","19:00"]],
+    "do": [["09:00","19:00"]],
+    "fr": [["09:00","19:00"]],
+    "sa": [["09:00","19:00"]],
+    "so": [["09:00","19:00"]]
+    }
+  },
+  {
+    "title": "Freiwillige Feuerwehr Wiedelah",
+    "description": "Öffnungszeiten: täglich 24 Stunden. Wiedelah, Amtsstr. 4",
+    "city": "Wiedelah",
+    "Defi": "außen am Gebäude in Richtung Amtsstraße",
+    "phone": "05324 7732694",
+    "lat": 51.959883,
+    "lng": 10.587666,
+	"opening_hours": "24/7"
+  },
+  {
+    "title": "Mercedes Benz Autohaus Rosier-Braunschweig GmbH",
+    "description": "während der Öffnungszeiten",
+    "city": "Goslar",
+    "Defi": "Eingangstür rechts an der Wand",
+    "phone": "05321-55641 / 0151 58053843",
+    "lat": 51.924612,
+    "lng": 10.414580,
+	"opening_hours": {
+		"mo": [["07:30", "18:00"]],
+		"di": [["07:30", "18:00"]],
+		"mi": [["07:30", "18:00"]],
+		"do": [["07:30", "18:00"]],
+		"fr": [["07:30", "18:00"]],
+		"sa": [["08:00", "12:00"]]
+		}
+  }
+]

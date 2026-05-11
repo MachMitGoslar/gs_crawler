@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Defibrillatoren-Kataster Goslar</title>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+  <link rel="stylesheet" href="//unpkg.com/leaflet-gesture-handling/dist/leaflet-gesture-handling.min.css" type="text/css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="light">
+  <header class="page-header">
+    <div class="page-header__inner">
+      <div class="page-header__title page-header__title--compact">
+        <p class="page-header__eyebrow">Goslar</p>
+        <h1>Defibrillatoren-Kataster</h1>
+        <p class="page-header__subtitle">Schnell finden, anrufen und direkt navigieren.</p>
+      </div>
+
+      <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Theme umschalten">
+        🌙
+      </button>
+    </div>
+  </header>
+
+  <div class="app">
+    <aside class="locations" aria-label="Standortliste">
+      <div class="locations__list" id="list"></div>
+    </aside>
+
+    <main id="map" aria-label="Karte der Standorte">
+      <button class="map-control-btn" type="button" id="toggle-map-maximize" title="Liste ein-/ausblenden">
+        🗺️ Karte maximieren
+      </button>
+      <button id="back-to-list" class="back-to-list-btn" type="button">
+        ⬆ Zurück zur Liste
+      </button>
+    </main>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
+  <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+  <script src="//unpkg.com/leaflet-gesture-handling"></script>
+  <script src="script.js?v=2"></script>
+</body>
+</html>

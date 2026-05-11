@@ -352,6 +352,17 @@ crawlers:
       - "056-serviceportal-alle.json"
     implementation: custom
 
+  - id: "060_defi_kataster"
+    name: "Defibrillatoren Kataster"
+    category: specialized
+    type: "Defi Locations"
+    schedule: "0 6 * * *"
+    schedule_human: "Täglich 06:00"
+    expected_files:
+        - "070-defi-katater.json"
+    implementation: custom
+
+
   # === MARKET DATA ===
   - id: "070_wochenmarkt"
     name: "Wochenmarkt Goslar"
