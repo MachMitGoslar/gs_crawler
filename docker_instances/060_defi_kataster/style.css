@@ -85,7 +85,7 @@ body{
 }
 
 .app{
-  max-width: 900px;
+  max-width: 980px;
   margin: 0 auto;
   padding: 16px;
   height: calc(100dvh - var(--header-h));
