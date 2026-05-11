@@ -16,7 +16,16 @@ const map = L.map("map", {
     zoom: 12,
     maxZoom: 18,
     minZoom: 10,
-    gestureHandling: true
+    gestureHandling: true,
+    gestureHandlingOptions: {
+      duration: 1800,
+      text: {
+        touch: "Karte mit zwei Fingern bewegen",
+        scroll: "Zum Zoomen Strg + Scrollen verwenden",
+        scrollMac: "Zum Zoomen \u2318 + Scrollen verwenden",
+      },
+    },
+    scrollWheelZoom: false
 });
 
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -292,6 +301,7 @@ function render(data) {
     markerGroup.addLayer(marker);
 
     const distanceInfo = getLocationDistanceInfo(item);
+    const openingHoursInfo = formatOpeningHours(item.opening_hours);
 
     const div = document.createElement("div");
     div.className = "location";
@@ -304,10 +314,13 @@ function render(data) {
         Wo liegt der Defi?
         ${item.Defi ? ` – ${item.Defi}` : ""}
       </p>
-      <p>${item.description}</p>
+      <div class="location__opening-hours">
+        <span class="location__meta-label">Öffnungszeiten</span>
+        ${openingHoursInfo}
+      </div>
       <p class="location__distance">${distanceInfo.label}</p>
       <div class="location__actions">
-        <button class="location__route-btn" type="button" data-lat="${item.lat} data-lng="${item.lng}" data-title="${item.title}">
+        <button class="location__route-btn" type="button" data-lat="${item.lat}" data-lng="${item.lng}" data-title="${item.title}">
           Route
         </button>
         ${
@@ -345,20 +358,33 @@ function render(data) {
 
     listEl.appendChild(div);
 
+    marker.on("click", () => {
+      focusLocationCard(div);
+    });
+
   }); // ← forEach sauber schließen
 
   } // ← render() sauber schließen
+
+function focusLocationCard(card) {
+  if (!card) return;
+
+  document
+    .querySelectorAll(".location--active")
+    .forEach((locationCard) => locationCard.classList.remove("location--active"));
+
+  card.classList.add("location--active");
+  card.scrollIntoView({
+    behavior: "smooth",
+    block: "center",
+  });
+}
 
 /* ============================= */
 /* ROUTING                      */
 /* ============================= */
 
 function startRoute(item) {
-  if (!lastUserPosition) {
-    alert("Standort wird noch ermittelt...");
-    return;
-  }
-
   const lat = parseFloat(item.lat);
   const lng = parseFloat(item.lng);
   const title = item.title || "";
@@ -373,33 +399,32 @@ function openNativeRoute(lat, lng, label = "") {
   const encodedLabel = encodeURIComponent(label);
 
   const isIOS = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
+  const isApplePlatform = /Mac|iPhone|iPad|iPod/.test(navigator.platform);
   const isAndroid = /android/i.test(ua);
 
-  if (isIOS) {
-    // Apple Maps (Fußweg)
+  if (isIOS || isApplePlatform) {
+    const appleMapsAppUrl = `maps://?daddr=${lat},${lng}&q=${encodedLabel}&dirflg=w`;
+    const appleMapsWebUrl = `https://maps.apple.com/?daddr=${lat},${lng}&q=${encodedLabel}&dirflg=w`;
 
-	const url = `https://maps.apple.com/?saddr=Current+Location&daddr=${lat},${lng}&dirflg=w`;
-    window.open(url, "_blank");
+    window.location.href = appleMapsAppUrl;
+
+    setTimeout(() => {
+      if (!document.hidden) {
+        window.location.href = appleMapsWebUrl;
+      }
+    }, 900);
+
     return;
   }
 
   if (isAndroid) {
-    // Android: native Karten-App
-    const geoUrl = `geo:0,0?q=${lat},${lng}${encodedLabel ? `(${encodedLabel})` : ""}`;
-    const googleNavUrl = `https://www.google.com/maps/dir/?saddr=Current%20Location&api=1&destination=${lat},${lng}&travelmode=walking`;
-
-    window.open(geourl, "_blank");
-
-    // Fallback auf Google Maps
-    setTimeout(() => {
-      window.open(googleNavUrl, "_blank");
-    }, 700);
-
+    const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=walking`;
+    window.location.href = googleMapsUrl;
     return;
   }
 
   // Desktop / Fallback
-  const fallbackUrl = `https://www.google.com/maps/dir/?saddr=Current%20Location&api=1&destination=${lat},${lng}&travelmode=walking`;
+  const fallbackUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=walking`;
   window.open(fallbackUrl, "_blank");
 }
 
@@ -428,7 +453,7 @@ function getLocationDistanceInfo(item) {
     return {
       meters: null,
       minutes: null,
-      label: "Standortfreigabe erforderlich"
+      label: "-- km • ca. -- Min. Fußweg"
     };
   }
 
@@ -444,7 +469,7 @@ function getLocationDistanceInfo(item) {
   return {
     meters,
     minutes,
-    label: `${formatDistance(meters)} • ca. ${minutes} Min. Fußweg`
+    label: `${formatDistance(meters)} • ca. ${formatWalkingTime(meters)} Fußweg`
   };
 }
 
@@ -461,7 +486,86 @@ function formatDistance(meters) {
 
 function formatWalkingTime(meters) {
   const minutes = estimateWalkingMinutes(meters);
-  return `${minutes} Min`;
+  if (minutes < 60) return `${minutes} Min.`;
+
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
+
+  if (remainingMinutes === 0) return `${hours} Std.`;
+  return `${hours} Std. ${remainingMinutes} Min.`;
+}
+
+function formatOpeningHours(openingHours) {
+  if (!openingHours) return `<span class="opening-hours__empty">Keine Angaben</span>`;
+  if (openingHours === "24/7") {
+    return `<span class="opening-hours__row"><span class="opening-hours__days">Täglich</span><span>24 Stunden</span></span>`;
+  }
+
+  const days = [
+    ["mo", "Mo"],
+    ["di", "Di"],
+    ["mi", "Mi"],
+    ["do", "Do"],
+    ["fr", "Fr"],
+    ["sa", "Sa"],
+    ["so", "So"],
+  ];
+
+  const dayEntries = days.map(([key, label]) => {
+    const slots = openingHours[key];
+    if (!Array.isArray(slots) || slots.length === 0) {
+      return { label, value: null };
+    }
+
+    const formattedSlots = slots
+      .filter(([start, end]) => start && end)
+      .map(([start, end]) => `${start}-${end}`);
+
+    return {
+      label,
+      value: formattedSlots.length > 0 ? formattedSlots.join(", ") : null,
+    };
+  });
+
+  const groups = [];
+
+  dayEntries.forEach((entry) => {
+    if (!entry.value) return;
+
+    const last = groups[groups.length - 1];
+    if (last && last.value === entry.value) {
+      last.days.push(entry.label);
+      return;
+    }
+
+    groups.push({
+      days: [entry.label],
+      value: entry.value,
+    });
+  });
+
+  if (groups.length === 0) {
+    return `<span class="opening-hours__empty">Keine Angaben</span>`;
+  }
+
+  return groups
+    .map((group) => {
+      const dayLabel = formatDayRange(group.days);
+      const timeLabel = group.value
+        .split(", ")
+        .map((slot) => `${slot} Uhr`)
+        .join(", ");
+
+      return `<span class="opening-hours__row"><span class="opening-hours__days">${dayLabel}</span><span>${timeLabel}</span></span>`;
+    })
+    .join("");
+}
+
+function formatDayRange(days) {
+  if (days.length === 7) return "Täglich";
+  if (days.length === 1) return days[0];
+
+  return `${days[0]}-${days[days.length - 1]}`;
 }
 
 function isCurrentlyOpenStructured(openingHours) {
