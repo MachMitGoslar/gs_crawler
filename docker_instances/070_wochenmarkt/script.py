@@ -166,7 +166,7 @@ def main():
         "title":              f"{market_name} – {date_label}",
         "description":        card_desc,
         "image_url":          market_image,
-        "call_to_action_url": f"{BASE_URL}/070_wochenmarkt_index.html",
+        "call_to_action_url": f"{BASE_URL}/070_wochenmarkt_alle.json",
         "published_at":       now_str,
     })
 
@@ -183,7 +183,7 @@ def main():
             "title":              vendor_name,
             "description":        description,
             "image_url":          vendor.get("logoFileUrl"),
-            "call_to_action_url": f"{BASE_URL}/070_wochenmarkt_detail.html?id={vendor_id}",
+            "call_to_action_url": f"{BASE_URL}/070_wochenmarkt_{vendor_id}.json",
             "published_at":       now_str,
         })
 
