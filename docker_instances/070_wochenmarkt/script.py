@@ -110,6 +110,13 @@ def vendor_address(vendor: dict) -> tuple[str, str]:
     return street, city
 
 
+def vendor_offer_description(vendor: dict) -> str:
+    """Return the vendor's offer description if the API provides one."""
+    return (
+        vendor.get("offerDescription")
+    ).strip()
+
+
 # ── Main ───────────────────────────────────────────────────────────────────────
 def main():
     now_str = datetime.now().isoformat(sep="T", timespec="minutes")
@@ -176,7 +183,15 @@ def main():
         vendor_id   = vendor["id"]
         vendor_name = vendor.get("name") or "Unbekannter Stand"
         street, city = vendor_address(vendor)
-        description = ", ".join(p for p in [street, city] if p) or market_loc
+        offer_description = vendor_offer_description(vendor)
+        address_description = ", ".join(p for p in [street, city] if p) or market_loc
+        description = ". ".join(
+            p for p in [
+                f"Wir haben für euch: {offer_description}" if offer_description else "",
+                address_description,
+            ]
+            if p
+        )
 
         index.append({
             "id":                 i,
@@ -196,8 +211,11 @@ def main():
         street, city = vendor_address(vendor)
         full_address = ", ".join(p for p in [street, city] if p)
         summary      = full_address or f"Stand auf dem {market_name}"
+        offer_description = vendor_offer_description(vendor)
 
         desc = f"<p>{vendor_name} ist beim {market_name} am {date_label} in {market_loc} dabei.</p>"
+        if offer_description:
+            desc += f"<p>Entdecken, genießen, mitnehmen: {offer_description}</p>"
         if full_address:
             desc += f"<p>Adresse: {full_address}</p>"
 
