@@ -1,7 +1,8 @@
 import requests
 import json
 import os
-from datetime import datetime
+from datetime import UTC, datetime
+from zoneinfo import ZoneInfo
 
 # ── Config ─────────────────────────────────────────────────────────────────────
 TOKEN_URL      = "https://backend.goslar-id.ceconsoft.de/connect/token"
@@ -18,6 +19,7 @@ OUTPUT_DIR = "/app/output"
 DAYS   = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"]
 MONTHS = ["Januar", "Februar", "März", "April", "Mai", "Juni",
           "Juli", "August", "September", "Oktober", "November", "Dezember"]
+LOCAL_TIMEZONE = ZoneInfo("Europe/Berlin")
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
@@ -55,11 +57,11 @@ def get_attendances(token: str, event_id: str) -> list:
 
 
 def parse_dt(iso_str: str) -> datetime:
-    """Parse ISO 8601 datetime, strip timezone for local display."""
+    """Parse an API UTC datetime and convert it to German local time."""
     dt = datetime.fromisoformat(iso_str)
-    if dt.tzinfo is not None:
-        dt = dt.astimezone().replace(tzinfo=None)
-    return dt
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=UTC)
+    return dt.astimezone(LOCAL_TIMEZONE)
 
 
 def german_date(dt: datetime) -> str:
