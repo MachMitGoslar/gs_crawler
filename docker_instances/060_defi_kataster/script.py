@@ -8,9 +8,9 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parent.parent
 
 if Path("/app/output").exists():
-    OUTPUT_DIR = Path("/app/output")
+    OUTPUT_DIR = Path("/app/output/defi-kataster")
 else:
-    OUTPUT_DIR = REPO_ROOT / "httpdocs" / "crawler"
+    OUTPUT_DIR = REPO_ROOT / "httpdocs" / "crawler" / "defi-kataster"
 
 # Der Registry-Eintrag erwartet aktuell den historischen Dateinamen mit
 CARD_OUTPUT_FILES = (
@@ -20,10 +20,10 @@ CARD_OUTPUT_FILES = (
 STATIC_ASSETS = ("index.html", "script.js", "style.css")
 LOCATIONS_FILE = "data.json"
 SOURCE_LOCATIONS_FILE = SCRIPT_DIR / LOCATIONS_FILE
-MAP_OUTPUT_DIR = "060_defi_kataster"
+MAP_OUTPUT_DIR = ""
 
 
-MAP_URL = "https://crawler.goslar.app/crawler/060_defi_kataster/index.html"
+MAP_URL = "https://crawler.goslar.app/crawler/defi-kataster/index.html"
 IMAGE_URL = None
 
 PUBLISHED_AT = datetime.now().strftime("%Y-%m-%dT%H:%M")
@@ -32,8 +32,8 @@ PUBLISHED_AT = datetime.now().strftime("%Y-%m-%dT%H:%M")
 CARD = {
     "title": "Defibrillatoren-Kataster Goslar",
     "description": (
-        "Schnell den naechsten Defibrillator in Goslar finden: "
-        "Standorte, Verfuegbarkeit und Navigation in der Kartenansicht."
+        "Schnell den nächsten Defibrillator in Goslar finden: "
+        "Standorte, Verfügbarkeit und Navigation in der Kartenansicht."
     ),
     "image_url": IMAGE_URL,
     "call_to_action_url": MAP_URL,
