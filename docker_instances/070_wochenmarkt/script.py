@@ -1,7 +1,8 @@
 import requests
 import json
 import os
-from datetime import datetime
+from datetime import UTC, datetime
+from zoneinfo import ZoneInfo
 
 # ── Config ─────────────────────────────────────────────────────────────────────
 TOKEN_URL      = "https://backend.goslar-id.ceconsoft.de/connect/token"
@@ -18,6 +19,7 @@ OUTPUT_DIR = "/app/output/wochenmaerkte"
 DAYS   = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"]
 MONTHS = ["Januar", "Februar", "März", "April", "Mai", "Juni",
           "Juli", "August", "September", "Oktober", "November", "Dezember"]
+LOCAL_TIMEZONE = ZoneInfo("Europe/Berlin")
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
@@ -56,11 +58,11 @@ def get_attendances(token: str, event_id: str) -> list:
 
 
 def parse_dt(iso_str: str) -> datetime:
-    """Parse ISO 8601 datetime, strip timezone for local display."""
+    """Parse an API UTC datetime and convert it to German local time."""
     dt = datetime.fromisoformat(iso_str)
-    if dt.tzinfo is not None:
-        dt = dt.astimezone().replace(tzinfo=None)
-    return dt
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=UTC)
+    return dt.astimezone(LOCAL_TIMEZONE)
 
 
 def german_date(dt: datetime) -> str:
@@ -109,6 +111,13 @@ def vendor_address(vendor: dict) -> tuple[str, str]:
     street = " ".join(p for p in [vendor.get("street", ""), vendor.get("houseNumber", "")] if p).strip()
     city   = " ".join(p for p in [vendor.get("zip", ""),    vendor.get("city", "")]          if p).strip()
     return street, city
+
+
+def vendor_offer_description(vendor: dict) -> str:
+    """Return the vendor's offer description if the API provides one."""
+    return (
+        vendor.get("offerDescription")
+    ).strip()
 
 
 # ── Main ───────────────────────────────────────────────────────────────────────
@@ -177,7 +186,15 @@ def main():
         vendor_id   = vendor["id"]
         vendor_name = vendor.get("name") or "Unbekannter Stand"
         street, city = vendor_address(vendor)
-        description = ", ".join(p for p in [street, city] if p) or market_loc
+        offer_description = vendor_offer_description(vendor)
+        address_description = ", ".join(p for p in [street, city] if p) or market_loc
+        description = ". ".join(
+            p for p in [
+                f"Wir haben für euch: {offer_description}" if offer_description else "",
+                address_description,
+            ]
+            if p
+        )
 
         index.append({
             "id":                 i,
@@ -197,8 +214,11 @@ def main():
         street, city = vendor_address(vendor)
         full_address = ", ".join(p for p in [street, city] if p)
         summary      = full_address or f"Stand auf dem {market_name}"
+        offer_description = vendor_offer_description(vendor)
 
         desc = f"<p>{vendor_name} ist beim {market_name} am {date_label} in {market_loc} dabei.</p>"
+        if offer_description:
+            desc += f"<p>Entdecken, genießen, mitnehmen: {offer_description}</p>"
         if full_address:
             desc += f"<p>Adresse: {full_address}</p>"
         if vendor.get("offerDescription"):
