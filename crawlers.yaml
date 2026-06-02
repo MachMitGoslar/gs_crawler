@@ -361,8 +361,8 @@ crawlers:
     schedule: "0 */2 * * *"
     schedule_human: "Alle 2 Stunden"
     expected_files:
-      - "070_wochenmarkt_card.json"
-      - "070_wochenmarkt_alle.json"
+      - "wochenmaerkte/070_wochenmarkt_card.json"
+      - "wochenmaerkte/070_wochenmarkt_alle.json"
     env_file:
       - .env
     implementation: custom

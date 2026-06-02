@@ -12,8 +12,8 @@ SCOPE          = "markets.read"
 EVENTS_URL      = "https://external-gateway.hsp.ceconsoft.de/api/external/market-events/upcoming"
 ATTENDANCES_URL = "https://external-gateway.hsp.ceconsoft.de/api/external/market-events/{id}/attendances"
 
-BASE_URL   = "https://crawler.goslar.app/crawler"
-OUTPUT_DIR = "/app/output"
+BASE_URL   = "https://crawler.goslar.app/crawler/wochenmaerkte"
+OUTPUT_DIR = "/app/output/wochenmaerkte"
 
 DAYS   = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"]
 MONTHS = ["Januar", "Februar", "März", "April", "Mai", "Juni",
@@ -50,6 +50,7 @@ def get_attendances(token: str, event_id: str) -> list:
     print(f"Attendances response for event {event_id}: HTTP {resp.status_code}")
     resp.raise_for_status()
     attendances = resp.json()
+    print(f"Attendances payload for event {event_id}: {attendances}")
     print(f"Attendances payload count for event {event_id}: {len(attendances)}")
     return attendances
 
@@ -166,7 +167,7 @@ def main():
         "title":              f"{market_name} – {date_label}",
         "description":        card_desc,
         "image_url":          market_image,
-        "call_to_action_url": f"{BASE_URL}/070_wochenmarkt_index.html",
+        "call_to_action_url": f"{BASE_URL}/070_wochenmarkt_alle.json",
         "published_at":       now_str,
     })
 
@@ -183,7 +184,7 @@ def main():
             "title":              vendor_name,
             "description":        description,
             "image_url":          vendor.get("logoFileUrl"),
-            "call_to_action_url": f"{BASE_URL}/070_wochenmarkt_detail.html?id={vendor_id}",
+            "call_to_action_url": f"{BASE_URL}/070_wochenmarkt_{vendor_id}.json",
             "published_at":       now_str,
         })
 
@@ -200,8 +201,17 @@ def main():
         desc = f"<p>{vendor_name} ist beim {market_name} am {date_label} in {market_loc} dabei.</p>"
         if full_address:
             desc += f"<p>Adresse: {full_address}</p>"
+        if vendor.get("offerDescription"):
+            desc += f"<p><strong>Angebot: </strong>{vendor['offerDescription']}</p>"
+        if vendor.get("contactEmailAddress"):
+            email = vendor["contactEmailAddress"]
+            desc += f'<p><a href="mailto:{email}">{email}</a></p>'
 
-        images = [{"url": vendor["logoFileUrl"]}] if vendor.get("logoFileUrl") else []
+        images = []
+        if vendor.get("marketStallImageUrl"):
+            images.append({"url": vendor["marketStallImageUrl"]})
+        if vendor.get("logoFileUrl"):
+            images.append({"url": vendor["logoFileUrl"]})
 
         write_json(os.path.join(OUTPUT_DIR, f"070_wochenmarkt_{vendor_id}.json"), {
             "id":                 i,
