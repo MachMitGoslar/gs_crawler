@@ -10,7 +10,7 @@ from jobs_logic import build_jobs_payload
 
 
 BASE_URL = os.getenv("CRAWLER_BASE_URL", "https://crawler.goslar.app/crawler")
-INDEX_URL = os.getenv("KARRIERE_INDEX_URL", "https://crawler.goslar.app/crawler/jobs.html?location=Goslar")
+INDEX_URL = os.getenv("KARRIERE_INDEX_URL", "https://crawler.goslar.app/jobs.html?location=Goslar")
 OUTPUT_DIR = Path(os.getenv("OUTPUT_DIR", "/app/output"))
 OUTPUT_FILE = OUTPUT_DIR / "072_karriere_card.json"
 EMPTY_DESCRIPTION = "Aktuell sind keine passenden Jobangebote fuer den Landkreis Goslar verfuegbar."
