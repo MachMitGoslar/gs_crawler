@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Termin buchen - Service Stadt Goslar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --color-background: #f5f5f5;
+      --color-card: #ffffff;
+      --color-text: #000000;
+      --color-copy: #3f3f3e;
+      --color-gold: #a88f35;
+      --radius-card: 16px;
+      --font-ui: "SF Pro Display", "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html {
+      min-height: 100%;
+      background: var(--color-background);
+    }
+
+    body {
+      margin: 0;
+      min-height: 100%;
+      font-family: var(--font-ui);
+      color: var(--color-text);
+      background: var(--color-background);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .booking-page {
+      width: 100%;
+      min-height: 100vh;
+      margin: 0 auto;
+      padding: 14px 15px 40px;
+      background: var(--color-background);
+    }
+
+    .back-link {
+      display: flex;
+      width: 24px;
+      height: 24px;
+      margin-left: 4px;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-gold);
+      text-decoration: none;
+    }
+
+    .back-link svg {
+      width: 24px;
+      height: 24px;
+      display: block;
+    }
+
+    h1 {
+      width: 100%;
+      margin: 12px 0 0 4px;
+      font-family: "Inter", var(--font-ui);
+      font-weight: 700;
+      font-size: 27px;
+      line-height: 34px;
+      letter-spacing: -1.4px;
+      color: var(--color-text);
+    }
+
+    .subtitle {
+      width: calc(100% - 4px);
+      margin: 0 0 0 4px;
+      font-family: var(--font-ui);
+      font-weight: 590;
+      font-size: 12px;
+      line-height: 20px;
+      letter-spacing: -0.004em;
+      color: var(--color-copy);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .booking-list {
+      display: grid;
+      gap: 15px;
+      margin-top: 22px;
+    }
+
+    .booking-card {
+      width: 100%;
+      height: 68px;
+      display: flex;
+      align-items: center;
+      padding: 20px 13px;
+      border-radius: var(--radius-card);
+      background: var(--color-card);
+      color: var(--color-gold);
+      font-family: var(--font-ui);
+      font-weight: 700;
+      font-size: 18px;
+      line-height: 28px;
+      letter-spacing: -0.004em;
+      text-decoration: none;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .booking-card:focus-visible,
+    .back-link:focus-visible {
+      outline: 3px solid rgba(168, 143, 53, 0.35);
+      outline-offset: 3px;
+    }
+
+    @media (min-width: 720px) {
+      html {
+        background:
+          radial-gradient(circle at 50% 0%, rgba(168, 143, 53, 0.1), transparent 32rem),
+          var(--color-background);
+      }
+
+      body { background: transparent; }
+
+      .booking-page {
+        padding-left: clamp(24px, 5vw, 72px);
+        padding-right: clamp(24px, 5vw, 72px);
+        background: transparent;
+      }
+
+      h1,
+      .subtitle {
+        white-space: nowrap;
+      }
+
+      .booking-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 22px 54px rgba(34, 34, 34, 0.1);
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="booking-page" aria-label="Termin buchen">
+    <a class="back-link" href="056_serviceportal_index.html" aria-label="Zurueck zum Serviceportal">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M20 11H7.83l5.59-5.59L12 4L4 12l8 8l1.42-1.41L7.83 13H20z" fill="currentColor" />
+      </svg>
+    </a>
+
+    <h1>Termin buchen</h1>
+    <p class="subtitle">Buche hier ganz bequem und einfach deinen Termin bei uns.</p>
+
+    <section class="booking-list" aria-label="Terminbereiche">
+      <a class="booking-card" href="https://timeacle.com/booking/company/stadt-goslar?search=Bürgerbüro">Bürgerbüro (Stadt Goslar)</a>
+      <a class="booking-card" href="https://timeacle.com/business/index/id/6624">Wohngeldstelle (Stadt Goslar)</a>
+      <a class="booking-card" href="https://formulare.landkreis-goslar.de/tvweb/select2?md=7">Ausländerbehörde (LK Goslar)</a>
+      <a class="booking-card" href="https://formulare.landkreis-goslar.de/tvweb/select2?md=13">Führerscheinstelle (LK Goslar)</a>
+      <a class="booking-card" href="https://formulare.landkreis-goslar.de/tvweb/select2?md=15">Kfz Zulassungsstelle (LK Goslar)</a>
+    </section>
+  </main>
+</body>
+</html>

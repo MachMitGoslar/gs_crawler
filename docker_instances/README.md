@@ -178,7 +178,7 @@ Das GS Crawler System besteht aus 24 Docker Containern, die verschiedene Website
 - **Cron:** `0 9 * * *` (täglich um 09:00 Uhr)
 - **Aufgabe:** Dienste des Goslarer Serviceportals
 - **Quelle:** https://service.goslar.de/home
-- **Output:** `056_serviceportal.json`, `056_serviceportal-alle.json`
+- **Output:** `056-serviceportal.json`, `056-serviceportal-alle.json`, `056_serviceportal_index.html`, `056_serviceportal_termin.html`
 
 ### 📷 Webcams
 

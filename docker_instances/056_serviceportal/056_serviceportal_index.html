@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Service Stadt Goslar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --color-background: #f5f5f5;
+      --color-card: #ffffff;
+      --color-text: #000000;
+      --color-copy: #3f3f3e;
+      --color-gold: #a88f35;
+      --radius-card: 16px;
+      --radius-icon: 12px;
+      --font-ui: "SF Pro Display", "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html {
+      min-height: 100%;
+      background: var(--color-background);
+    }
+
+    body {
+      margin: 0;
+      min-height: 100%;
+      font-family: var(--font-ui);
+      color: var(--color-text);
+      background: var(--color-background);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .service-page {
+      width: 100%;
+      min-height: 100vh;
+      margin: 0 auto;
+      padding: 50px clamp(15px, 4vw, 24px) 18px;
+      background: var(--color-background);
+    }
+
+    h1 {
+      max-width: none;
+      margin: 0;
+      font-family: "Inter", var(--font-ui);
+      font-weight: 700;
+      font-size: clamp(27px, 7vw, 34px);
+      line-height: 1.26;
+      letter-spacing: -1.4px;
+      color: var(--color-text);
+    }
+
+    .intro {
+      max-width: none;
+      margin: 3px 4px 0;
+      font-family: var(--font-ui);
+      font-weight: 590;
+      font-size: 12px;
+      line-height: 20px;
+      letter-spacing: -0.004em;
+      color: var(--color-copy);
+    }
+
+    .button-card {
+      width: 100%;
+      min-height: 68px;
+      display: flex;
+      align-items: center;
+      padding: 20px 15px;
+      border: 0;
+      border-radius: var(--radius-card);
+      background: var(--color-card);
+      color: var(--color-gold);
+      font-family: var(--font-ui);
+      font-weight: 700;
+      font-size: 18px;
+      line-height: 28px;
+      letter-spacing: -0.004em;
+      text-align: left;
+      text-decoration: none;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .button-card:focus-visible,
+    .portal-widget:focus-visible {
+      outline: 3px solid rgba(168, 143, 53, 0.35);
+      outline-offset: 2px;
+    }
+
+    .button-main { margin-top: 26px; }
+
+    .portal-widget {
+      position: relative;
+      width: 100%;
+      min-height: 115px;
+      margin-top: 16px;
+      display: block;
+      border-radius: var(--radius-card);
+      background: var(--color-card);
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .widget-icon-bg {
+      position: absolute;
+      left: 14px;
+      top: 16px;
+      width: 86px;
+      height: 83px;
+      border-radius: var(--radius-icon);
+      background: var(--color-background);
+    }
+
+    .widget-icon {
+      position: absolute;
+      width: 85px;
+      height: 85px;
+      left: 15px;
+      top: 15px;
+    }
+
+    .widget-title {
+      position: absolute;
+      left: 113px;
+      right: 24px;
+      top: 13.91%;
+      margin: 0;
+      font-family: var(--font-ui);
+      font-weight: 700;
+      font-size: 18px;
+      line-height: 28px;
+      letter-spacing: -0.004em;
+      color: var(--color-gold);
+    }
+
+    .widget-copy {
+      position: absolute;
+      left: 113px;
+      right: 9px;
+      top: 38.26%;
+      margin: 0;
+      font-family: var(--font-ui);
+      font-weight: 590;
+      font-size: 12px;
+      line-height: 20px;
+      letter-spacing: -0.004em;
+      color: var(--color-copy);
+    }
+
+    .more-title {
+      margin: 26px 0 0;
+      font-family: var(--font-ui);
+      font-weight: 700;
+      font-size: 18px;
+      line-height: 28px;
+      letter-spacing: -0.004em;
+      color: var(--color-copy);
+    }
+
+    .button-1,
+    .button-2,
+    .button-3,
+    .button-4,
+    .button-5 {
+      margin-top: 16px;
+    }
+
+    @media (min-width: 720px) {
+      html {
+        background:
+          radial-gradient(circle at 50% 0%, rgba(168, 143, 53, 0.12), transparent 28rem),
+          var(--color-background);
+      }
+
+      body { background: transparent; }
+
+      .service-page {
+        max-width: none;
+        padding-top: 50px;
+        padding-left: clamp(24px, 5vw, 72px);
+        padding-right: clamp(24px, 5vw, 72px);
+        padding-bottom: 40px;
+        background: transparent;
+      }
+
+      h1,
+      .intro {
+        white-space: nowrap;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="service-page" aria-label="Service Stadt Goslar">
+    <h1>Online-Dienstleistungen der Stadt Goslar</h1>
+    <p class="intro">Termine buchen, Anträge stellen und weitere Online Dienstleistungen - probier uns aus!</p>
+
+    <a class="button-card button-1" href="056_serviceportal_termin.html">Termin buchen</a>
+
+    <a class="portal-widget" href="https://service.goslar.de/?search=" aria-label="Zum Service Portal">
+      <span class="widget-icon-bg" aria-hidden="true"></span>
+      <svg class="widget-icon" viewBox="0 0 85 85" role="img" aria-label="Serviceportal Symbol">
+        <path d="M38 10h35v38H38z" fill="#B2B2B2" />
+        <path d="M8 43h33v32H8z" fill="#B09641" />
+        <path d="M1 15h28v28H1z" fill="#646363" />
+      </svg>
+      <p class="widget-title">Zum Service Portal</p>
+      <p class="widget-copy">Online Anträge stellen und mit der Verwaltung kommunizieren</p>
+    </a>
+
+    <p class="more-title">Weiteres:</p>
+
+    <a class="button-card button-1" href="https://www.goslar.de/stadt-und-verwaltung/aktuelles/aktuelle-meldungen/stadt-goslar-erhaelt-dokumentenausgabebox" >Dokumentenbox Info</a>
+    <a class="button-card button-2" href="https://www.xn--fundbrodeutschland-q6b.de/">Online Fundsachen (Fundbüro) </a>
+    <a class="button-card button-3" href="https://goslar.maps.arcgis.com/home/index.html">Geoportal</a>
+    <a class="button-card button-4" href="https://foyer.smartharz.de/foyer/machmithaus-innen/">Smart City: Demo Dashboard</a>
+    <a class="button-card button-5" href="https://service.goslar.de/dienstleistungen/-/egov-bis-detail/dienstleistung/3442/show" >Leerstandsmelder</a>
+  </main>
+
+  <script>
+    const SERVICE_JSON = '056-serviceportal-alle.json';
+    const serviceButtons = [...document.querySelectorAll('.button-1, .button-2, .button-3, .button-4, .button-5')];
+
+    function cleanTitle(value) {
+      return String(value || '')
+        .split('\n')
+        .pop()
+        .replace(/^"|"$/g, '')
+        .trim();
+    }
+
+    async function hydrateButtons() {
+      try {
+        const response = await fetch(SERVICE_JSON, { cache: 'no-store' });
+        if (!response.ok) return;
+        const services = await response.json();
+        services.slice(0, serviceButtons.length).forEach((service, index) => {
+          const title = cleanTitle(service.title || service.description);
+          if (title) serviceButtons[index].textContent = title;
+          if (service.call_to_action_url) serviceButtons[index].href = service.call_to_action_url;
+        });
+      } catch (_) {
+        // Static fallback links stay usable when the JSON is not available locally.
+      }
+    }
+
+    hydrateButtons();
+  </script>
+</body>
+</html>

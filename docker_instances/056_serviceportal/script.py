@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 import random
 import json
 import os
+import shutil
 from datetime import datetime
 
 # Ziel-URL
@@ -13,7 +14,12 @@ imageurl = "https://crawler.goslar.app/senioren/jsonapp/023-serviceportal.png"
 save_dir = "output/"
 export_jsonfile = "056-serviceportal.json"
 export_jsonfile_alle = "056-serviceportal-alle.json"
+export_htmlfiles = ["056_serviceportal_index.html", "056_serviceportal_termin.html"]
 os.makedirs(save_dir, exist_ok=True)
+
+for export_htmlfile in export_htmlfiles:
+    if os.path.exists(export_htmlfile):
+        shutil.copyfile(export_htmlfile, os.path.join(save_dir, export_htmlfile))
 
 try:
     response = requests.get(url, timeout=10)

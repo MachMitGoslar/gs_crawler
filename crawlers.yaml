@@ -350,6 +350,8 @@ crawlers:
     expected_files:
       - "056-serviceportal.json"
       - "056-serviceportal-alle.json"
+      - "056_serviceportal_index.html"
+      - "056_serviceportal_termin.html"
     implementation: custom
 
   # === MARKET DATA ===
