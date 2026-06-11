@@ -349,7 +349,6 @@ crawlers:
     schedule_human: "Täglich 09:00"
     expected_files:
       - "056-serviceportal.json"
-      - "056-serviceportal-alle.json"
       - "056_serviceportal_index.html"
       - "056_serviceportal_termin.html"
     implementation: custom

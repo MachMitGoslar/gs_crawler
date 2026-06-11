@@ -223,34 +223,5 @@
     <a class="button-card button-5" href="https://service.goslar.de/dienstleistungen/-/egov-bis-detail/dienstleistung/3442/show" >Leerstandsmelder</a>
   </main>
 
-  <script>
-    const SERVICE_JSON = '056-serviceportal-alle.json';
-    const serviceButtons = [...document.querySelectorAll('.button-1, .button-2, .button-3, .button-4, .button-5')];
-
-    function cleanTitle(value) {
-      return String(value || '')
-        .split('\n')
-        .pop()
-        .replace(/^"|"$/g, '')
-        .trim();
-    }
-
-    async function hydrateButtons() {
-      try {
-        const response = await fetch(SERVICE_JSON, { cache: 'no-store' });
-        if (!response.ok) return;
-        const services = await response.json();
-        services.slice(0, serviceButtons.length).forEach((service, index) => {
-          const title = cleanTitle(service.title || service.description);
-          if (title) serviceButtons[index].textContent = title;
-          if (service.call_to_action_url) serviceButtons[index].href = service.call_to_action_url;
-        });
-      } catch (_) {
-        // Static fallback links stay usable when the JSON is not available locally.
-      }
-    }
-
-    hydrateButtons();
-  </script>
 </body>
 </html>

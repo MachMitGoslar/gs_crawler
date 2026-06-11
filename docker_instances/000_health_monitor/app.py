@@ -227,7 +227,7 @@ if CONTAINERS is None:
         },
         'gs_compiler_056_serviceportal': {
             'name': 'Serviceportal Goslar',
-            'expected_files': ['056-serviceportal.json', '056-serviceportal-alle.json', '056_serviceportal_index.html', '056_serviceportal_termin.html'],
+            'expected_files': ['056-serviceportal.json', '056_serviceportal_index.html', '056_serviceportal_termin.html'],
             'source': 'https://service.goslar.de/home',
             'schedule': 'Täglich 09:00',
             'type': 'Service Portal'
