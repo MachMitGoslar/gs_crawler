@@ -22,12 +22,12 @@ selectors:
   image_url:
     selector: "div.PictureContainer img"
     attribute: "src"
-    prefix: "https://www.goslarsche.de/lokales/Goslar"
+    prefix: "https://www.goslarsche.de"
 
   call_to_action_url:
     selector: "h2.article-heading a"
     attribute: "href"
-    prefix: "https://www.goslarsche.de/lokales/Goslar"
+    prefix: "https://www.goslarsche.de"
 
 output:
   single:
