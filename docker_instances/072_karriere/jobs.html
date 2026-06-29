@@ -748,6 +748,7 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
   const DEFAULT_LOCATION = __DEFAULT_LOCATION__;
+  const APP_BASE_PATH = __APP_BASE_PATH__;
   const SEARCH_PARAMS = new URLSearchParams(location.search);
   const FILTER_MODAL = new bootstrap.Modal(document.getElementById('filter-modal'));
   const state = {
@@ -766,7 +767,7 @@
     try {
       showLoading('Stellenangebote werden geladen…');
       const apiParams = buildApiParamsFromUrl();
-      const res = await fetch('/jobs?' + apiParams.toString());
+      const res = await fetch(appPath('/jobs') + '?' + apiParams.toString());
       if (!res.ok && res.status !== 207) throw new Error('HTTP ' + res.status);
       const payload = await res.json();
 
@@ -876,7 +877,12 @@
   }
 
   function navigateWithParams(params) {
-    location.search = params.toString();
+    location.href = appPath('/') + '?' + params.toString();
+  }
+
+  function appPath(path) {
+    const normalizedPath = '/' + String(path || '').replace(/^\/+/, '');
+    return APP_BASE_PATH ? APP_BASE_PATH + normalizedPath : normalizedPath;
   }
 
   function setOrDelete(params, key, value) {

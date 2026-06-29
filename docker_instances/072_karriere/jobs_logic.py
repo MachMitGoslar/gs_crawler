@@ -6,6 +6,7 @@ from urllib.parse import quote
 
 from config import (
     ALLOWED_BUNDESAPI_FILTERS,
+    APP_BASE_PATH,
     DEFAULT_LOCATION,
     DETAIL_HTML_TEMPLATE_PATH,
     FIXED_RADIUS_KM,
@@ -18,12 +19,18 @@ from config import (
 from api_clients import fetch_job_detail, fetch_jobs, fetch_studium
 
 
+def app_path(path: str) -> str:
+    """Builds an application-local URL below the configured public base path."""
+    normalized_path = "/" + path.lstrip("/")
+    return f"{APP_BASE_PATH}{normalized_path}" if APP_BASE_PATH else normalized_path
+
+
 def normalize_bundesapi_job(job: dict[str, Any]) -> dict[str, Any]:
     """Normalisiert ein reguläres Jobsuche-Angebot in das gemeinsame Kartenformat."""
     work_location = job.get("arbeitsort") or {}
     logo_hash = job.get("kundennummerHash")
     detail_url = job.get("externeUrl")
-    fallback_url = f"/job-detail.html?source=bundesapi&id={quote(str(job.get('refnr') or ''))}"
+    fallback_url = app_path(f"/job-detail.html?source=bundesapi&id={quote(str(job.get('refnr') or ''))}")
     return {
         "source": "bundesapi",
         "source_label": OPEN_DATA_SOURCE_LABELS["bundesapi"],
@@ -44,7 +51,7 @@ def normalize_bundesapi_job(job: dict[str, Any]) -> dict[str, Any]:
         "detail_url": detail_url,
         "click_url": detail_url or fallback_url,
         "fallback_url": fallback_url,
-        "logo_url": f"/logo?source=bundesapi&hash={quote(logo_hash)}" if logo_hash else None,
+        "logo_url": app_path(f"/logo?source=bundesapi&hash={quote(logo_hash)}") if logo_hash else None,
         "raw": job,
     }
 
@@ -154,13 +161,17 @@ def render_html_page(location: str) -> str:
     """Lädt die Übersichtsseite und setzt den Default-Ort ein."""
     with open(HTML_TEMPLATE_PATH, encoding="utf-8") as html_file:
         html = html_file.read()
-    return html.replace("__DEFAULT_LOCATION__", json.dumps(location))
+    return (
+        html
+        .replace("__DEFAULT_LOCATION__", json.dumps(location))
+        .replace("__APP_BASE_PATH__", json.dumps(APP_BASE_PATH))
+    )
 
 
 def render_detail_html_page() -> str:
     """Lädt die HTML-Vorlage für die interne Detailseite."""
     with open(DETAIL_HTML_TEMPLATE_PATH, encoding="utf-8") as html_file:
-        return html_file.read()
+        return html_file.read().replace("__APP_BASE_PATH__", json.dumps(APP_BASE_PATH))
 
 
 def build_jobs_payload(filters: dict[str, str]) -> dict[str, Any]:
@@ -326,7 +337,7 @@ def build_bundesapi_job_detail_payload(refnr: str) -> dict[str, Any]:
         "published_at": detail.get("aktuelleVeroeffentlichungsdatum"),
         "location": " · ".join([part for part in location_parts if part]),
         "external_url": detail.get("externeUrl"),
-        "logo_url": f"/logo?source=bundesapi&hash={quote(str(logo_hash))}" if logo_hash else None,
+        "logo_url": app_path(f"/logo?source=bundesapi&hash={quote(str(logo_hash))}") if logo_hash else None,
         "raw": detail,
     }
 
