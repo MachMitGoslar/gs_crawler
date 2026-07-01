@@ -5,6 +5,7 @@ FROM ghcr.io/machmitgoslar/gs_crawler_python_basic_crawler:latest
 COPY script.py .
 COPY 056_serviceportal_index.html .
 COPY 056_serviceportal_termin.html .
+COPY 056_serviceportal_image.png .
 COPY crontab /etc/cron.d/mycron
 
 

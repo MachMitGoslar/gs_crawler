@@ -351,6 +351,7 @@ crawlers:
       - "056-serviceportal.json"
       - "056_serviceportal_index.html"
       - "056_serviceportal_termin.html"
+      - "056_serviceportal_image.png"
     implementation: custom
 
   # === MARKET DATA ===
