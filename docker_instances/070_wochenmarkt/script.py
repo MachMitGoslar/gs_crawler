@@ -1,7 +1,8 @@
 import requests
 import json
 import os
-from datetime import datetime
+from datetime import UTC, datetime
+from zoneinfo import ZoneInfo
 
 # ── Config ─────────────────────────────────────────────────────────────────────
 TOKEN_URL      = "https://backend.goslar-id.ceconsoft.de/connect/token"
@@ -12,12 +13,13 @@ SCOPE          = "markets.read"
 EVENTS_URL      = "https://external-gateway.hsp.ceconsoft.de/api/external/market-events/upcoming"
 ATTENDANCES_URL = "https://external-gateway.hsp.ceconsoft.de/api/external/market-events/{id}/attendances"
 
-BASE_URL   = "https://crawler.goslar.app/crawler"
-OUTPUT_DIR = "/app/output"
+BASE_URL   = "https://crawler.goslar.app/crawler/wochenmaerkte"
+OUTPUT_DIR = "/app/output/wochenmaerkte"
 
 DAYS   = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"]
 MONTHS = ["Januar", "Februar", "März", "April", "Mai", "Juni",
           "Juli", "August", "September", "Oktober", "November", "Dezember"]
+LOCAL_TIMEZONE = ZoneInfo("Europe/Berlin")
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
@@ -50,16 +52,17 @@ def get_attendances(token: str, event_id: str) -> list:
     print(f"Attendances response for event {event_id}: HTTP {resp.status_code}")
     resp.raise_for_status()
     attendances = resp.json()
+    print(f"Attendances payload for event {event_id}: {attendances}")
     print(f"Attendances payload count for event {event_id}: {len(attendances)}")
     return attendances
 
 
 def parse_dt(iso_str: str) -> datetime:
-    """Parse ISO 8601 datetime, strip timezone for local display."""
+    """Parse an API UTC datetime and convert it to German local time."""
     dt = datetime.fromisoformat(iso_str)
-    if dt.tzinfo is not None:
-        dt = dt.astimezone().replace(tzinfo=None)
-    return dt
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=UTC)
+    return dt.astimezone(LOCAL_TIMEZONE)
 
 
 def german_date(dt: datetime) -> str:
@@ -108,6 +111,13 @@ def vendor_address(vendor: dict) -> tuple[str, str]:
     street = " ".join(p for p in [vendor.get("street", ""), vendor.get("houseNumber", "")] if p).strip()
     city   = " ".join(p for p in [vendor.get("zip", ""),    vendor.get("city", "")]          if p).strip()
     return street, city
+
+
+def vendor_offer_description(vendor: dict) -> str:
+    """Return the vendor's offer description if the API provides one."""
+    return (
+        vendor.get("offerDescription")
+    ).strip()
 
 
 # ── Main ───────────────────────────────────────────────────────────────────────
@@ -166,7 +176,7 @@ def main():
         "title":              f"{market_name} – {date_label}",
         "description":        card_desc,
         "image_url":          market_image,
-        "call_to_action_url": f"{BASE_URL}/070_wochenmarkt_index.html",
+        "call_to_action_url": f"{BASE_URL}/070_wochenmarkt_alle.json",
         "published_at":       now_str,
     })
 
@@ -176,14 +186,22 @@ def main():
         vendor_id   = vendor["id"]
         vendor_name = vendor.get("name") or "Unbekannter Stand"
         street, city = vendor_address(vendor)
-        description = ", ".join(p for p in [street, city] if p) or market_loc
+        offer_description = vendor_offer_description(vendor)
+        address_description = ", ".join(p for p in [street, city] if p) or market_loc
+        description = ". ".join(
+            p for p in [
+                f"Wir haben für euch: {offer_description}" if offer_description else "",
+                address_description,
+            ]
+            if p
+        )
 
         index.append({
             "id":                 i,
             "title":              vendor_name,
             "description":        description,
             "image_url":          vendor.get("logoFileUrl"),
-            "call_to_action_url": f"{BASE_URL}/070_wochenmarkt_detail.html?id={vendor_id}",
+            "call_to_action_url": f"{BASE_URL}/070_wochenmarkt_{vendor_id}.json",
             "published_at":       now_str,
         })
 
@@ -196,12 +214,24 @@ def main():
         street, city = vendor_address(vendor)
         full_address = ", ".join(p for p in [street, city] if p)
         summary      = full_address or f"Stand auf dem {market_name}"
+        offer_description = vendor_offer_description(vendor)
 
         desc = f"<p>{vendor_name} ist beim {market_name} am {date_label} in {market_loc} dabei.</p>"
+        if offer_description:
+            desc += f"<p>Entdecken, genießen, mitnehmen: {offer_description}</p>"
         if full_address:
             desc += f"<p>Adresse: {full_address}</p>"
+        if vendor.get("offerDescription"):
+            desc += f"<p><strong>Angebot: </strong>{vendor['offerDescription']}</p>"
+        if vendor.get("contactEmailAddress"):
+            email = vendor["contactEmailAddress"]
+            desc += f'<p><a href="mailto:{email}">{email}</a></p>'
 
-        images = [{"url": vendor["logoFileUrl"]}] if vendor.get("logoFileUrl") else []
+        images = []
+        if vendor.get("marketStallImageUrl"):
+            images.append({"url": vendor["marketStallImageUrl"]})
+        if vendor.get("logoFileUrl"):
+            images.append({"url": vendor["logoFileUrl"]})
 
         write_json(os.path.join(OUTPUT_DIR, f"070_wochenmarkt_{vendor_id}.json"), {
             "id":                 i,

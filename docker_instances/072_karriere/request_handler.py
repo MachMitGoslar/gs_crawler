@@ -7,7 +7,7 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import parse_qs, urlparse
 
 from api_clients import fetch_logo
-from config import DEFAULT_LOCATION, LOGO_PLACEHOLDER_SVG
+from config import APP_BASE_PATH, DEFAULT_LOCATION, LOGO_PLACEHOLDER_SVG
 from jobs_logic import (
     build_bundesapi_job_detail_payload,
     build_jobs_payload,
@@ -26,52 +26,71 @@ class JobRequestHandler(BaseHTTPRequestHandler):
     def do_GET(self) -> None:
         """Routet eingehende GET-Requests auf HTML-, JSON- und Asset-Endpunkte."""
         parsed = urlparse(self.path)
+        path = self.route_path(parsed.path)
         query = parse_qs(parsed.query)
         filters = parse_filter_params(query)
         location = filters.get("wo", DEFAULT_LOCATION)
 
-        if parsed.path in {"/", "/jobs.html"}:
+        if path in {"/", "/jobs.html"}:
             self.send_html(200, render_html_page(location))
             return
 
-        if parsed.path == "/favicon.ico":
+        if path == "/favicon.ico":
             self.send_empty(204)
             return
 
-        if parsed.path == "/job-detail.html":
+        if path == "/job-detail.html":
             self.send_html(200, render_detail_html_page())
             return
 
-        if parsed.path == "/health":
+        if path == "/health":
             self.send_json(200, {"status": "ok"})
             return
 
-        if parsed.path in {"/job-details", "/job-details-data"}:
+        if path in {"/job-details", "/job-details-data"}:
             self.handle_job_details_data_request(query)
             return
 
-        if parsed.path == "/logo":
+        if path == "/logo":
             self.handle_logo_request(query)
             return
 
-        if parsed.path != "/jobs":
+        if path != "/jobs":
             self.send_json(
                 404,
                 {
                     "error": "Not found",
                     "available_endpoints": [
-                        "/",
-                        "/jobs.html?location=Goslar",
-                        "/job-detail.html?source=bundesapi&id=REFNR",
-                        "/job-details-data?source=bundesapi&id=REFNR",
-                        "/health",
-                        "/jobs?location=Goslar",
+                        self.public_path("/"),
+                        self.public_path("/jobs.html?location=Goslar"),
+                        self.public_path("/job-detail.html?source=bundesapi&id=REFNR"),
+                        self.public_path("/job-details-data?source=bundesapi&id=REFNR"),
+                        self.public_path("/health"),
+                        self.public_path("/jobs?location=Goslar"),
                     ],
                 },
             )
             return
 
         self.send_json(200, build_jobs_payload(filters))
+
+    def route_path(self, path: str) -> str:
+        """Maps public `/karriere/...` paths to the internal route table."""
+        if not APP_BASE_PATH:
+            return path
+        if path == APP_BASE_PATH:
+            return "/"
+        if path.startswith(f"{APP_BASE_PATH}/"):
+            stripped = path[len(APP_BASE_PATH):]
+            return stripped or "/"
+        return path
+
+    def public_path(self, path: str) -> str:
+        """Returns an endpoint path with the configured public base path."""
+        if not APP_BASE_PATH:
+            return path
+        separator = "" if path.startswith("/") else "/"
+        return f"{APP_BASE_PATH}{separator}{path}"
 
     def handle_job_details_data_request(self, query: dict[str, list[str]]) -> None:
         """Liefert die JSON-Daten für die interne Detailansicht eines BA-Jobs."""

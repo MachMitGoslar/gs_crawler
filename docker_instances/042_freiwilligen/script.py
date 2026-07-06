@@ -1,8 +1,10 @@
 import json
 import os
 import random
+import re
 import sys
 from datetime import datetime
+from html import unescape
 
 import requests
 from bs4 import BeautifulSoup
@@ -31,6 +33,11 @@ def normalize_whitespace(value):
     return " ".join(value.split()).strip()
 
 
+def normalize_description(value):
+    value = re.sub(r"<[^>]+>", " ", unescape(value or ""))
+    return normalize_whitespace(value)
+
+
 def unix_to_iso8601(timestamp_text, fallback):
     timestamp_text = (timestamp_text or "").strip()
     if not timestamp_text:
@@ -56,8 +63,8 @@ def build_offer_entry(offer, fallback_timestamp):
     if not title:
         return None
 
-    short_description = normalize_whitespace(get_tag_text(offer, "kurz_beschreibung"))
-    full_description = normalize_whitespace(get_tag_text(offer, "beschreibung"))
+    short_description = normalize_description(get_tag_text(offer, "kurz_beschreibung"))
+    full_description = normalize_description(get_tag_text(offer, "beschreibung"))
     description = short_description or full_description
 
     organization = normalize_whitespace(get_tag_text(offer, "einrichtungsname"))
@@ -73,6 +80,8 @@ def build_offer_entry(offer, fallback_timestamp):
         description = f"{description} ({organization})" if description else organization
     elif location:
         description = f"{description} ({location})" if description else location
+
+    description = normalize_description(description)
 
     avatar = normalize_whitespace(get_tag_text(offer, "avatar"))
     published_at = unix_to_iso8601(get_tag_text(offer, "bearbeitet"), fallback_timestamp)
@@ -122,7 +131,7 @@ def parse_offers(xml_text):
 def build_card(featured_offer):
     return {
         "title": featured_offer["title"],
-        "description": featured_offer["description"],
+        "description": normalize_description(featured_offer["description"]),
         "image_url": featured_offer["image_url"],
         "call_to_action_url": INDEX_JSON_URL,
         "published_at": featured_offer["published_at"],

@@ -11,6 +11,7 @@ DEFAULT_LOCATION = "Goslar"
 FIXED_RADIUS_KM = "60"
 DEFAULT_TIMEOUT_SECONDS = 30
 DEFAULT_PAGE_SIZE = 100
+APP_BASE_PATH = os.getenv("KARRIERE_BASE_PATH", "/karriere").rstrip("/") or ""
 
 HTML_TEMPLATE_PATH = os.path.join(BASE_DIR, "jobs.html")
 DETAIL_HTML_TEMPLATE_PATH = os.path.join(BASE_DIR, "job_detail.html")

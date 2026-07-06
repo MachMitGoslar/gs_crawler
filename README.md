@@ -25,7 +25,7 @@ To add/modify a crawler:
 3. Commit the changes
 
 <!-- CRAWLER_TABLE_START -->
-**Total Crawlers:** 27 (18 custom containers, 9 config-driven)
+**Total Crawlers:** 28 (19 custom containers, 9 config-driven)
 
 ### Infrastructure
 _System monitoring and management_
@@ -52,7 +52,7 @@ _Event calendars and activities_
 | 014_kunst_in_ar | Kunst in AR | Event Crawler | Täglich 08:00 | `017-kunst-in-ar-single.json` |
 | 019_was_app | WasApp Community | Community Feed | Alle 3 Minuten | `019_was_app.json` |
 | 027_erster_freitag | Erster Freitag Events | Event Crawler | Täglich 09:00 | `027-erster-freitag.json` |
-| 070_wochenmarkt | Wochenmarkt Goslar | Market Crawler | Alle 2 Stunden | `070_wochenmarkt_card.json, 070_wochenmarkt_alle...` |
+| 070_wochenmarkt | Wochenmarkt Goslar | Market Crawler | Alle 2 Stunden | `wochenmaerkte/070_wochenmarkt_card.json, wochen...` |
 
 ### Local Communities
 _Village and neighborhood news_
@@ -99,6 +99,7 @@ _Unique data sources requiring custom processing_
 | 032_webcams_goslar | Webcams Goslar | Webcam Processor | Täglich 09:00 | `032_webcams_goslar.json, 032_webcams.gif` |
 | 033_goslar24-7 | Goslar24-7 Webcams | Webcam Processor | Stündlich | `033_gif_schuhhof.json, 033_gif_schuhhof.gif, 03...` |
 | 056_serviceportal | Serviceportal Goslar | Service Portal | Täglich 09:00 | `056-serviceportal.json, 056_serviceportal_index.html, 056_serviceportal_termin.html` |
+| 060_defi_kataster | Defibrillatoren Kataster | Defi Locations | Täglich 06:00 | `060-defi-kataster.json` |
 
 ### API Services
 _API endpoints and services_
