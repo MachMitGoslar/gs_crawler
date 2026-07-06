@@ -24,6 +24,10 @@ def build_location_label(job: dict) -> str:
 
 def build_card_description(job: dict) -> str:
     segments = []
+    title = job.get("title")
+    if title:
+        segments.append(f"**{title}**.")
+
     employer = job.get("employer")
     if employer:
         segments.append(f"Arbeitgeber: {employer}.")

@@ -25,6 +25,21 @@ def app_path(path: str) -> str:
     return f"{APP_BASE_PATH}{normalized_path}" if APP_BASE_PATH else normalized_path
 
 
+def normalize_external_url(url: Any) -> str | None:
+    """Normalisiert externe Links aus der BA-API zu klickbaren HTTPS-URLs."""
+    value = str(url or "").strip()
+    if not value:
+        return None
+    if value.startswith(("http://", "https://")):
+        return value
+    return f"https://{value}"
+
+
+def build_ba_job_url(refnr: str) -> str:
+    """Erzeugt die konkrete öffentliche BA-Jobdetailseite für eine Referenznummer."""
+    return f"https://www.arbeitsagentur.de/jobsuche/jobdetail/{quote(refnr, safe='')}"
+
+
 def normalize_bundesapi_job(job: dict[str, Any]) -> dict[str, Any]:
     """Normalisiert ein reguläres Jobsuche-Angebot in das gemeinsame Kartenformat."""
     work_location = job.get("arbeitsort") or {}
@@ -37,7 +52,7 @@ def normalize_bundesapi_job(job: dict[str, Any]) -> dict[str, Any]:
         "category": "jobs",
         "category_label": SOURCE_CATEGORY_LABELS["jobs"],
         "id": job.get("refnr"),
-        "title": job.get("titel") or job.get("beruf"),
+        "title": job.get("titel") or job.get("beruf") or job.get("studiengang"),
         "employer": job.get("arbeitgeber"),
         "published_at": job.get("aktuelleVeroeffentlichungsdatum"),
         "starts_at": job.get("eintrittsdatum"),
@@ -325,18 +340,25 @@ def build_bundesapi_job_detail_payload(refnr: str) -> dict[str, Any]:
     """Baut den Detail-Response für die interne BundesAPI-Detailansicht."""
     detail = fetch_job_detail(refnr)
     logo_hash = detail.get("arbeitgeberKundennummerHash")
+    application_url = normalize_external_url(detail.get("externeUrl")) or build_ba_job_url(refnr)
     location_parts = []
     for place in detail.get("arbeitsorte") or []:
         location_parts.append(" ".join([str(place.get("plz", "")).strip(), str(place.get("ort", "")).strip()]).strip())
     return {
         "id": refnr,
-        "title": detail.get("stellenangebotsTitel") or refnr,
+        "title": detail.get("stellenangebotsTitel") or detail.get("beruf") or detail.get("studiengang") or detail.get("hauptberuf") or refnr,
         "employer": detail.get("arbeitgeberName") or detail.get("arbeitgeber") or "",
-        "summary": detail.get("beruf") or detail.get("titel") or "",
+        "summary": detail.get("beruf") or detail.get("titel") or detail.get("studiengang") or detail.get("hauptberuf") or "",
         "description_html": str(detail.get("stellenangebotsBeschreibung") or "Keine Detailbeschreibung vorhanden."),
         "published_at": detail.get("aktuelleVeroeffentlichungsdatum"),
+        "first_published_at": detail.get("datumErsteVeroeffentlichung"),
+        "application_period": detail.get("veroeffentlichungszeitraum"),
+        "starts_at": (detail.get("eintrittszeitraum") or {}).get("von"),
+        "employment_type": detail.get("stellenangebotsart"),
+        "contract_duration": detail.get("vertragsdauer"),
+        "compensation": detail.get("verguetungsangabe"),
         "location": " · ".join([part for part in location_parts if part]),
-        "external_url": detail.get("externeUrl"),
+        "external_url": application_url,
         "logo_url": app_path(f"/logo?source=bundesapi&hash={quote(str(logo_hash))}") if logo_hash else None,
         "raw": detail,
     }
