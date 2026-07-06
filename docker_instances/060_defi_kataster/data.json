@@ -1461,7 +1461,7 @@
     }
   },
   {
-    "title": "Lukas-Werk Gesundheitsdienste GmbH - Fachambulanz Sucht",
+    "title": "Defibrillator: Lukas-Werk Gesundheitsdienste GmbH - Fachambulanz Sucht",
     "city": "Goslar",
     "Defi": "",
     "phone": "053213588500",
@@ -1515,6 +1515,49 @@
         ],
         [
           "13:00",
+          "15:00"
+        ]
+      ],
+      "sa": [],
+      "so": []
+    }
+  },
+  {
+    "title": "Defibrillator: Ratsgymnasium Goslar",
+    "city": "Goslar",
+    "Defi": "",
+    "phone": "05321 38 170",
+    "lat": 51.908503,
+    "lng": 10.425344,
+    "opening_hours": {
+      "mo":  [
+                [
+          "07:30",
+          "15:00"
+        ]
+      ],
+      "di": [
+                [
+          "07:30",
+          "15:00"
+        ]
+      ],
+      "mi":  [
+                [
+          "07:30",
+          "15:00"
+        ]
+      ],
+      "do": [
+                [
+          "07:30",
+          "15:00"
+        ]
+      ],
+      "fr":  [
+
+                [
+          "07:30",
           "15:00"
         ]
       ],
