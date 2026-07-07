@@ -85,7 +85,7 @@ def main() -> None:
             "description": build_card_description(selected_job),
             "image_url": build_image_url(selected_job),
             "call_to_action_url": INDEX_URL,
-            "published_at": now_str,
+            "published_at": selected_job.get("published_at"),
         }
 
     with OUTPUT_FILE.open("w", encoding="utf-8") as output_file:
