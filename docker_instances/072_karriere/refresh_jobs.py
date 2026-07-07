@@ -26,7 +26,7 @@ def build_card_description(job: dict) -> str:
     segments = []
     title = job.get("title")
     if title:
-        segments.append(f"**{title}**.")
+        segments.append(f"{title}.")
 
     employer = job.get("employer")
     if employer:
