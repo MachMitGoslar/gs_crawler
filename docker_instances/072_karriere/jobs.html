@@ -616,6 +616,30 @@
       background: var(--color-background);
     }
 
+    .loader {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      z-index: 1080;
+      width: 40px;
+      --b: 8px;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      padding: 1px;
+      background: conic-gradient(#0000 10%,var(--color-primary)) content-box;
+      -webkit-mask:
+        repeating-conic-gradient(#0000 0deg,#000 1deg 20deg,#0000 21deg 36deg),
+        radial-gradient(farthest-side,#0000 calc(100% - var(--b) - 1px),#000 calc(100% - var(--b)));
+      -webkit-mask-composite: destination-in;
+              mask-composite: intersect;
+      animation:l4 1s infinite steps(10);
+      transform: translate(-50%, -50%);
+    }
+    @keyframes l4 {
+      to { transform: translate(-50%, -50%) rotate(1turn); }
+    }
+
     #reset-button,
     #save-filters.btn {
       min-height: 44px;
@@ -703,7 +727,7 @@
       </svg>
     </button>
   </div>
-  <div class="status-message" id="loading">Stellenangebote werden geladen…</div>
+  <div class="loader" id="loading"></div>
   <div class="status-message" id="error"></div>
   <div class="filter-summary" id="filter-summary"></div>
 </div>
@@ -902,7 +926,7 @@
     }
 
     try {
-      showLoading('Stellenangebote werden geladen…');
+      showLoading();
       const res = await fetch(appPath('/jobs') + '?' + apiParams.toString());
       if (!res.ok && res.status !== 207) throw new Error('HTTP ' + res.status);
       const payload = await res.json();
@@ -1122,9 +1146,8 @@
     document.getElementById('filter-summary').textContent = visible + '/' + total + ' sichtbar | ' + active.join(' | ');
   }
 
-  function showLoading(message) {
+  function showLoading() {
     const el = document.getElementById('loading');
-    el.textContent = message;
     el.style.display = 'block';
   }
 
