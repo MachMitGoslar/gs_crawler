@@ -130,7 +130,7 @@ def parse_offers(xml_text):
 
 def build_card(featured_offer):
     return {
-        "title": featured_offer["title"],
+        "title": "Freiwilligenagentur",
         "description": normalize_description(featured_offer["description"]),
         "image_url": featured_offer["image_url"],
         "call_to_action_url": INDEX_JSON_URL,
