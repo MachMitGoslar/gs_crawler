@@ -1,7 +1,11 @@
 import json
-import os
 import shutil
 from datetime import datetime
+from pathlib import Path
+
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+OUTPUT_DIR = Path("/app/output")
 
 IMAGE_URL = "https://crawler.goslar.app/crawler/056_serviceportal_image.png"
 EXPORT_JSON_FILE = "056-serviceportal.json"
@@ -17,4 +21,29 @@ entry = {
     "published_at": datetime.now().strftime("%Y-%m-%dT%H:%M")
 }
 
-print("Erfolgreich gespeichert:", entry["title"])
+
+def write_json() -> None:
+    path = OUTPUT_DIR / EXPORT_JSON_FILE
+    with path.open("w", encoding="utf-8") as handle:
+        json.dump(entry, handle, ensure_ascii=False, indent=2)
+        handle.write("\n")
+    print(f"Gespeichert: {path}")
+
+
+def copy_static_files() -> None:
+    for filename in [*EXPORT_HTML_FILES, *EXPORT_ASSET_FILES]:
+        source = SCRIPT_DIR / filename
+        target = OUTPUT_DIR / filename
+        shutil.copyfile(source, target)
+        print(f"Kopiert: {target}")
+
+
+def main() -> None:
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    write_json()
+    copy_static_files()
+    print("Erfolgreich gespeichert:", entry["title"])
+
+
+if __name__ == "__main__":
+    main()

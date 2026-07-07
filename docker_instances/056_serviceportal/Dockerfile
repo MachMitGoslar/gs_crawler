@@ -12,4 +12,5 @@ COPY crontab /etc/cron.d/mycron
 
 # Konfiguriere Cron
 RUN chmod 0600 /etc/cron.d/mycron && \
-    crontab /etc/cron.d/mycron
+    crontab /etc/cron.d/mycron && \
+    mkdir -p /app/output
