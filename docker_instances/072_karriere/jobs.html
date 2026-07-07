@@ -111,8 +111,8 @@
     .multi-select-toggle.show,
     .calendar-nav:focus-visible,
     .calendar-chip:focus-visible {
-      outline: 3px solid var(--color-primary);
-      outline-offset: 3px;
+      outline: 2px solid var(--color-primary);
+      outline-offset: 2px;
       box-shadow: none;
     }
 
@@ -350,38 +350,38 @@
     }
 
     .modal-field {
-      min-height: 72px;
+      min-height: 60px;
       display: flex;
       flex-direction: row;
       align-items: center;
       justify-content: space-between;
       gap: 16px;
-      padding: 12px 22px;
+      padding: 8px 22px;
       border-bottom: 1px solid var(--color-soft-border);
     }
 
-    .modal-field label {
+    .modal-field > label {
       margin: 0;
       color: var(--color-text);
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 700;
-      line-height: 28px;
+      line-height: 24px;
       letter-spacing: -0.004em;
     }
 
     .modal-grid input,
     .modal-grid select,
     .multi-select-toggle {
-      width: min(188px, 52vw);
-      min-height: 46px;
+      width: min(178px, 50vw);
+      min-height: 38px;
       border: none;
-      border-radius: 16px;
+      border-radius: 13px;
       background: #fff;
       color: var(--color-primary);
       padding: 0 12px;
-      font-size: 16px;
+      font-size: 14px;
       font-weight: 500;
-      line-height: 34px;
+      line-height: 28px;
       letter-spacing: -0.4px;
     }
 
@@ -397,14 +397,15 @@
       gap: 8px;
       text-align: left;
       cursor: pointer;
+      transition: box-shadow 0.16s ease, color 0.16s ease;
     }
 
     .multi-select-toggle::after {
       content: "";
-      width: 9px;
-      height: 9px;
-      border-right: 2px solid var(--color-primary);
-      border-bottom: 2px solid var(--color-primary);
+      width: 8px;
+      height: 8px;
+      border-right: 1.8px solid var(--color-primary);
+      border-bottom: 1.8px solid var(--color-primary);
       transform: rotate(45deg) translateY(-3px);
       flex: 0 0 auto;
     }
@@ -412,38 +413,38 @@
     .multi-select-menu,
     .calendar-menu {
       border: 1px solid #e1ded4;
-      border-radius: 18px;
-      padding: 8px;
-      box-shadow: 0 20px 42px #201c122e;
+      border-radius: 16px;
+      padding: 6px;
+      box-shadow: 0 14px 30px #201c1224;
     }
 
     .multi-select-menu {
       right: 0 !important;
       left: auto !important;
-      width: min(188px, 52vw);
-      min-width: min(188px, 52vw);
-      max-height: 260px;
+      width: min(232px, calc(100vw - 72px));
+      min-width: min(204px, calc(100vw - 72px));
+      max-height: 236px;
       overflow-y: auto;
       background: #fff;
-      transform: translate3d(0, 52px, 0) !important;
+      transform: translate3d(0, 44px, 0) !important;
     }
 
     .multi-select-option {
       display: flex;
       align-items: center;
+      justify-content: space-between;
       gap: 10px;
       width: 100%;
-      min-height: 38px;
+      min-height: 28px;
       border: none;
-      border-radius: 12px;
+      border-radius: 8px;
       background: transparent;
       color: var(--color-text);
       text-align: left;
-      padding: 6px 10px;
+      padding: 3px 7px;
       cursor: pointer;
-      font-size: 14px;
-      font-weight: 650;
-      line-height: 20px;
+      position: relative;
+      transition: background 0.14s ease, color 0.14s ease;
     }
 
     .multi-select-option:hover,
@@ -453,9 +454,16 @@
 
     .multi-select-option.is-selected-option,
     .multi-select-option:has(input:checked) {
-      background: #ec6fb3;
-      color: #fff;
-      font-weight: 800;
+      background: #f8f5e9;
+      color: var(--color-primary-dark);
+      font-weight: 560;
+    }
+
+    .dropdown-option {
+      font-family: var(--font-family);
+      font-size: 11px;
+      font-weight: 560;
+      line-height: 15px;
     }
 
     .multi-select-option input {
@@ -464,12 +472,14 @@
       pointer-events: none;
     }
 
-    .multi-select-option:has(input:checked)::before {
+    .multi-select-option:has(input:checked)::after,
+    .multi-select-option.is-selected-option::after {
       content: "✓";
-      flex: 0 0 auto;
-      color: #fff;
-      font-weight: 900;
+      color: var(--color-primary);
+      font-size: 12px;
+      font-weight: 800;
       line-height: 1;
+      margin-left: 8px;
     }
 
     .multi-select-summary {
@@ -485,8 +495,8 @@
       position: absolute !important;
       right: 0 !important;
       left: auto !important;
-      width: min(316px, calc(100vw - 48px));
-      min-width: min(316px, calc(100vw - 48px));
+      width: min(250px, calc(100vw - 48px));
+      min-width: min(250px, calc(100vw - 48px));
       padding: 14px;
       transform: translate3d(0, 52px, 0) !important;
       z-index: 1070;
@@ -507,11 +517,10 @@
 
     .calendar-month-label {
       flex: 1;
-      min-height: 34px;
       color: var(--color-text);
       text-align: center;
       text-transform: capitalize;
-      font-size: 15px;
+      font-size: 11px;
       font-weight: 800;
       letter-spacing: -0.004em;
     }
@@ -558,7 +567,7 @@
       border-radius: 11px;
       background: transparent;
       color: #2f2d29;
-      font-size: 13px;
+      font-size: 10px;
       font-weight: 700;
       font-variant-numeric: tabular-nums;
       cursor: pointer;
@@ -581,7 +590,7 @@
       color: var(--color-muted);
       padding: 0 12px;
       cursor: pointer;
-      font-size: 13px;
+      font-size: 11px;
       font-weight: 700;
     }
 
@@ -609,13 +618,13 @@
 
     #reset-button,
     #save-filters.btn {
-      min-height: 48px;
+      min-height: 44px;
       border: none;
-      border-radius: 16px;
-      padding: 0 18px;
-      font-size: 16px;
+      border-radius: 14px;
+      padding: 0 16px;
+      font-size: 15px;
       font-weight: 700;
-      line-height: 28px;
+      line-height: 24px;
     }
 
     #reset-button {
@@ -637,7 +646,7 @@
       .modal-actions { padding-inline: 20px; }
       .modal-grid input,
       .modal-grid select,
-      .multi-select-toggle { width: min(176px, 50vw); }
+      .multi-select-toggle { width: min(164px, 48vw); }
       .card { padding-left: 16px; }
     }
 
@@ -737,7 +746,7 @@
               <span class="multi-select-summary">Alle Arbeitgeber</span>
             </button>
             <div class="dropdown-menu multi-select-menu" id="filter-employer-menu" aria-labelledby="filter-employer">
-              <div class="multi-select-option">Lade Arbeitgeber…</div>
+              <div class="multi-select-option dropdown-option">Lade Arbeitgeber…</div>
             </div>
           </div>
         </div>
@@ -748,7 +757,7 @@
               <span class="multi-select-summary">Alle Berufsfelder</span>
             </button>
             <div class="dropdown-menu multi-select-menu" id="filter-berufsfeld-menu" aria-labelledby="filter-berufsfeld">
-              <div class="multi-select-option">Lade Berufsfelder…</div>
+              <div class="multi-select-option dropdown-option">Lade Berufsfelder…</div>
             </div>
           </div>
         </div>
@@ -759,11 +768,11 @@
               <span class="multi-select-summary">Beliebig</span>
             </button>
             <div class="dropdown-menu multi-select-menu" aria-labelledby="filter-arbeitszeit">
-              <label class="multi-select-option"><input type="checkbox" value="vz" data-multi-select="arbeitszeit" /> Vollzeit</label>
-              <label class="multi-select-option"><input type="checkbox" value="tz" data-multi-select="arbeitszeit" /> Teilzeit</label>
-              <label class="multi-select-option"><input type="checkbox" value="ho" data-multi-select="arbeitszeit" /> Homeoffice</label>
-              <label class="multi-select-option"><input type="checkbox" value="mj" data-multi-select="arbeitszeit" /> Minijob</label>
-              <label class="multi-select-option"><input type="checkbox" value="snw" data-multi-select="arbeitszeit" /> Schicht/Nacht/Wochenende</label>
+              <label class="multi-select-option dropdown-option"><input type="checkbox" value="vz" data-multi-select="arbeitszeit" /> Vollzeit</label>
+              <label class="multi-select-option dropdown-option"><input type="checkbox" value="tz" data-multi-select="arbeitszeit" /> Teilzeit</label>
+              <label class="multi-select-option dropdown-option"><input type="checkbox" value="ho" data-multi-select="arbeitszeit" /> Homeoffice</label>
+              <label class="multi-select-option dropdown-option"><input type="checkbox" value="mj" data-multi-select="arbeitszeit" /> Minijob</label>
+              <label class="multi-select-option dropdown-option"><input type="checkbox" value="snw" data-multi-select="arbeitszeit" /> Schicht/Nacht/Wochenende</label>
             </div>
           </div>
         </div>
@@ -774,8 +783,8 @@
               <span class="multi-select-summary">Beliebig</span>
             </button>
             <div class="dropdown-menu multi-select-menu" aria-labelledby="filter-befristung">
-              <label class="multi-select-option"><input type="checkbox" value="1" data-multi-select="befristung" /> Befristet</label>
-              <label class="multi-select-option"><input type="checkbox" value="2" data-multi-select="befristung" /> Unbefristet</label>
+              <label class="multi-select-option dropdown-option"><input type="checkbox" value="1" data-multi-select="befristung" /> Befristet</label>
+              <label class="multi-select-option dropdown-option"><input type="checkbox" value="2" data-multi-select="befristung" /> Unbefristet</label>
             </div>
           </div>
         </div>
@@ -821,11 +830,11 @@
               <span class="multi-select-summary">Alle Kategorien</span>
             </button>
             <div class="dropdown-menu multi-select-menu" aria-labelledby="filter-categories">
-              <label class="multi-select-option"><input type="checkbox" value="jobs" data-multi-select="categories" /> Jobs</label>
-              <label class="multi-select-option"><input type="checkbox" value="studium" data-multi-select="categories" /> Studium</label>
-              <label class="multi-select-option"><input type="checkbox" value="ausbildung" data-multi-select="categories" /> Ausbildungsstellen</label>
-              <label class="multi-select-option"><input type="checkbox" value="selbststaendigkeit" data-multi-select="categories" /> Selbständigkeit</label>
-              <label class="multi-select-option"><input type="checkbox" value="praktikum" data-multi-select="categories" /> Praktikum/Trainee/Werkstudent</label>
+              <label class="multi-select-option dropdown-option"><input type="checkbox" value="jobs" data-multi-select="categories" /> Jobs</label>
+              <label class="multi-select-option dropdown-option"><input type="checkbox" value="studium" data-multi-select="categories" /> Studium</label>
+              <label class="multi-select-option dropdown-option"><input type="checkbox" value="ausbildung" data-multi-select="categories" /> Ausbildungsstellen</label>
+              <label class="multi-select-option dropdown-option"><input type="checkbox" value="selbststaendigkeit" data-multi-select="categories" /> Selbständigkeit</label>
+              <label class="multi-select-option dropdown-option"><input type="checkbox" value="praktikum" data-multi-select="categories" /> Praktikum/Trainee/Werkstudent</label>
             </div>
           </div>
         </div>
@@ -836,10 +845,10 @@
               <span class="multi-select-summary" id="filter-sort-summary">Titel A-Z</span>
             </button>
             <div class="dropdown-menu multi-select-menu" aria-labelledby="filter-sort-toggle" id="filter-sort-menu">
-              <button class="multi-select-option" data-sort-option="title" type="button">Titel A-Z</button>
-              <button class="multi-select-option" data-sort-option="employer" type="button">Arbeitgeber A-Z</button>
-              <button class="multi-select-option" data-sort-option="location" type="button">Ort A-Z</button>
-              <button class="multi-select-option" data-sort-option="published" type="button">Neueste zuerst</button>
+              <button class="multi-select-option dropdown-option" data-sort-option="title" type="button">Titel A-Z</button>
+              <button class="multi-select-option dropdown-option" data-sort-option="employer" type="button">Arbeitgeber A-Z</button>
+              <button class="multi-select-option dropdown-option" data-sort-option="location" type="button">Ort A-Z</button>
+              <button class="multi-select-option dropdown-option" data-sort-option="published" type="button">Neueste zuerst</button>
             </div>
           </div>
           <input id="filter-sort" type="hidden" value="title" />
@@ -953,6 +962,8 @@
   }
 
   function hydrateModalFromUrl() {
+    setMultiSelectValues('employer', getMultiParam('arbeitgeber'));
+    setMultiSelectValues('berufsfeld', getMultiParam('berufsfeld'));
     setMultiSelectValues('arbeitszeit', getMultiParam('arbeitszeit'));
     setMultiSelectValues('befristung', getMultiParam('befristung'));
     document.getElementById('filter-published').value = convertDaysParamToDate(SEARCH_PARAMS.get('veroeffentlichtseit'));
@@ -1002,6 +1013,15 @@
   }
 
   function resetFilters() {
+    document.getElementById('search-input').value = '';
+    document.getElementById('filter-published').value = '';
+    setMultiSelectValues('employer', []);
+    setMultiSelectValues('berufsfeld', []);
+    setMultiSelectValues('arbeitszeit', []);
+    setMultiSelectValues('befristung', []);
+    setMultiSelectValues('categories', []);
+    setSortValue('title');
+    syncPublishedPicker();
     navigateWithParams(new URLSearchParams('location=' + encodeURIComponent(DEFAULT_LOCATION) + '&wo=' + encodeURIComponent(DEFAULT_LOCATION)));
   }
 
@@ -1228,13 +1248,13 @@
     if (!menu) return;
 
     if (!values.length) {
-      menu.innerHTML = '<div class="multi-select-option">Keine Optionen verfügbar</div>';
+      menu.innerHTML = '<div class="multi-select-option dropdown-option">Keine Optionen verfügbar</div>';
       updateMultiSelectSummary(name);
       return;
     }
 
     menu.innerHTML = values.map(value =>
-      '<label class="multi-select-option">'
+      '<label class="multi-select-option dropdown-option">'
       + '<input type="checkbox" value="' + esc(value) + '" data-multi-select="' + name + '" /> '
       + esc(value)
       + '</label>'
@@ -1357,7 +1377,7 @@
       target.textContent = defaultMultiSelectSummary(name);
       return;
     }
-    target.textContent = labels.join(', ');
+    target.textContent = labels.length === 1 ? labels[0] : labels.length + ' ausgewählt';
   }
 
   function defaultMultiSelectSummary(name) {
