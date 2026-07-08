@@ -336,7 +336,7 @@
       document.getElementById('vendor-description').innerHTML = renderRichText(job.description_html || '');
 
       if (job.published_at || job.location) {
-        if (job.published_at) document.getElementById('market-event-date').textContent = 'Veröffentlicht: ' + job.published_at;
+        if (job.published_at) document.getElementById('market-event-date').textContent = 'Veröffentlicht: ' + formatDateValue(job.published_at);
         if (job.location) document.getElementById('market-event-location').textContent = job.location;
         document.getElementById('market-event').style.display = 'flex';
       }
@@ -388,9 +388,9 @@
 
   function renderApplicationInfo(job) {
     const items = [
-      ['Beginn', job.starts_at],
+      ['Beginn', formatStartValue(job.starts_at, job)],
       ['Erstveröffentlicht', job.first_published_at],
-      ['Zeitraum', job.application_period],
+      ['Veröffentlichungszeitraum', job.application_period],
       ['Angebotsart', job.employment_type],
       ['Vertragsdauer', job.contract_duration],
       ['Vergütung', job.compensation],
@@ -429,7 +429,58 @@
     }
     const formatted = String(value).trim();
     if (isEmptyInfoValue(formatted)) return '';
-    return formatted;
+    return formatDateValue(formatted);
+  }
+
+  function formatDateValue(value) {
+    const formatted = String(value || '').trim();
+    if (!formatted) return '';
+
+    const dateOnly = parseIsoDate(formatted);
+    if (dateOnly) return formatGermanDate(dateOnly);
+
+    return formatted.replace(/\b(\d{4})-(\d{2})-(\d{2})(?:[T\s]\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:?\d{2})?)?\b/g, (match) => {
+      const date = parseIsoDate(match);
+      return date ? formatGermanDate(date) : match;
+    });
+  }
+
+  function formatStartValue(startsAt, job) {
+    const start = String(startsAt || '').trim();
+    if (!start) return '';
+    if (start.toLocaleLowerCase('de-DE').includes('sofort')) return 'ab sofort';
+    const startDate = dateToken(start);
+    const comparisonDates = [
+      job && job.published_at,
+      job && job.first_published_at,
+      job && job.application_period,
+    ].map(dateToken).filter(Boolean);
+    if (startDate && comparisonDates.includes(startDate)) return 'ab sofort';
+    return start;
+  }
+
+  function parseIsoDate(value) {
+    const match = String(value || '').trim().match(/^(\d{4})-(\d{2})-(\d{2})(?:[T\s].*)?$/);
+    if (!match) return null;
+    const date = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+
+  function formatGermanDate(date) {
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    return day + '.' + month + '.' + date.getFullYear();
+  }
+
+  function dateToken(value) {
+    const text = String(value || '').trim();
+    const iso = text.match(/(\d{4})-(\d{2})-(\d{2})/);
+    if (iso) return iso[1] + '-' + iso[2] + '-' + iso[3];
+
+    const german = text.match(/(\d{2})\.(\d{2})\.(\d{4})/);
+    if (german) return german[3] + '-' + german[2] + '-' + german[1];
+
+    return '';
   }
 
   function isEmptyInfoValue(value) {

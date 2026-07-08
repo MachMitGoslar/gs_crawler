@@ -1124,7 +1124,7 @@
         + '<div class="card-name">' + esc(job.title || 'Ohne Titel') + '</div>'
         + '<div class="card-address">' + esc(job.employer || 'Kein Arbeitgeber hinterlegt') + '</div>'
         + '<div class="card-meta">' + esc(meta) + '</div>'
-        + '<div class="card-cta">' + (job.detail_url ? 'Externes Angebot öffnen →' : job.click_url ? 'Interne Detailansicht öffnen →' : 'Kein Link verfügbar') + '</div>'
+        + '<div class="card-cta">' + (job.click_url ? 'Detailansicht öffnen →' : 'Kein Link verfügbar') + '</div>'
         + '</div>';
       grid.appendChild(card);
     }
@@ -1140,10 +1140,18 @@
     const active = ['Gebiet: Landkreis Goslar'];
     for (const key of ['was', 'arbeitgeber', 'berufsfeld', 'arbeitszeit', 'befristung', 'veroeffentlichtseit', 'categories']) {
       const value = SEARCH_PARAMS.get(key);
-      if (value) active.push(key + ': ' + value);
+      if (value) active.push(formatFilterSummaryItem(key, value));
     }
     active.push('Sortierung: ' + (SEARCH_PARAMS.get('sort') || 'title'));
     document.getElementById('filter-summary').textContent = visible + '/' + total + ' sichtbar | ' + active.join(' | ');
+  }
+
+  function formatFilterSummaryItem(key, value) {
+    if (key === 'veroeffentlichtseit') {
+      const date = parseInputDate(convertDaysParamToDate(value));
+      return 'Veröffentlicht seit: ' + (date ? formatDateForDisplay(date) : value);
+    }
+    return key + ': ' + value;
   }
 
   function showLoading() {
@@ -1606,7 +1614,9 @@
   }
 
   function formatDateForDisplay(date) {
-    return date.toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' });
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    return day + '.' + month + '.' + date.getFullYear();
   }
 
   function isSameDate(left, right) {
