@@ -264,15 +264,95 @@
     }
 
     @media (min-width: 900px) {
-      header { padding-inline: 48px; }
-      .card-body { padding-inline: 48px; }
-      .back-btn { margin-inline: 48px; }
+      header {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding-inline: 48px;
+      }
+
+      #content {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 0 48px 56px;
+      }
+
+      .card {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 340px;
+        gap: 10px 34px;
+        align-items: start;
+      }
+
+      .detail-sidebar {
+        grid-column: 2;
+        grid-row: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .logo-wrap {
+        height: 240px;
+        border-radius: 18px;
+        box-shadow: 0 8px 20px #0000000a;
+      }
+
+      .logo-wrap img {
+        object-fit: contain;
+        padding: 34px;
+        background: #fff;
+      }
+
+      .card-body {
+        grid-column: 1;
+        grid-row: 1 / span 2;
+        padding: 28px 0 0;
+      }
+
+      .vendor-name {
+        max-width: 760px;
+        margin-bottom: 8px;
+        font-size: 36px;
+        line-height: 44px;
+      }
+
+      .vendor-summary,
+      .vendor-description {
+        max-width: 760px;
+      }
+
+      .market-event {
+        max-width: 760px;
+      }
+
+      .application-info {
+        max-width: none;
+        margin: 0;
+      }
+
+      .application-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .application-link {
+        width: 100%;
+        min-width: 0;
+        padding-inline: 34px;
+      }
+
+      .back-btn {
+        margin: 18px 0 0;
+      }
     }
 
     @media (min-width: 1200px) {
-      header { padding-inline: 64px; }
-      .card-body { padding-inline: 64px; }
-      .back-btn { margin-inline: 64px; }
+      header { padding-inline: 24px; }
+      #content { padding-inline: 24px; }
+      .card {
+        grid-template-columns: minmax(0, 1fr) 380px;
+        gap: 10px 48px;
+      }
+      .logo-wrap { height: 260px; }
     }
   </style>
 </head>
@@ -287,8 +367,10 @@
 
 <div id="content">
   <div class="card">
-    <div class="logo-wrap" id="logo-wrap">
-      <div class="logo-placeholder"></div>
+    <div class="detail-sidebar" id="detail-sidebar">
+      <div class="logo-wrap" id="logo-wrap">
+        <div class="logo-placeholder"></div>
+      </div>
     </div>
     <div class="card-body">
       <div class="vendor-name" id="vendor-name"></div>
@@ -342,6 +424,7 @@
       }
 
       renderApplicationInfo(job);
+      syncApplicationInfoLayout();
 
       if (job.logo_url) {
         const img = document.createElement('img');
@@ -413,6 +496,23 @@
     target.innerHTML = intro + itemHtml + linkHtml;
     wrapper.style.display = items.length || linkHtml ? 'flex' : 'none';
   }
+
+  function syncApplicationInfoLayout() {
+    const sidebar = document.getElementById('detail-sidebar');
+    const body = document.querySelector('.card-body');
+    const info = document.getElementById('application-info');
+    const summary = document.getElementById('vendor-summary');
+    if (!sidebar || !body || !info || !summary) return;
+
+    if (window.matchMedia('(min-width: 900px)').matches) {
+      if (info.parentElement !== sidebar) sidebar.appendChild(info);
+      return;
+    }
+
+    if (info.parentElement !== body) body.insertBefore(info, summary);
+  }
+
+  window.addEventListener('resize', syncApplicationInfoLayout);
 
   function formatValue(value) {
     if (value === null || value === undefined || value === '') return '';
