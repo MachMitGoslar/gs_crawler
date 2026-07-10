@@ -25,7 +25,7 @@ To add/modify a crawler:
 3. Commit the changes
 
 <!-- CRAWLER_TABLE_START -->
-**Total Crawlers:** 28 (19 custom containers, 9 config-driven)
+**Total Crawlers:** 29 (20 custom containers, 9 config-driven)
 
 ### Infrastructure
 _System monitoring and management_
@@ -98,8 +98,9 @@ _Unique data sources requiring custom processing_
 |:---|:-----|:-----|:---------|:-------------|
 | 032_webcams_goslar | Webcams Goslar | Webcam Processor | Täglich 09:00 | `032_webcams_goslar.json, 032_webcams.gif` |
 | 033_goslar24-7 | Goslar24-7 Webcams | Webcam Processor | Stündlich | `033_gif_schuhhof.json, 033_gif_schuhhof.gif, 03...` |
-| 056_serviceportal | Serviceportal Goslar | Service Portal | Täglich 09:00 | `056-serviceportal.json, 056_serviceportal_index.html, 056_serviceportal_termin.html` |
-| 060_defi_kataster | Defibrillatoren Kataster | Defi Locations | Täglich 06:00 | `060-defi-kataster.json` |
+| 056_serviceportal | Serviceportal Goslar | Service Portal | Täglich 09:00 | `056-serviceportal.json, 056_serviceportal_index...` |
+| 060_defi_kataster | Defibrillatoren Kataster | Defi Locations | Täglich 06:00 | `defi-kataster/060-defi-kataster.json` |
+| 080_bereitschaftsdienste | Bereitschaftsdienste Goslar | Emergency Services | Alle 15 Minuten (API nur nach Endzeit) | `080_bereitschaftsdienste_card.json, 080_bereitschaftsdienste_index.html, 080_bereitschaftsdienste_medizinisch.html` |
 
 ### API Services
 _API endpoints and services_

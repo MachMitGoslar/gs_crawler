@@ -364,6 +364,19 @@ crawlers:
         - "defi-kataster/060-defi-kataster.json"
     implementation: custom
 
+  - id: "080_bereitschaftsdienste"
+    name: "Bereitschaftsdienste Goslar"
+    category: specialized
+    type: "Emergency Services"
+    source: "https://www.goslar.de/"
+    schedule: "*/15 * * * *"
+    schedule_human: "Alle 15 Minuten (API nur nach Endzeit)"
+    expected_files:
+      - "080_bereitschaftsdienste_card.json"
+      - "080_bereitschaftsdienste_index.html"
+      - "080_bereitschaftsdienste_medizinisch.html"
+    implementation: custom
+
 
   # === MARKET DATA ===
   - id: "070_wochenmarkt"

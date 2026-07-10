@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Medizinische Notdienste Goslar</title>
+  <style>
+    :root {
+      --color-background: #f5f5f5;
+      --color-card: #ffffff;
+      --color-text: #000000;
+      --color-copy: #3f3f3e;
+      --color-gold: #a88f35;
+      --color-border: rgba(0, 0, 0, 0.25);
+      --radius-card: 16px;
+      --font-ui: "SF Pro Display", "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html {
+      min-height: 100%;
+      background: var(--color-background);
+    }
+
+    body {
+      min-width: 320px;
+      min-height: 100%;
+      margin: 0;
+      background: var(--color-background);
+      color: var(--color-text);
+      font-family: var(--font-ui);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .medical-page {
+      width: 100%;
+      min-height: 100vh;
+      margin: 0 auto;
+      padding: 14px 15px 48px;
+      background: var(--color-background);
+    }
+
+    .back-link {
+      width: 24px;
+      height: 24px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-gold);
+      text-decoration: none;
+      font-size: 32px;
+      font-weight: 400;
+      line-height: 24px;
+    }
+
+    .back-link:focus-visible,
+    .service-card:focus-within,
+    .action-link:focus-visible,
+    .external-link:focus-visible {
+      outline: 3px solid rgba(168, 143, 53, 0.35);
+      outline-offset: 3px;
+    }
+
+    .page-title {
+      margin: 12px 4px 0;
+      color: var(--color-text);
+      font-size: 27px;
+      font-weight: 700;
+      line-height: 34px;
+      letter-spacing: -1.4px;
+    }
+
+    .page-intro {
+      max-width: 355px;
+      margin: 0 4px;
+      color: var(--color-copy);
+      font-size: 12px;
+      font-weight: 590;
+      line-height: 20px;
+      letter-spacing: -0.004em;
+    }
+
+    .service-list {
+      display: grid;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .service-card {
+      width: 100%;
+      min-height: 208px;
+      padding: 11px 14px 15px;
+      border-radius: var(--radius-card);
+      background: var(--color-card);
+      color: inherit;
+    }
+
+    .service-heading-row {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 34px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .service-title {
+      margin: 0;
+      color: var(--color-gold);
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 28px;
+      letter-spacing: -0.004em;
+    }
+
+    .external-link {
+      flex: 0 0 auto;
+      width: 20px;
+      height: 20px;
+      margin-top: 4px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-gold);
+      text-decoration: none;
+      font-size: 24px;
+      font-weight: 700;
+      line-height: 20px;
+    }
+
+    .provider-name {
+      margin: 8px 0 0;
+      color: var(--color-text);
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 28px;
+      letter-spacing: -0.004em;
+    }
+
+    .provider-address {
+      margin: 0;
+      color: var(--color-copy);
+      font-size: 12px;
+      font-weight: 590;
+      line-height: 20px;
+      letter-spacing: -0.004em;
+    }
+
+    .provider-meta {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 12px;
+      margin-top: 35px;
+      color: var(--color-copy);
+      font-size: 12px;
+      font-weight: 590;
+      line-height: 20px;
+      letter-spacing: -0.004em;
+    }
+
+    .meta-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+      white-space: nowrap;
+    }
+
+    .meta-item.call { justify-self: end; }
+
+    .meta-icon {
+      width: 16px;
+      height: 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #1c1b1f;
+      font-size: 16px;
+      line-height: 16px;
+    }
+
+    .action-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-top: 13px;
+    }
+
+    .action-link {
+      min-height: 34px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 16px;
+      background: var(--color-gold);
+      color: #ffffff;
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 590;
+      line-height: 20px;
+      text-align: center;
+      letter-spacing: -0.004em;
+    }
+
+    @media (min-width: 720px) {
+      html {
+        background:
+          radial-gradient(circle at 50% 0%, rgba(168, 143, 53, 0.12), transparent 28rem),
+          var(--color-background);
+      }
+
+      body { background: transparent; }
+
+      .medical-page {
+        max-width: 390px;
+        background: transparent;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="medical-page" aria-label="Medizinische Notdienste Goslar">
+    <a class="back-link" href="080_bereitschaftsdienste_index.html" aria-label="Zurück">←</a>
+    <h1 class="page-title">Medizinische Notdienste</h1>
+    <p class="page-intro">Medizinische Notdienste der Stadt Goslar auf einen Blick – schnell finden und direkt erreichen.</p>
+
+    <section class="service-list" aria-label="Medizinische Notdienste">
+      <article class="service-card">
+        <div class="service-heading-row">
+          <h2 class="service-title">Apotheken Notdienst</h2>
+          <a class="external-link" href="__PHARMACY_EXTERNAL_HREF__" target="_blank" rel="noopener noreferrer" aria-label="Apotheken Notdienst extern öffnen">↗</a>
+        </div>
+        <h3 class="provider-name">__PHARMACY_NAME__</h3>
+        <p class="provider-address">__PHARMACY_ADDRESS__</p>
+        <div class="provider-meta">
+          <span class="meta-item"><span class="meta-icon" aria-hidden="true">⌾</span><span id="pharmacy-distance" class="dynamic-distance">__PHARMACY_DISTANCE__</span></span>
+          <span class="meta-item call"><span class="meta-icon" aria-hidden="true">☎</span>__PHARMACY_PHONE__</span>
+        </div>
+        <div class="action-row">
+          <a class="action-link route-link" id="pharmacy-route" href="__PHARMACY_ROUTE_HREF__" data-lat="__PHARMACY_LAT__" data-lon="__PHARMACY_LON__" target="_blank" rel="noopener noreferrer">Route</a>
+          <a class="action-link" href="__PHARMACY_TEL_HREF__">Anrufen</a>
+        </div>
+      </article>
+
+      <article class="service-card">
+        <div class="service-heading-row">
+          <h2 class="service-title">Ärztlicher Bereitschaftsdienst</h2>
+          <a class="external-link" href="__DOCTOR_EXTERNAL_HREF__" target="_blank" rel="noopener noreferrer" aria-label="Ärztlichen Bereitschaftsdienst extern öffnen">↗</a>
+        </div>
+        <h3 class="provider-name">__DOCTOR_NAME__</h3>
+        <p class="provider-address">__DOCTOR_ADDRESS__</p>
+        <div class="provider-meta">
+          <span class="meta-item"><span class="meta-icon" aria-hidden="true">⌾</span><span class="dynamic-distance">__DOCTOR_DISTANCE__</span></span>
+          <span class="meta-item call"><span class="meta-icon" aria-hidden="true">☎</span>__DOCTOR_PHONE__</span>
+        </div>
+        <div class="action-row">
+          <a class="action-link route-link" href="__DOCTOR_ROUTE_HREF__" data-lat="__DOCTOR_LAT__" data-lon="__DOCTOR_LON__" target="_blank" rel="noopener noreferrer">Route</a>
+          <a class="action-link" href="__DOCTOR_TEL_HREF__">Anrufen</a>
+        </div>
+      </article>
+
+      <article class="service-card">
+        <div class="service-heading-row">
+          <h2 class="service-title">Zahnärztlicher Notdienst</h2>
+          <a class="external-link" href="https://www.kzvn.de/patienten/notdienst" target="_blank" rel="noopener noreferrer" aria-label="Zahnärztlichen Notdienst extern öffnen">↗</a>
+        </div>
+        <h3 class="provider-name">Einrichtung</h3>
+        <p class="provider-address">Straße Nr., PLZ Ort</p>
+        <div class="provider-meta">
+          <span class="meta-item"><span class="meta-icon" aria-hidden="true">⌾</span>0,0 km entfernt</span>
+          <span class="meta-item call"><span class="meta-icon" aria-hidden="true">☎</span>05321 000000</span>
+        </div>
+        <div class="action-row">
+          <a class="action-link" href="https://maps.google.com/?q=Goslar" target="_blank" rel="noopener noreferrer">Route</a>
+          <a class="action-link" href="tel:+495321000000">Anrufen</a>
+        </div>
+      </article>
+    </section>
+  </main>
+  <script>
+    const routeLinks = Array.from(document.querySelectorAll('.route-link'));
+    let userPosition = null;
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        position => {
+          userPosition = {
+            lat: position.coords.latitude,
+            lon: position.coords.longitude,
+          };
+          updateDistancesFromUserPosition();
+        },
+        () => {},
+        { enableHighAccuracy: true, timeout: 8000, maximumAge: 300000 }
+      );
+    }
+
+    for (const link of routeLinks) {
+      link.addEventListener('click', event => {
+        const lat = Number(link.dataset.lat || NaN);
+        const lon = Number(link.dataset.lon || NaN);
+        if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
+        event.preventDefault();
+        const destination = lat + ',' + lon;
+        const origin = userPosition ? userPosition.lat + ',' + userPosition.lon : '';
+        window.location.href = buildRouteUrl(origin, destination);
+      });
+    }
+
+    function updateDistancesFromUserPosition() {
+      for (const link of routeLinks) {
+        const lat = Number(link.dataset.lat || NaN);
+        const lon = Number(link.dataset.lon || NaN);
+        if (!Number.isFinite(lat) || !Number.isFinite(lon)) continue;
+        const card = link.closest('.service-card');
+        const target = card?.querySelector('.dynamic-distance');
+        if (!target) continue;
+        target.textContent = formatDistance(distanceKm(userPosition.lat, userPosition.lon, lat, lon));
+      }
+    }
+
+    function buildRouteUrl(origin, destination) {
+      if (isAppleDevice()) {
+        const params = new URLSearchParams({ daddr: destination, dirflg: 'd' });
+        if (origin) params.set('saddr', origin);
+        return 'https://maps.apple.com/?' + params.toString();
+      }
+
+      return origin
+        ? 'https://www.google.com/maps/dir/?api=1&origin=' + encodeURIComponent(origin) + '&destination=' + encodeURIComponent(destination) + '&travelmode=driving'
+        : 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(destination) + '&travelmode=driving';
+    }
+
+    function isAppleDevice() {
+      const platform = navigator.platform || '';
+      const ua = navigator.userAgent || '';
+      return /iPhone|iPad|iPod|Mac/.test(platform) || /iPhone|iPad|iPod|Macintosh/.test(ua);
+    }
+
+    function distanceKm(lat1, lon1, lat2, lon2) {
+      const radius = 6371;
+      const phi1 = toRad(lat1);
+      const phi2 = toRad(lat2);
+      const dPhi = toRad(lat2 - lat1);
+      const dLambda = toRad(lon2 - lon1);
+      const a = Math.sin(dPhi / 2) ** 2 + Math.cos(phi1) * Math.cos(phi2) * Math.sin(dLambda / 2) ** 2;
+      return radius * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+
+    function toRad(value) {
+      return value * Math.PI / 180;
+    }
+
+    function formatDistance(value) {
+      return value.toFixed(1).replace('.', ',') + ' km entfernt';
+    }
+  </script>
+</body>
+</html>

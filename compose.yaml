@@ -143,6 +143,13 @@ services:
     container_name: gs_compiler_060_defi_kataster
     restart: unless-stopped
 
+  gs_compiler_080_bereitschaftsdienste:
+    image: ghcr.io/machmitgoslar/gs_crawler_080_bereitschaftsdienste:latest
+    volumes:
+      - ./httpdocs/crawler:/app/output
+    container_name: gs_compiler_080_bereitschaftsdienste
+    restart: unless-stopped
+
   # === API SERVICES ===
   gs_compiler_068_altstadtfest:
     image: ghcr.io/machmitgoslar/gs_crawler_068_altstadtfest:latest
