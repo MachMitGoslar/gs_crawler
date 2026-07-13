@@ -100,7 +100,7 @@ _Unique data sources requiring custom processing_
 | 033_goslar24-7 | Goslar24-7 Webcams | Webcam Processor | Stündlich | `033_gif_schuhhof.json, 033_gif_schuhhof.gif, 03...` |
 | 056_serviceportal | Serviceportal Goslar | Service Portal | Täglich 09:00 | `056-serviceportal.json, 056_serviceportal_index...` |
 | 060_defi_kataster | Defibrillatoren Kataster | Defi Locations | Täglich 06:00 | `defi-kataster/060-defi-kataster.json` |
-| 080_bereitschaftsdienste | Bereitschaftsdienste Goslar | Emergency Services | Alle 15 Minuten (API nur nach Endzeit) | `080_bereitschaftsdienste_card.json, 080_bereitschaftsdienste_card.png, 080_bereitschaftsdienste_index.html, 080_bereitschaftsdienste_medizinisch.html, 080_bereitschaftsdienste_staedtisch.html, 080_bereitschaftsdienste_sicherheit.html` |
+| 080_bereitschaftsdienste | Bereitschaftsdienste Goslar | Emergency Services | Alle 15 Minuten (API nur nach Endzeit) | `080_bereitschaftsdienste_card.json, 080_bereits...` |
 
 ### API Services
 _API endpoints and services_
