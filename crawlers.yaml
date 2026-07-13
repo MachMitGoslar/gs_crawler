@@ -375,6 +375,8 @@ crawlers:
       - "080_bereitschaftsdienste_card.json"
       - "080_bereitschaftsdienste_index.html"
       - "080_bereitschaftsdienste_medizinisch.html"
+      - "080_bereitschaftsdienste_staedtisch.html"
+      - "080_bereitschaftsdienste_sicherheit.html"
     implementation: custom
 
 

@@ -1,12 +1,13 @@
 import json
 import math
+import re
 import ssl
 import shutil
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
 from urllib.error import HTTPError, URLError
-from urllib.parse import quote_plus
+from urllib.parse import quote_plus, urlencode
 from urllib.request import Request, urlopen
 
 
@@ -16,10 +17,13 @@ OUTPUT_DIR = Path("/app/output")
 EXPORT_JSON_FILE = "080_bereitschaftsdienste_card.json"
 INDEX_HTML_FILE = "080_bereitschaftsdienste_index.html"
 MEDICAL_HTML_FILE = "080_bereitschaftsdienste_medizinisch.html"
+SAFETY_HTML_FILE = "080_bereitschaftsdienste_sicherheit.html"
+CITY_HTML_FILE = "080_bereitschaftsdienste_staedtisch.html"
 PHARMACY_CACHE_FILE = "080_bereitschaftsdienste_apotheke_cache.json"
 DOCTOR_CACHE_FILE = "080_bereitschaftsdienste_arztpraxis_cache.json"
+DENTIST_CACHE_FILE = "080_bereitschaftsdienste_zahnarzt_cache.json"
 INDEX_HTML_URL = "https://crawler.goslar.app/crawler/080_bereitschaftsdienste_index.html"
-CACHE_VERSION = 4
+CACHE_VERSION = 10
 
 GOSLAR_LAT = 51.90355041574386
 GOSLAR_LON = 10.436801399999984
@@ -32,7 +36,16 @@ APOTHEKEN_AUTH_TOKEN = "uKs1pxszpo7IGpkOXwH1HFDSyEs1Fqmr"
 DOCTOR_API_URL = "https://bereitschaftspraxen.116117.de/api/data"
 DOCTOR_AUTH_TOKEN = "YmRwczpma3I0OTNtdmdfZg=="
 DOCTOR_REQ_VAL = "MzEyMjAwNw=="
+DENTIST_SERVICE_URL = "https://www.schaabner-haase.de/service.php"
+NOMINATIM_URL = "https://nominatim.openstreetmap.org/search"
 LOCAL_TZ = ZoneInfo("Europe/Berlin")
+DENTIST_COORDINATE_FALLBACKS = {
+    "insterburger": (51.9281006, 10.4314266),
+    "fischemäker": (51.9056, 10.4268),
+    "vogelsang": (51.9107, 10.4304),
+    "messingstr": (51.9049, 10.4188),
+    "marktstr": (51.9044, 10.4289),
+}
 
 entry = {
     "title": "Bereitschaftsdienste",
@@ -58,7 +71,21 @@ def copy_index_file() -> None:
     print(f"Kopiert: {target}")
 
 
-def write_medical_file(pharmacy: dict[str, str], doctor: dict[str, str]) -> None:
+def copy_safety_file() -> None:
+    source = SCRIPT_DIR / SAFETY_HTML_FILE
+    target = OUTPUT_DIR / SAFETY_HTML_FILE
+    shutil.copyfile(source, target)
+    print(f"Kopiert: {target}")
+
+
+def copy_city_file() -> None:
+    source = SCRIPT_DIR / CITY_HTML_FILE
+    target = OUTPUT_DIR / CITY_HTML_FILE
+    shutil.copyfile(source, target)
+    print(f"Kopiert: {target}")
+
+
+def write_medical_file(pharmacy: dict[str, str], doctor: dict[str, str], dentist: dict[str, str]) -> None:
     source = SCRIPT_DIR / MEDICAL_HTML_FILE
     target = OUTPUT_DIR / MEDICAL_HTML_FILE
     html = source.read_text(encoding="utf-8")
@@ -81,6 +108,16 @@ def write_medical_file(pharmacy: dict[str, str], doctor: dict[str, str]) -> None
         "__DOCTOR_EXTERNAL_HREF__": "https://bereitschaftspraxen.116117.de/",
         "__DOCTOR_LAT__": doctor.get("latitude") or "",
         "__DOCTOR_LON__": doctor.get("longitude") or "",
+        "__DENTIST_NAME__": dentist.get("name") or "Kein zahnärztlicher Notdienst gefunden",
+        "__DENTIST_ADDRESS__": dentist.get("address") or "Adresse nicht verfügbar",
+        "__DENTIST_DISTANCE__": dentist.get("distance_label") or "- km entfernt",
+        "__DENTIST_PHONE__": dentist.get("telephone") or "Keine Telefonnummer",
+        "__DENTIST_TEL_HREF__": dentist.get("telephone_href") or "#",
+        "__DENTIST_ROUTE_HREF__": dentist.get("route_href") or "#",
+        "__DENTIST_EXTERNAL_HREF__": dentist.get("external_href") or DENTIST_SERVICE_URL,
+        "__DENTIST_LAT__": dentist.get("latitude") or "",
+        "__DENTIST_LON__": dentist.get("longitude") or "",
+        "__DENTIST_DATE__": dentist.get("date_label") or "",
     }
     for key, value in replacements.items():
         html = html.replace(key, escape_html(value))
@@ -126,6 +163,25 @@ def get_current_doctor_practice() -> dict[str, str]:
         return fallback_doctor_practice()
 
 
+def get_current_dentist_service() -> dict[str, str]:
+    cached = read_valid_dentist_cache()
+    if cached:
+        print("Zahnärztlicher Notdienst aus Cache verwendet bis", cached.get("duty_end"))
+        return cached
+
+    try:
+        dentist = fetch_current_dentist_service()
+        write_dentist_cache(dentist)
+        return dentist
+    except (HTTPError, URLError, TimeoutError, RuntimeError) as exc:
+        print(f"Zahnarzt-Notdienst Scrape fehlgeschlagen: {exc}")
+        fallback = read_dentist_cache(ignore_expiry=True)
+        if fallback:
+            print("Abgelaufenen Zahnarzt-Cache als Fallback verwendet")
+            return fallback
+        return fallback_dentist_service()
+
+
 def read_valid_pharmacy_cache() -> dict[str, str] | None:
     cached = read_pharmacy_cache()
     if not cached:
@@ -140,6 +196,18 @@ def read_valid_pharmacy_cache() -> dict[str, str] | None:
 
 def read_valid_doctor_cache() -> dict[str, str] | None:
     cached = read_doctor_cache()
+    if not cached:
+        return None
+    if cached.get("cache_version") != CACHE_VERSION:
+        return None
+    duty_end = parse_datetime(cached.get("duty_end"))
+    if duty_end and datetime.now(timezone.utc) < duty_end:
+        return cached
+    return None
+
+
+def read_valid_dentist_cache() -> dict[str, str] | None:
+    cached = read_dentist_cache()
     if not cached:
         return None
     if cached.get("cache_version") != CACHE_VERSION:
@@ -176,6 +244,19 @@ def read_doctor_cache(ignore_expiry: bool = False) -> dict[str, str] | None:
     return cached if isinstance(cached, dict) else None
 
 
+def read_dentist_cache(ignore_expiry: bool = False) -> dict[str, str] | None:
+    path = OUTPUT_DIR / DENTIST_CACHE_FILE
+    if not path.exists():
+        return None
+    try:
+        cached = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return None
+    if ignore_expiry:
+        return cached
+    return cached if isinstance(cached, dict) else None
+
+
 def write_pharmacy_cache(pharmacy: dict[str, str]) -> None:
     path = OUTPUT_DIR / PHARMACY_CACHE_FILE
     with path.open("w", encoding="utf-8") as handle:
@@ -190,6 +271,14 @@ def write_doctor_cache(doctor: dict[str, str]) -> None:
         json.dump(doctor, handle, ensure_ascii=False, indent=2)
         handle.write("\n")
     print(f"Bereitschaftspraxis-Cache gespeichert: {path}")
+
+
+def write_dentist_cache(dentist: dict[str, str]) -> None:
+    path = OUTPUT_DIR / DENTIST_CACHE_FILE
+    with path.open("w", encoding="utf-8") as handle:
+        json.dump(dentist, handle, ensure_ascii=False, indent=2)
+        handle.write("\n")
+    print(f"Zahnarzt-Cache gespeichert: {path}")
 
 
 def fetch_current_pharmacy() -> dict[str, str]:
@@ -289,6 +378,173 @@ def fetch_current_doctor_practice() -> dict[str, str]:
         candidates.sort(key=lambda row: row[0])
         return candidates[0][1]
     raise RuntimeError("No current or upcoming doctor practice found")
+
+
+def fetch_current_dentist_service() -> dict[str, str]:
+    req = Request(
+        DENTIST_SERVICE_URL,
+        headers={
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Accept-Language": "de-DE,de;q=0.9,en;q=0.8",
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.5 Safari/605.1.15",
+        },
+    )
+    try:
+        with urlopen(req, timeout=20) as response:
+            html = response.read().decode("utf-8", errors="replace")
+    except URLError as exc:
+        if not isinstance(exc.reason, ssl.SSLCertVerificationError):
+            raise
+        with urlopen(req, timeout=20, context=ssl._create_unverified_context()) as response:
+            html = response.read().decode("utf-8", errors="replace")
+
+    entries = parse_dentist_entries(html)
+    if not entries:
+        raise RuntimeError("No dentist emergency entries found")
+
+    now_local = datetime.now(LOCAL_TZ)
+    selected = select_dentist_entry(entries, now_local)
+    lat, lon = geocode_dentist_address(selected["address"])
+    distance = distance_km(GOSLAR_LAT, GOSLAR_LON, lat, lon) if lat and lon else None
+    return build_dentist_payload(selected, lat, lon, distance)
+
+
+def parse_dentist_entries(html: str) -> list[dict[str, str]]:
+    match = re.search(r"<h4[^>]*>\s*Zahnärztlicher Notdienst\s*</h4>(.*?)<h4[^>]*>\s*Apotheken Notdienst\s*</h4>", html, re.S | re.I)
+    if not match:
+        return []
+    block = re.sub(r"<!--.*?-->", "", match.group(1), flags=re.S)
+    pattern = re.compile(r"<strong>\s*([^<]+?)\s*</strong>\s*([^<]+?)(?:<br\s*/?>)", re.I)
+    entries: list[dict[str, str]] = []
+    for date_label, details in pattern.findall(block):
+        details_text = clean_html_text(details)
+        if not details_text or "wird noch" in details_text.casefold():
+            continue
+        parsed = parse_dentist_details(details_text)
+        if parsed:
+            parsed["date_label"] = clean_html_text(date_label)
+            entries.append(parsed)
+    return entries
+
+
+def parse_dentist_details(details: str) -> dict[str, str] | None:
+    match = re.match(r"(?P<name>.*?),\s*(?P<address>.*?),\s*Tel\.?\s*:?\s*(?P<phone>.+)$", details, re.I)
+    if not match:
+        return None
+    name = match.group("name").strip()
+    address = normalize_dentist_address(match.group("address").strip())
+    phone = match.group("phone").strip()
+    return {
+        "name": name,
+        "address": address,
+        "telephone": phone,
+    }
+
+
+def normalize_dentist_address(address: str) -> str:
+    normalized = re.sub(r"\s+", " ", address).strip()
+    if re.search(r"\b\d{5}\b", normalized):
+        return normalized
+    return normalized + ", 38640 Goslar"
+
+
+def select_dentist_entry(entries: list[dict[str, str]], now_local: datetime) -> dict[str, str]:
+    candidates: list[tuple[bool, datetime, dict[str, str]]] = []
+    for entry in entries:
+        start, end = parse_dentist_date_range(entry["date_label"], now_local.year)
+        if not start or not end:
+            continue
+        if end < now_local:
+            start, end = parse_dentist_date_range(entry["date_label"], now_local.year + 1)
+        enriched = dict(entry)
+        enriched["duty_begin"] = start.astimezone(timezone.utc).isoformat()
+        enriched["duty_end"] = end.astimezone(timezone.utc).isoformat()
+        enriched["date_label"] = format_dentist_date_label(start, end)
+        candidates.append((start <= now_local <= end, start, enriched))
+    if not candidates:
+        raise RuntimeError("No matching dentist emergency entry found")
+    candidates.sort(key=lambda row: (not row[0], row[1]))
+    return candidates[0][2]
+
+
+def parse_dentist_date_range(value: str, year: int) -> tuple[datetime | None, datetime | None]:
+    match = re.match(r"\s*(\d{1,2})\.-(\d{1,2})\.(\d{1,2})\.?\s*$", value)
+    if not match:
+        return None, None
+    start_day = int(match.group(1))
+    end_day = int(match.group(2))
+    month = int(match.group(3))
+    start = datetime(year, month, start_day, 0, 0, tzinfo=LOCAL_TZ)
+    end = datetime(year, month, end_day, 23, 59, 59, tzinfo=LOCAL_TZ)
+    if end < start:
+        end += timedelta(days=31)
+    return start, end
+
+
+def format_dentist_date_label(start: datetime, end: datetime) -> str:
+    return start.strftime("%d.%m.%Y") + " - " + end.strftime("%d.%m.%Y")
+
+
+def geocode_dentist_address(address: str) -> tuple[float | None, float | None]:
+    fallback = dentist_coordinate_fallback(address)
+    if fallback:
+        return fallback
+
+    base_query = normalize_geocode_query(address if "Goslar" in address else address + ", Goslar")
+    no_zip_query = normalize_geocode_query(re.sub(r"\b\d{5}\s*", "", base_query).replace(", ,", ",").strip(" ,"))
+    street_query = no_zip_query.replace(" Str.", " Straße")
+    suffix_street_query = re.sub(r"str\.\s*", "straße ", no_zip_query, flags=re.I)
+    for query in [base_query, no_zip_query, street_query, suffix_street_query]:
+        if not query:
+            continue
+        url = NOMINATIM_URL + "?" + urlencode({"q": query, "format": "json", "limit": "1", "countrycodes": "de"})
+        req = Request(url, headers={"User-Agent": "machmitgoslar-gs-crawler/080"})
+        try:
+            with urlopen(req, timeout=10) as response:
+                payload = json.loads(response.read().decode("utf-8"))
+        except (HTTPError, URLError, TimeoutError, json.JSONDecodeError):
+            continue
+        if not payload:
+            continue
+        try:
+            return float(payload[0]["lat"]), float(payload[0]["lon"])
+        except (KeyError, TypeError, ValueError):
+            continue
+    return None, None
+
+
+def dentist_coordinate_fallback(address: str) -> tuple[float, float] | None:
+    normalized = address.casefold()
+    for token, coords in DENTIST_COORDINATE_FALLBACKS.items():
+        if token in normalized:
+            return coords
+    return None
+
+
+def normalize_geocode_query(value: str) -> str:
+    text = re.sub(r"\bStr\.(?=\d)", "Str. ", value)
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def build_dentist_payload(entry: dict[str, str], lat: float | None, lon: float | None, distance: float | None) -> dict[str, str]:
+    query = quote_plus(entry.get("address") or entry.get("name") or "Zahnarzt Notdienst Goslar")
+    telephone = entry.get("telephone") or ""
+    return {
+        "name": entry.get("name") or "Zahnärztlicher Notdienst",
+        "address": entry.get("address") or "",
+        "date_label": entry.get("date_label") or "",
+        "distance_label": format_distance(distance) if distance is not None else "- km entfernt",
+        "telephone": format_dentist_phone(telephone),
+        "telephone_href": "tel:" + normalize_phone(telephone) if telephone else "#",
+        "route_href": f"https://www.google.com/maps/dir/?api=1&destination={lat},{lon}&travelmode=driving" if lat and lon else f"https://www.google.com/maps/search/?api=1&query={query}",
+        "external_href": DENTIST_SERVICE_URL,
+        "latitude": str(lat or ""),
+        "longitude": str(lon or ""),
+        "duty_begin": entry.get("duty_begin") or "",
+        "duty_end": entry.get("duty_end") or "",
+        "fetched_at": datetime.now(timezone.utc).isoformat(),
+        "cache_version": CACHE_VERSION,
+    }
 
 
 def select_active_duty(item: dict, now: datetime) -> dict[str, datetime] | None:
@@ -418,8 +674,31 @@ def format_distance(distance: float) -> str:
     return f"{distance:.1f}".replace(".", ",") + " km entfernt"
 
 
+def clean_html_text(value: str) -> str:
+    text = re.sub(r"<[^>]+>", "", value)
+    return (
+        text.replace("&nbsp;", " ")
+        .replace("&amp;", "&")
+        .replace("&#228;", "ä")
+        .replace("&#196;", "Ä")
+        .strip()
+    )
+
+
 def normalize_phone(value: str) -> str:
-    return "+49" + "".join(ch for ch in value if ch.isdigit()).lstrip("0")
+    digits = "".join(ch for ch in value if ch.isdigit())
+    if digits == "116117":
+        return "116117"
+    if digits and not digits.startswith("0") and len(digits) <= 6:
+        return "+495321" + digits
+    return "+49" + digits.lstrip("0")
+
+
+def format_dentist_phone(value: str) -> str:
+    digits = "".join(ch for ch in value if ch.isdigit())
+    if digits and not digits.startswith("0") and len(digits) <= 6:
+        return "05321 " + digits
+    return value
 
 
 def fallback_pharmacy() -> dict[str, str]:
@@ -450,6 +729,22 @@ def fallback_doctor_practice() -> dict[str, str]:
     }
 
 
+def fallback_dentist_service() -> dict[str, str]:
+    return {
+        "name": "Zahnärztlicher Notdienst nicht verfügbar",
+        "address": "Bitte Notdienstseite öffnen",
+        "date_label": "",
+        "distance_label": "- km entfernt",
+        "telephone": "Keine Telefonnummer",
+        "telephone_href": "#",
+        "route_href": DENTIST_SERVICE_URL,
+        "external_href": DENTIST_SERVICE_URL,
+        "latitude": "",
+        "longitude": "",
+        "duty_end": "",
+    }
+
+
 def escape_html(value: str) -> str:
     return (
         str(value)
@@ -464,9 +759,12 @@ def main() -> None:
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     pharmacy = get_current_pharmacy()
     doctor = get_current_doctor_practice()
+    dentist = get_current_dentist_service()
     write_json()
     copy_index_file()
-    write_medical_file(pharmacy, doctor)
+    copy_city_file()
+    copy_safety_file()
+    write_medical_file(pharmacy, doctor, dentist)
     print("Erfolgreich gespeichert:", entry["title"])
 
 
