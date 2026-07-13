@@ -96,7 +96,7 @@ def write_medical_file(pharmacy: dict[str, str], doctor: dict[str, str], dentist
         "__PHARMACY_PHONE__": pharmacy.get("telephone") or "Keine Telefonnummer",
         "__PHARMACY_TEL_HREF__": pharmacy.get("telephone_href") or "#",
         "__PHARMACY_ROUTE_HREF__": pharmacy.get("route_href") or "#",
-        "__PHARMACY_EXTERNAL_HREF__": "https://www.aponet.de/notdienstsuche/Goslar%20Altstadt",
+        "__PHARMACY_EXTERNAL_HREF__": "https://www.apotheken.de/apotheken-und-notdienste-suchen/goslar/",
         "__PHARMACY_LAT__": pharmacy.get("latitude") or "",
         "__PHARMACY_LON__": pharmacy.get("longitude") or "",
         "__DOCTOR_NAME__": doctor.get("name") or "Keine Bereitschaftspraxis gefunden",
