@@ -15,6 +15,7 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 OUTPUT_DIR = Path("/app/output")
 
 EXPORT_JSON_FILE = "080_bereitschaftsdienste_card.json"
+CARD_IMAGE_FILE = "080_bereitschaftsdienste_card.png"
 INDEX_HTML_FILE = "080_bereitschaftsdienste_index.html"
 MEDICAL_HTML_FILE = "080_bereitschaftsdienste_medizinisch.html"
 SAFETY_HTML_FILE = "080_bereitschaftsdienste_sicherheit.html"
@@ -23,7 +24,8 @@ PHARMACY_CACHE_FILE = "080_bereitschaftsdienste_apotheke_cache.json"
 DOCTOR_CACHE_FILE = "080_bereitschaftsdienste_arztpraxis_cache.json"
 DENTIST_CACHE_FILE = "080_bereitschaftsdienste_zahnarzt_cache.json"
 INDEX_HTML_URL = "https://crawler.goslar.app/crawler/080_bereitschaftsdienste_index.html"
-CACHE_VERSION = 10
+CARD_IMAGE_URL = "https://crawler.goslar.app/crawler/080_bereitschaftsdienste_card.png"
+CACHE_VERSION = 11
 
 GOSLAR_LAT = 51.90355041574386
 GOSLAR_LON = 10.436801399999984
@@ -39,18 +41,12 @@ DOCTOR_REQ_VAL = "MzEyMjAwNw=="
 DENTIST_SERVICE_URL = "https://www.schaabner-haase.de/service.php"
 NOMINATIM_URL = "https://nominatim.openstreetmap.org/search"
 LOCAL_TZ = ZoneInfo("Europe/Berlin")
-DENTIST_COORDINATE_FALLBACKS = {
-    "insterburger": (51.9281006, 10.4314266),
-    "fischemäker": (51.9056, 10.4268),
-    "vogelsang": (51.9107, 10.4304),
-    "messingstr": (51.9049, 10.4188),
-    "marktstr": (51.9044, 10.4289),
-}
+
 
 entry = {
     "title": "Bereitschaftsdienste",
     "description": "Alle Notdienste der Stadt Goslar auf einen Blick – schnell finden, direkt erreichen und im Ernstfall sofort handeln.",
-    "image_url": "",
+    "image_url": CARD_IMAGE_URL,
     "call_to_action_url": INDEX_HTML_URL,
     "published_at": datetime.now().strftime("%Y-%m-%dT%H:%M"),
 }
@@ -67,6 +63,13 @@ def write_json() -> None:
 def copy_index_file() -> None:
     source = SCRIPT_DIR / INDEX_HTML_FILE
     target = OUTPUT_DIR / INDEX_HTML_FILE
+    shutil.copyfile(source, target)
+    print(f"Kopiert: {target}")
+
+
+def copy_card_image_file() -> None:
+    source = SCRIPT_DIR / CARD_IMAGE_FILE
+    target = OUTPUT_DIR / CARD_IMAGE_FILE
     shutil.copyfile(source, target)
     print(f"Kopiert: {target}")
 
@@ -176,7 +179,7 @@ def get_current_dentist_service() -> dict[str, str]:
     except (HTTPError, URLError, TimeoutError, RuntimeError) as exc:
         print(f"Zahnarzt-Notdienst Scrape fehlgeschlagen: {exc}")
         fallback = read_dentist_cache(ignore_expiry=True)
-        if fallback:
+        if fallback and fallback.get("cache_version") == CACHE_VERSION:
             print("Abgelaufenen Zahnarzt-Cache als Fallback verwendet")
             return fallback
         return fallback_dentist_service()
@@ -443,9 +446,9 @@ def parse_dentist_details(details: str) -> dict[str, str] | None:
 
 def normalize_dentist_address(address: str) -> str:
     normalized = re.sub(r"\s+", " ", address).strip()
-    if re.search(r"\b\d{5}\b", normalized):
-        return normalized
-    return normalized + ", 38640 Goslar"
+    normalized = re.sub(r"\b\d{5}\s*", "", normalized).strip(" ,")
+    normalized = re.sub(r",?\s*Goslar\s*$", "", normalized, flags=re.I).strip(" ,")
+    return normalized + ", Goslar"
 
 
 def select_dentist_entry(entries: list[dict[str, str]], now_local: datetime) -> dict[str, str]:
@@ -486,44 +489,28 @@ def format_dentist_date_label(start: datetime, end: datetime) -> str:
 
 
 def geocode_dentist_address(address: str) -> tuple[float | None, float | None]:
-    fallback = dentist_coordinate_fallback(address)
-    if fallback:
-        return fallback
-
-    base_query = normalize_geocode_query(address if "Goslar" in address else address + ", Goslar")
-    no_zip_query = normalize_geocode_query(re.sub(r"\b\d{5}\s*", "", base_query).replace(", ,", ",").strip(" ,"))
-    street_query = no_zip_query.replace(" Str.", " Straße")
-    suffix_street_query = re.sub(r"str\.\s*", "straße ", no_zip_query, flags=re.I)
-    for query in [base_query, no_zip_query, street_query, suffix_street_query]:
-        if not query:
-            continue
-        url = NOMINATIM_URL + "?" + urlencode({"q": query, "format": "json", "limit": "1", "countrycodes": "de"})
-        req = Request(url, headers={"User-Agent": "machmitgoslar-gs-crawler/080"})
+    query = normalize_dentist_address(address)
+    url = NOMINATIM_URL + "?" + urlencode({"q": query, "format": "json", "limit": "1", "countrycodes": "de"})
+    req = Request(url, headers={"User-Agent": "machmitgoslar-gs-crawler/080"})
+    try:
+        with urlopen(req, timeout=10) as response:
+            payload = json.loads(response.read().decode("utf-8"))
+    except URLError as exc:
+        if not isinstance(exc.reason, ssl.SSLCertVerificationError):
+            return None, None
         try:
-            with urlopen(req, timeout=10) as response:
+            with urlopen(req, timeout=10, context=ssl._create_unverified_context()) as response:
                 payload = json.loads(response.read().decode("utf-8"))
         except (HTTPError, URLError, TimeoutError, json.JSONDecodeError):
-            continue
-        if not payload:
-            continue
-        try:
-            return float(payload[0]["lat"]), float(payload[0]["lon"])
-        except (KeyError, TypeError, ValueError):
-            continue
-    return None, None
-
-
-def dentist_coordinate_fallback(address: str) -> tuple[float, float] | None:
-    normalized = address.casefold()
-    for token, coords in DENTIST_COORDINATE_FALLBACKS.items():
-        if token in normalized:
-            return coords
-    return None
-
-
-def normalize_geocode_query(value: str) -> str:
-    text = re.sub(r"\bStr\.(?=\d)", "Str. ", value)
-    return re.sub(r"\s+", " ", text).strip()
+            return None, None
+    except (HTTPError, TimeoutError, json.JSONDecodeError):
+        return None, None
+    if not payload:
+        return None, None
+    try:
+        return float(payload[0]["lat"]), float(payload[0]["lon"])
+    except (KeyError, TypeError, ValueError):
+        return None, None
 
 
 def build_dentist_payload(entry: dict[str, str], lat: float | None, lon: float | None, distance: float | None) -> dict[str, str]:
@@ -761,6 +748,7 @@ def main() -> None:
     doctor = get_current_doctor_practice()
     dentist = get_current_dentist_service()
     write_json()
+    copy_card_image_file()
     copy_index_file()
     copy_city_file()
     copy_safety_file()

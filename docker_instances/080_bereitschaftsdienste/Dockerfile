@@ -3,6 +3,7 @@ FROM ghcr.io/machmitgoslar/gs_crawler_python_basic_crawler:latest
 
 # Kopiere container-spezifische Dateien
 COPY script.py .
+COPY 080_bereitschaftsdienste_card.png .
 COPY 080_bereitschaftsdienste_index.html .
 COPY 080_bereitschaftsdienste_medizinisch.html .
 COPY 080_bereitschaftsdienste_sicherheit.html .

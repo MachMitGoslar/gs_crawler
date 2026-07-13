@@ -373,6 +373,7 @@ crawlers:
     schedule_human: "Alle 15 Minuten (API nur nach Endzeit)"
     expected_files:
       - "080_bereitschaftsdienste_card.json"
+      - "080_bereitschaftsdienste_card.png"
       - "080_bereitschaftsdienste_index.html"
       - "080_bereitschaftsdienste_medizinisch.html"
       - "080_bereitschaftsdienste_staedtisch.html"
