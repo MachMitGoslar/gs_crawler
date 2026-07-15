@@ -221,8 +221,6 @@ def main():
             desc += f"<p>Entdecken, genießen, mitnehmen: {offer_description}</p>"
         if full_address:
             desc += f"<p>Adresse: {full_address}</p>"
-        if vendor.get("offerDescription"):
-            desc += f"<p><strong>Angebot: </strong>{vendor['offerDescription']}</p>"
         if vendor.get("contactEmailAddress"):
             email = vendor["contactEmailAddress"]
             desc += f'<p><a href="mailto:{email}">{email}</a></p>'
