@@ -5,18 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Karriere Goslar</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="/ui-kit/goslar-ui.css" rel="stylesheet" />
   <style>
     :root {
-      --color-background: #f5f5f5;
-      --color-backgroundTile: #ffffff;
-      --color-primary: #a88f35;
+      --color-background: var(--gs-color-background, #f5f5f5);
+      --color-backgroundTile: var(--gs-color-card, #ffffff);
+      --color-primary: var(--gs-color-gold, #a88f35);
       --color-primary-dark: #806b1f;
-      --color-text: #000000;
-      --color-muted: #3f3f3e;
+      --color-text: var(--gs-color-text, #000000);
+      --color-muted: var(--gs-color-copy, #3f3f3e);
       --color-border: #d9d9d9;
       --color-soft-border: #e3e3e3;
       --color-error: #b42318;
-      --font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --font-family: var(--gs-font-ui, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
     }
 
     *, *::before, *::after { box-sizing: border-box; }
@@ -49,6 +50,13 @@
       letter-spacing: -0.4px;
     }
 
+    header .gs-page-title {
+      margin: 0;
+      font-size: 27px;
+      line-height: 34px;
+      letter-spacing: -0.4px;
+    }
+
     header p {
       max-width: 355px;
       margin: 0;
@@ -57,6 +65,11 @@
       font-weight: 590;
       line-height: 20px;
       letter-spacing: -0.004em;
+    }
+
+    header .gs-page-description {
+      max-width: 355px;
+      margin: 0;
     }
 
     .toolbar-wrap {
@@ -677,7 +690,9 @@
     @media (min-width: 768px) {
       header { padding: 72px 32px 12px; }
       header h1 { font-size: 34px; line-height: 42px; }
+      header .gs-page-title { font-size: 34px; line-height: 42px; }
       header p { max-width: 720px; font-size: 15px; line-height: 24px; }
+      header .gs-page-description { max-width: 720px; font-size: 15px; line-height: 24px; }
       .toolbar-wrap { margin-bottom: 16px; padding-inline: 32px; }
       .search-row { padding-inline: 0; }
       .grid { gap: 17px; padding-inline: 32px; }
@@ -714,10 +729,10 @@
     }
   </style>
 </head>
-<body>
-<header>
-  <h1 id="jobs-title">Karriere Goslar</h1>
-  <p id="jobs-subtitle">Jobs, Ausbildungsstellen und Praxisangebote im Landkreis Goslar</p>
+<body class="gs-body">
+<header class="gs-page-header">
+  <h1 class="gs-page-title" id="jobs-title">Karriere Goslar</h1>
+  <p class="gs-page-description" id="jobs-subtitle">Jobs, Ausbildungsstellen und Praxisangebote im Landkreis Goslar</p>
 </header>
 
 <div class="toolbar-wrap">
@@ -901,6 +916,9 @@
 <script>
   const DEFAULT_LOCATION = __DEFAULT_LOCATION__;
   const APP_BASE_PATH = __APP_BASE_PATH__;
+  const JOBS_DATA_URL = __JOBS_DATA_URL__;
+  const EMBEDDED_JOBS_DATA = __JOBS_DATA_JSON__;
+  const STATIC_INDEX_URL = __STATIC_INDEX_URL__;
   let SEARCH_PARAMS = new URLSearchParams(location.search);
   const LIST_STATE_KEY = 'karriere:list-state:v1';
   const FILTER_MODAL = new bootstrap.Modal(document.getElementById('filter-modal'));
@@ -931,15 +949,22 @@
 
     try {
       showLoading();
-      const res = await fetch(appPath('/jobs') + '?' + apiParams.toString());
-      if (!res.ok && res.status !== 207) throw new Error('HTTP ' + res.status);
-      const payload = await res.json();
+      const payload = await loadJobsPayload();
       applyJobsPayload(payload);
       writeListState({ payload, scrollY: 0 });
     } catch (e) {
       hideLoading();
       showError('Daten konnten nicht geladen werden: ' + e.message);
     }
+  }
+
+  async function loadJobsPayload() {
+    if (EMBEDDED_JOBS_DATA && Array.isArray(EMBEDDED_JOBS_DATA.results)) {
+      return EMBEDDED_JOBS_DATA;
+    }
+    const res = await fetch(JOBS_DATA_URL, { cache: 'no-cache' });
+    if (!res.ok && res.status !== 207) throw new Error('HTTP ' + res.status);
+    return res.json();
   }
 
   function applyJobsPayload(payload) {
@@ -1055,7 +1080,7 @@
 
   function navigateWithParams(params, options = {}) {
     const query = params.toString();
-    const nextUrl = appPath('/') + (query ? '?' + query : '');
+    const nextUrl = staticIndexPath() + (query ? '?' + query : '');
     if (options.replace) history.replaceState(null, '', nextUrl);
     else history.pushState(null, '', nextUrl);
     SEARCH_PARAMS = new URLSearchParams(location.search);
@@ -1069,6 +1094,12 @@
   function appPath(path) {
     const normalizedPath = '/' + String(path || '').replace(/^\/+/, '');
     return APP_BASE_PATH ? APP_BASE_PATH + normalizedPath : normalizedPath;
+  }
+
+  function staticIndexPath() {
+    if (APP_BASE_PATH) return appPath('/');
+    const current = location.pathname.split('/').pop();
+    return current || STATIC_INDEX_URL;
   }
 
   function setOrDelete(params, key, value) {

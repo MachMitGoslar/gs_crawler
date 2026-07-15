@@ -246,11 +246,19 @@ if CONTAINERS is None:
             'schedule': 'Alle 2 Stunden',
             'type': 'Market Crawler'
         },
-        'gs_compiler_072-karriere': {
+        'gs_compiler_072_karriere': {
             'name': 'Karriere Goslar',
-            'expected_files': ['072_karriere_card.json'],
+            'expected_files': [
+                'ui-kit/goslar-ui.css',
+                'ui-kit/goslar-ui.js',
+                '072_karriere_card.json',
+                '072_jobs.json',
+                '072_job_details.json',
+                '072_karriere_index.html',
+                '072_karriere_detail.html',
+            ],
             'source': 'https://rest.arbeitsagentur.de/',
-            'schedule': 'Alle 2 Stunden',
+            'schedule': 'Stündlich',
             'type': 'Job Portal'
         }
     }

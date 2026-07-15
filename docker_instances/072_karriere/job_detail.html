@@ -4,17 +4,18 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Job – Goslar</title>
+  <link href="/ui-kit/goslar-ui.css" rel="stylesheet" />
   <style>
     :root {
-      --color-background: #f5f5f5;
-      --color-backgroundTile: #ffffff;
-      --color-primary: #a88f35;
+      --color-background: var(--gs-color-background, #f5f5f5);
+      --color-backgroundTile: var(--gs-color-card, #ffffff);
+      --color-primary: var(--gs-color-gold, #a88f35);
       --color-primary-dark: #806b1f;
-      --color-text: #000000;
-      --color-muted: #3f3f3e;
+      --color-text: var(--gs-color-text, #000000);
+      --color-muted: var(--gs-color-copy, #3f3f3e);
       --color-border: #dbdbdb;
       --color-error: #b42318;
-      --font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --font-family: var(--gs-font-ui, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
     }
 
     *, *::before, *::after { box-sizing: border-box; }
@@ -59,6 +60,12 @@
       line-height: 1;
     }
 
+    header a.gs-back-link {
+      width: 24px;
+      height: 24px;
+      justify-content: center;
+    }
+
     header a:focus-visible,
     .back-btn:focus-visible,
     .application-link:focus-visible {
@@ -71,6 +78,13 @@
       color: var(--color-text);
       font-size: 18px;
       font-weight: 700;
+      line-height: 28px;
+      letter-spacing: -0.4px;
+    }
+
+    header .gs-page-title {
+      margin: 0;
+      font-size: 18px;
       line-height: 28px;
       letter-spacing: -0.4px;
     }
@@ -100,6 +114,14 @@
       overflow: visible;
     }
 
+    .detail-sidebar {
+      display: none;
+    }
+
+    .detail-sidebar.has-logo {
+      display: block;
+    }
+
     .logo-wrap {
       width: 100%;
       height: 213px;
@@ -113,14 +135,6 @@
       object-fit: cover;
       object-position: center;
       display: block;
-    }
-
-    .logo-placeholder {
-      width: 100%;
-      height: 100%;
-      background:
-        radial-gradient(circle at 70% 30%, #ffffff 0 18px, transparent 19px),
-        linear-gradient(135deg, #e8e0c8, #f7f5ef);
     }
 
     .card-body { padding: 19px; }
@@ -253,6 +267,7 @@
     @media (min-width: 768px) {
       header { padding: 24px 32px 12px; }
       header h1 { font-size: 21px; line-height: 30px; }
+      header .gs-page-title { font-size: 21px; line-height: 30px; }
       .logo-wrap { height: 320px; }
       .card-body { padding: 28px 32px 48px; }
       .vendor-name { font-size: 34px; line-height: 42px; }
@@ -286,9 +301,12 @@
       .detail-sidebar {
         grid-column: 2;
         grid-row: 1;
-        display: flex;
         flex-direction: column;
         gap: 10px;
+      }
+
+      .detail-sidebar.has-logo {
+        display: flex;
       }
 
       .logo-wrap {
@@ -356,10 +374,10 @@
     }
   </style>
 </head>
-<body>
+<body class="gs-body">
 <header>
-  <a id="back-btn" href="/karriere/">←</a>
-  <h1 id="market-name">Karriere Goslar</h1>
+  <a class="gs-back-link" id="back-btn" href="/karriere/" aria-label="Zurück">←</a>
+  <h1 class="gs-page-title" id="market-name">Karriere Goslar</h1>
 </header>
 
 <div id="loading">Job wird geladen…</div>
@@ -368,9 +386,6 @@
 <div id="content">
   <div class="card">
     <div class="detail-sidebar" id="detail-sidebar">
-      <div class="logo-wrap" id="logo-wrap">
-        <div class="logo-placeholder"></div>
-      </div>
     </div>
     <div class="card-body">
       <div class="vendor-name" id="vendor-name"></div>
@@ -394,8 +409,11 @@
   const id = params.get('id');
   const source = params.get('source') || 'bundesapi';
   const APP_BASE_PATH = __APP_BASE_PATH__;
+  const DETAILS_DATA_URL = __DETAILS_DATA_URL__;
+  const EMBEDDED_DETAILS_DATA = __DETAILS_DATA_JSON__;
+  const STATIC_INDEX_URL = __STATIC_INDEX_URL__;
   const LIST_STATE_KEY = 'karriere:list-state:v1';
-  const INDEX_PAGE = appPath('/');
+  const INDEX_PAGE = staticIndexPath();
   const RETURN_PAGE = getSavedListUrl() || INDEX_PAGE;
 
   document.getElementById('back-btn').href = RETURN_PAGE;
@@ -408,9 +426,9 @@
     }
 
     try {
-      const res = await fetch(appPath('/job-details-data') + '?source=' + encodeURIComponent(source) + '&id=' + encodeURIComponent(id));
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      const job = await res.json();
+      const details = await loadDetailsPayload();
+      const job = resolveJobDetail(details);
+      if (!job) throw new Error('Keine Detaildaten für dieses Angebot gefunden.');
 
       document.title = (job.title ?? 'Job') + ' – Landkreis Goslar';
       document.getElementById('vendor-name').textContent = job.title || '';
@@ -424,23 +442,23 @@
       }
 
       renderApplicationInfo(job);
+      renderLogo(job);
       syncApplicationInfoLayout();
-
-      if (job.logo_url) {
-        const img = document.createElement('img');
-        img.src = job.logo_url;
-        img.alt = job.employer || job.title || 'Logo';
-        img.onerror = () => img.replaceWith(makePlaceholder());
-        const wrap = document.getElementById('logo-wrap');
-        wrap.innerHTML = '';
-        wrap.appendChild(img);
-      }
 
       document.getElementById('loading').style.display = 'none';
       document.getElementById('content').style.display = 'block';
     } catch (e) {
       showError('Job konnte nicht geladen werden: ' + e.message);
     }
+  }
+
+  async function loadDetailsPayload() {
+    if (EMBEDDED_DETAILS_DATA && typeof EMBEDDED_DETAILS_DATA === 'object') {
+      return EMBEDDED_DETAILS_DATA;
+    }
+    const res = await fetch(DETAILS_DATA_URL, { cache: 'no-cache' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    return res.json();
   }
 
   function showError(msg) {
@@ -450,10 +468,27 @@
     el.textContent = msg;
   }
 
-  function makePlaceholder() {
-    const d = document.createElement('div');
-    d.className = 'logo-placeholder';
-    return d;
+  function renderLogo(job) {
+    const sidebar = document.getElementById('detail-sidebar');
+    if (!sidebar) return;
+    sidebar.classList.remove('has-logo');
+    sidebar.innerHTML = '';
+
+    if (!job.logo_url) return;
+
+    const wrap = document.createElement('div');
+    wrap.className = 'logo-wrap';
+    const img = document.createElement('img');
+    img.src = job.logo_url;
+    img.alt = job.employer || job.title || 'Logo';
+    img.onerror = () => {
+      sidebar.classList.remove('has-logo');
+      sidebar.innerHTML = '';
+      syncApplicationInfoLayout();
+    };
+    wrap.appendChild(img);
+    sidebar.appendChild(wrap);
+    sidebar.classList.add('has-logo');
   }
 
   function getSavedListUrl() {
@@ -491,7 +526,7 @@
         ).join('') + '</div>'
       : '';
     const linkHtml = job.external_url
-      ? '<a class="application-link" href="' + escapeHtml(job.external_url) + '" target="_blank" rel="noopener noreferrer">Jetzt bewerben →</a>'
+      ? '<a class="application-link gs-action" href="' + escapeHtml(job.external_url) + '" target="_blank" rel="noopener noreferrer">Jetzt bewerben →</a>'
       : '';
     target.innerHTML = intro + itemHtml + linkHtml;
     wrapper.style.display = items.length || linkHtml ? 'flex' : 'none';
@@ -504,7 +539,7 @@
     const summary = document.getElementById('vendor-summary');
     if (!sidebar || !body || !info || !summary) return;
 
-    if (window.matchMedia('(min-width: 900px)').matches) {
+    if (window.matchMedia('(min-width: 900px)').matches && sidebar.classList.contains('has-logo')) {
       if (info.parentElement !== sidebar) sidebar.appendChild(info);
       return;
     }
@@ -595,6 +630,19 @@
   function appPath(path) {
     const normalizedPath = '/' + String(path || '').replace(/^\/+/, '');
     return APP_BASE_PATH ? APP_BASE_PATH + normalizedPath : normalizedPath;
+  }
+
+  function staticIndexPath() {
+    if (APP_BASE_PATH) return appPath('/');
+    return STATIC_INDEX_URL;
+  }
+
+  function resolveJobDetail(details) {
+    if (!details || typeof details !== 'object') return null;
+    return details[source + ':' + id]
+      || details['bundesapi:' + id]
+      || details[id]
+      || null;
   }
 
   function renderRichText(content) {

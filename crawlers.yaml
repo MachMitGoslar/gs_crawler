@@ -348,6 +348,8 @@ crawlers:
     schedule: "0 9 * * *"
     schedule_human: "Täglich 09:00"
     expected_files:
+      - "ui-kit/goslar-ui.css"
+      - "ui-kit/goslar-ui.js"
       - "056-serviceportal.json"
       - "056_serviceportal_index.html"
       - "056_serviceportal_termin.html"
@@ -372,6 +374,8 @@ crawlers:
     schedule: "*/15 * * * *"
     schedule_human: "Alle 15 Minuten (API nur nach Endzeit)"
     expected_files:
+      - "ui-kit/goslar-ui.css"
+      - "ui-kit/goslar-ui.js"
       - "080_bereitschaftsdienste_card.json"
       - "080_bereitschaftsdienste_card.png"
       - "080_bereitschaftsdienste_index.html"
@@ -417,11 +421,16 @@ crawlers:
     category: api
     type: "Job Portal"
     source: "https://github.com/bundesAPI"
-    schedule: "0 */2 * * *"
-    schedule_human: "Alle 2 Stunden"
+    schedule: "0 * * * *"
+    schedule_human: "Stündlich"
     expected_files:
+      - "ui-kit/goslar-ui.css"
+      - "ui-kit/goslar-ui.js"
       - "072_karriere_card.json"
-    ports:
-      - "5017:8000"
+      - "072_jobs.json"
+      - "072_job_details.json"
+      - "072_karriere_index.html"
+      - "072_karriere_detail.html"
+    ports: []
     implementation: custom
-    notes: "Lokales Job-Portal fuer Landkreis Goslar. Schreibt alle 2 Stunden eine zufaellige Job-Card als JSON und stellt eine HTTP-Oberflaeche bereit."
+    notes: "Statischer Karriereportal-Export fuer Landkreis Goslar. Laedt stündlich Jobdaten und schreibt HTML plus JSON nach /app/output."

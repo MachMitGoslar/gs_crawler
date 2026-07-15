@@ -13,9 +13,13 @@ from urllib.request import Request, urlopen
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 OUTPUT_DIR = Path("/app/output")
+UI_KIT_DIR = SCRIPT_DIR / "ui-kit"
 
 EXPORT_JSON_FILE = "080_bereitschaftsdienste_card.json"
 CARD_IMAGE_FILE = "080_bereitschaftsdienste_card.png"
+UI_CSS_FILE = "goslar-ui.css"
+UI_JS_FILE = "goslar-ui.js"
+UI_OUTPUT_DIR = "ui-kit"
 INDEX_HTML_FILE = "080_bereitschaftsdienste_index.html"
 MEDICAL_HTML_FILE = "080_bereitschaftsdienste_medizinisch.html"
 SAFETY_HTML_FILE = "080_bereitschaftsdienste_sicherheit.html"
@@ -72,6 +76,16 @@ def copy_card_image_file() -> None:
     target = OUTPUT_DIR / CARD_IMAGE_FILE
     shutil.copyfile(source, target)
     print(f"Kopiert: {target}")
+
+
+def copy_ui_kit_files() -> None:
+    target_dir = OUTPUT_DIR / UI_OUTPUT_DIR
+    target_dir.mkdir(parents=True, exist_ok=True)
+    for filename in [UI_CSS_FILE, UI_JS_FILE]:
+        source = UI_KIT_DIR / filename
+        target = target_dir / filename
+        shutil.copyfile(source, target)
+        print(f"Kopiert: {target}")
 
 
 def copy_safety_file() -> None:
@@ -749,6 +763,7 @@ def main() -> None:
     dentist = get_current_dentist_service()
     write_json()
     copy_card_image_file()
+    copy_ui_kit_files()
     copy_index_file()
     copy_city_file()
     copy_safety_file()

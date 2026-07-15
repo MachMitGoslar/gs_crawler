@@ -4,240 +4,59 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Städtische Notdienste Goslar</title>
+  <link rel="stylesheet" href="ui-kit/goslar-ui.css" />
   <style>
-    :root {
-      --color-background: #f5f5f5;
-      --color-card: #ffffff;
-      --color-text: #000000;
-      --color-copy: #3f3f3e;
-      --color-gold: #a88f35;
-      --color-border: rgba(0, 0, 0, 0.25);
-      --radius-card: 16px;
-      --font-ui: "SF Pro Display", "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
-
-    *, *::before, *::after { box-sizing: border-box; }
-
-    html {
-      min-height: 100%;
-      background: var(--color-background);
-    }
-
-    body {
-      min-width: 320px;
-      min-height: 100%;
-      margin: 0;
-      background: var(--color-background);
-      color: var(--color-text);
-      font-family: var(--font-ui);
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-    }
-
-    .city-page {
-      width: 100%;
-      min-height: 100vh;
-      max-width: 390px;
-      margin: 0 auto;
-      padding: 14px 15px 32px;
-      background: var(--color-background);
-    }
-
-    .back-link {
-      width: 28px;
-      height: 28px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: flex-start;
-      color: var(--color-gold);
-      text-decoration: none;
-    }
-
-    .back-link svg {
-      width: 24px;
-      height: 24px;
-      display: block;
-      fill: currentColor;
-    }
-
-    .page-title {
-      margin: 7px 4px 0;
-      color: var(--color-text);
-      font-size: 27px;
-      font-weight: 700;
-      line-height: 34px;
-      letter-spacing: -1.4px;
-    }
-
-    .page-intro {
-      margin: 4px 4px 0;
-      color: var(--color-copy);
-      font-size: 12px;
-      font-weight: 590;
-      line-height: 20px;
-      letter-spacing: -0.004em;
-    }
-
-    .service-list {
-      display: grid;
-      gap: 12px;
-      margin-top: 12px;
-    }
-
-    .service-card {
-      min-height: 162px;
-      padding: 12px 14px 16px;
-      border-radius: var(--radius-card);
-      background: var(--color-card);
-      color: inherit;
-      box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02);
-    }
-
-    .service-heading-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid var(--color-border);
-    }
-
-    .service-title {
-      margin: 0;
-      color: var(--color-gold);
-      font-size: 18px;
-      font-weight: 700;
-      line-height: 28px;
-      letter-spacing: -0.004em;
-    }
-
-    .external-link {
-      width: 24px;
-      height: 24px;
-      flex: 0 0 24px;
-      display: grid;
-      place-items: center;
-      color: var(--color-gold);
-      text-decoration: none;
-    }
-
-    .external-link svg {
-      width: 22px;
-      height: 22px;
-      fill: currentColor;
-    }
-
-    .provider-name {
+    .city-service-text {
       margin: 20px 0 28px;
-      color: var(--color-text);
-      font-size: 16px;
-      font-weight: 700;
-      line-height: 28px;
+      color: var(--gs-color-text);
+      font: 700 16px/28px var(--gs-font-ui);
       letter-spacing: -0.004em;
     }
 
-    .service-footer {
+    .city-service-footer {
       display: grid;
       grid-template-columns: minmax(0, 1fr) minmax(146px, 44%);
       align-items: center;
       gap: 16px;
     }
-
-    .phone-row {
-      display: inline-flex;
-      align-items: center;
-      gap: 12px;
-      min-width: 0;
-      color: var(--color-copy);
-      font-size: 12px;
-      font-weight: 590;
-      line-height: 20px;
-      letter-spacing: -0.004em;
-      white-space: nowrap;
-    }
-
-    .phone-row svg {
-      width: 16px;
-      height: 16px;
-      flex: 0 0 16px;
-      fill: #1c1b1f;
-    }
-
-    .action-link {
-      min-height: 34px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 7px 16px;
-      border-radius: 16px;
-      background: var(--color-gold);
-      color: #ffffff;
-      text-decoration: none;
-      font-size: 12px;
-      font-weight: 590;
-      line-height: 20px;
-      letter-spacing: -0.004em;
-      text-align: center;
-    }
-
-    .back-link:focus-visible,
-    .external-link:focus-visible,
-    .action-link:focus-visible {
-      outline: 3px solid rgba(168, 143, 53, 0.35);
-      outline-offset: 3px;
-    }
-
-    @media (min-width: 720px) {
-      html {
-        background:
-          radial-gradient(circle at 50% 0%, rgba(168, 143, 53, 0.12), transparent 28rem),
-          var(--color-background);
-      }
-
-      body { background: transparent; }
-
-      .city-page {
-        max-width: none;
-        padding-left: clamp(24px, 5vw, 72px);
-        padding-right: clamp(24px, 5vw, 72px);
-        padding-bottom: 40px;
-        background: transparent;
-      }
-    }
   </style>
 </head>
-<body>
-  <main class="city-page" aria-label="Städtische Notdienste Goslar">
-    <a class="back-link" href="080_bereitschaftsdienste_index.html" aria-label="Zurück">
+<body class="gs-body">
+  <main class="gs-page gs-page--with-back" aria-label="Städtische Notdienste Goslar">
+    <a class="gs-back-link" href="080_bereitschaftsdienste_index.html" aria-label="Zurück">
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <path d="M20 11H7.83l5.59-5.59L12 4 4 12l8 8 1.42-1.41L7.83 13H20v-2Z" />
       </svg>
     </a>
 
-    <h1 class="page-title">Städtische Notdienste</h1>
-    <p class="page-intro">Wichtige Rufnummern bei Störungen und Problemen.</p>
+    <header class="gs-page-header">
+      <h1 class="gs-page-title">Städtische Notdienste</h1>
+      <p class="gs-page-description">Wichtige Rufnummern bei Störungen und Problemen.</p>
+    </header>
 
-    <section class="service-list" aria-label="Städtische Notdienste">
-      <article class="service-card">
-        <div class="service-heading-row">
-          <h2 class="service-title">EURAWASSER Goslar</h2>
-          <a class="external-link" href="https://www.eurawasser.de/" target="_blank" rel="noopener noreferrer" aria-label="EURAWASSER extern öffnen">
+    <section class="gs-content" aria-label="Städtische Notdienste">
+      <article class="gs-info-card">
+        <div class="gs-info-card__header">
+          <h2 class="gs-info-card__title">EURAWASSER Goslar</h2>
+          <a class="gs-icon-link" href="https://www.eurawasser.de/" target="_blank" rel="noopener noreferrer" aria-label="EURAWASSER extern öffnen">
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H14V3ZM5 5h6v2H7v10h10v-4h2v6H5V5Z" />
             </svg>
           </a>
         </div>
 
-        <h3 class="provider-name">bei Rohrbrüchen, Ausfällen oder Problemen mit der Abwasserentsorgung</h3>
+        <div class="gs-info-card__body">
+          <h3 class="city-service-text">bei Rohrbrüchen, Ausfällen oder Problemen mit der Abwasserentsorgung</h3>
 
-        <div class="service-footer">
-          <span class="phone-row">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.28-.28.67-.36 1.02-.25 1.12.37 2.32.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1C10.61 21 3 13.39 3 4c0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2Z" />
-            </svg>
-            <span>05321 3376-11</span>
-          </span>
-          <a class="action-link" href="tel:+495321337611">Anrufen</a>
+          <div class="city-service-footer">
+            <span class="gs-meta">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.28-.28.67-.36 1.02-.25 1.12.37 2.32.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1C10.61 21 3 13.39 3 4c0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2Z" />
+              </svg>
+              <span>05321 3376-11</span>
+            </span>
+            <a class="gs-action" href="tel:+495321337611">Anrufen</a>
+          </div>
         </div>
       </article>
     </section>

@@ -4,194 +4,53 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Bereitschaftsdienste Goslar</title>
+  <link rel="stylesheet" href="ui-kit/goslar-ui.css" />
   <style>
-    :root {
-      --color-background: #f5f5f5;
-      --color-card: #ffffff;
-      --color-text: #000000;
-      --color-copy: #3f3f3e;
-      --color-gold: #a88f35;
-      --color-medical: #f2ecda;
-      --color-city: #e8eef9;
-      --color-safety: #fde9e7;
-      --radius-card: 16px;
-      --radius-icon: 999px;
-      --font-ui: "SF Pro Display", "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
-
-    *, *::before, *::after { box-sizing: border-box; }
-
-    html {
-      min-height: 100%;
-      background: var(--color-background);
-    }
-
-    body {
-      min-width: 320px;
-      min-height: 100%;
-      margin: 0;
-      background: var(--color-background);
-      color: var(--color-text);
-      font-family: var(--font-ui);
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-    }
-
-    .emergency-page {
-      width: 100%;
-      min-height: 100vh;
-      margin: 0 auto;
-      padding: 50px clamp(15px, 4vw, 24px) 18px;
-      background: var(--color-background);
-    }
-
-    .page-title {
-      margin: 0;
-      color: var(--color-text);
-      font-size: clamp(27px, 7vw, 34px);
-      font-weight: 700;
-      line-height: 1.26;
-      letter-spacing: -1.4px;
-    }
-
-    .page-intro {
-      max-width: none;
-      margin: 3px 4px 0;
-      color: var(--color-copy);
-      font-size: 12px;
-      font-weight: 590;
-      line-height: 20px;
-      letter-spacing: -0.004em;
-    }
-
-    .category-list {
-      display: grid;
-      gap: 16px;
-      margin-top: 26px;
-    }
-
-    .emergency-card {
-      width: 100%;
-      min-height: 115px;
-      display: grid;
-      grid-template-columns: 86px minmax(0, 1fr);
-      align-items: center;
-      gap: 13px;
-      padding: 15px 15px;
-      border-radius: var(--radius-card);
-      background: var(--color-card);
-      color: inherit;
-      text-decoration: none;
-      box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02);
-      transition: transform 0.18s ease, box-shadow 0.18s ease;
-    }
-
-    .emergency-card:focus-visible {
-      outline: 3px solid rgba(168, 143, 53, 0.35);
-      outline-offset: 2px;
-    }
-
-    .emergency-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 18px 36px rgba(28, 25, 18, 0.08);
-    }
-
-    .icon-bubble {
+    .emergency-icon {
       width: 86px;
       height: 86px;
-      border-radius: var(--radius-icon);
+      border-radius: 999px;
       display: grid;
       place-items: center;
-      color: var(--color-gold);
+      color: var(--gs-color-gold);
       font-size: 38px;
       line-height: 1;
     }
 
-    .icon-bubble.medical { background: var(--color-medical); }
-    .icon-bubble.city { background: var(--color-city); }
-    .icon-bubble.safety { background: var(--color-safety); }
-
-    .card-title {
-      margin: 0;
-      color: var(--color-gold);
-      font-size: 18px;
-      font-weight: 700;
-      line-height: 28px;
-      letter-spacing: -0.004em;
-    }
-
-    .card-copy {
-      display: block;
-      margin: 0;
-      color: var(--color-copy);
-      font-size: 12px;
-      font-weight: 590;
-      line-height: 20px;
-      letter-spacing: -0.004em;
-    }
-
-    @media (min-width: 720px) {
-      html {
-        background:
-          radial-gradient(circle at 50% 0%, rgba(168, 143, 53, 0.12), transparent 28rem),
-          var(--color-background);
-      }
-
-      body { background: transparent; }
-
-      .emergency-page {
-        max-width: none;
-        padding-top: 50px;
-        padding-left: clamp(24px, 5vw, 72px);
-        padding-right: clamp(24px, 5vw, 72px);
-        padding-bottom: 40px;
-        background: transparent;
-      }
-
-      .page-title,
-      .page-intro {
-        white-space: nowrap;
-      }
-    }
-
-    @media (max-width: 620px) {
-      .emergency-page { padding-top: 50px; }
-      .emergency-card {
-        min-height: 115px;
-        grid-template-columns: 86px minmax(0, 1fr);
-        gap: 13px;
-        padding: 15px;
-      }
-    }
+    .emergency-icon--medical { background: #f2ecda; }
+    .emergency-icon--city { background: #e8eef9; }
+    .emergency-icon--safety { background: #fde9e7; }
   </style>
 </head>
-<body>
-  <main class="emergency-page" aria-label="Bereitschaftsdienste Goslar">
-    <h1 class="page-title">Bereitschaftsdienste</h1>
-    <p class="page-intro">Alle Notdienste der Stadt Goslar auf einen Blick – schnell finden, direkt erreichen und im Ernstfall sofort handeln.</p>
+<body class="gs-body">
+  <main class="gs-page" aria-label="Bereitschaftsdienste Goslar">
+    <header class="gs-page-header">
+      <h1 class="gs-page-title">Bereitschaftsdienste</h1>
+      <p class="gs-page-description">Alle Notdienste der Stadt Goslar auf einen Blick – schnell finden, direkt erreichen und im Ernstfall sofort handeln.</p>
+    </header>
 
-    <section class="category-list" aria-label="Notdienst-Kategorien">
-      <a class="emergency-card" href="080_bereitschaftsdienste_medizinisch.html">
-        <span class="icon-bubble medical" aria-hidden="true">⚕</span>
-        <span>
-          <span class="card-title">Medizinische Notdienste</span>
-          <span class="card-copy">Apotheken, Ärzte und Zahnärzte in Ihrer Nähe</span>
+    <section class="gs-content gs-content--loose" aria-label="Notdienst-Kategorien">
+      <a class="gs-widget" href="080_bereitschaftsdienste_medizinisch.html">
+        <span class="emergency-icon emergency-icon--medical" aria-hidden="true">⚕</span>
+        <span class="gs-widget__content">
+          <span class="gs-widget__title">Medizinische Notdienste</span>
+          <span class="gs-widget__copy">Apotheken, Ärzte und Zahnärzte in Ihrer Nähe</span>
         </span>
       </a>
 
-      <a class="emergency-card" href="080_bereitschaftsdienste_staedtisch.html">
-        <span class="icon-bubble city" aria-hidden="true">🔧</span>
-        <span>
-          <span class="card-title">Städtische Notdienste</span>
-          <span class="card-copy">Wasser, Abwasser, Straßenbeleuchtung, uvm.</span>
+      <a class="gs-widget" href="080_bereitschaftsdienste_staedtisch.html">
+        <span class="emergency-icon emergency-icon--city" aria-hidden="true">🔧</span>
+        <span class="gs-widget__content">
+          <span class="gs-widget__title">Städtische Notdienste</span>
+          <span class="gs-widget__copy">Wasser, Abwasser, Straßenbeleuchtung, uvm.</span>
         </span>
       </a>
 
-      <a class="emergency-card" href="080_bereitschaftsdienste_sicherheit.html">
-        <span class="icon-bubble safety" aria-hidden="true">🛡</span>
-        <span>
-          <span class="card-title">Behörden &amp; Sicherheit</span>
-          <span class="card-copy">Polizei, Feuerwehr, Rettungsdienst und nora Notruf-App</span>
+      <a class="gs-widget" href="080_bereitschaftsdienste_sicherheit.html">
+        <span class="emergency-icon emergency-icon--safety" aria-hidden="true">🛡</span>
+        <span class="gs-widget__content">
+          <span class="gs-widget__title">Behörden &amp; Sicherheit</span>
+          <span class="gs-widget__copy">Polizei, Feuerwehr, Rettungsdienst und nora Notruf-App</span>
         </span>
       </a>
     </section>

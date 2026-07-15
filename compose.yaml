@@ -164,8 +164,6 @@ services:
     image: ghcr.io/machmitgoslar/gs_crawler_072_karriere:latest
     volumes:
       - ./httpdocs/crawler:/app/output
-    ports:
-      - "5017:8000"
     container_name: gs_compiler_072_karriere
     restart: unless-stopped
 

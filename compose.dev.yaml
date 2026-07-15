@@ -163,8 +163,6 @@ services:
     build: ./docker_instances/072_karriere
     volumes:
       - ./httpdocs/crawler:/app/output
-    ports:
-      - "5017:8000"
     container_name: gs_compiler_072_karriere
     restart: unless-stopped
 

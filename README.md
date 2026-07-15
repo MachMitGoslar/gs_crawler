@@ -98,9 +98,9 @@ _Unique data sources requiring custom processing_
 |:---|:-----|:-----|:---------|:-------------|
 | 032_webcams_goslar | Webcams Goslar | Webcam Processor | Täglich 09:00 | `032_webcams_goslar.json, 032_webcams.gif` |
 | 033_goslar24-7 | Goslar24-7 Webcams | Webcam Processor | Stündlich | `033_gif_schuhhof.json, 033_gif_schuhhof.gif, 03...` |
-| 056_serviceportal | Serviceportal Goslar | Service Portal | Täglich 09:00 | `056-serviceportal.json, 056_serviceportal_index...` |
+| 056_serviceportal | Serviceportal Goslar | Service Portal | Täglich 09:00 | `ui-kit/goslar-ui.css, ui-kit/goslar-ui.js, 056-serviceportal.json, 056_serviceportal_index.html, 056_serviceportal_termin.html, 056_serviceportal_image.png` |
 | 060_defi_kataster | Defibrillatoren Kataster | Defi Locations | Täglich 06:00 | `defi-kataster/060-defi-kataster.json` |
-| 080_bereitschaftsdienste | Bereitschaftsdienste Goslar | Emergency Services | Alle 15 Minuten (API nur nach Endzeit) | `080_bereitschaftsdienste_card.json, 080_bereits...` |
+| 080_bereitschaftsdienste | Bereitschaftsdienste Goslar | Emergency Services | Alle 15 Minuten (API nur nach Endzeit) | `ui-kit/goslar-ui.css, ui-kit/goslar-ui.js, 080_bereitschaftsdienste_card.json, 080_bereitschaftsdienste_card.png, 080_bereitschaftsdienste_index.html, 080_bereitschaftsdienste_medizinisch.html, 080_bereitschaftsdienste_staedtisch.html, 080_bereitschaftsdienste_sicherheit.html` |
 
 ### API Services
 _API endpoints and services_
@@ -108,7 +108,7 @@ _API endpoints and services_
 | ID | Name | Type | Schedule | Output Files |
 |:---|:-----|:-----|:---------|:-------------|
 | 068_altstadtfest | Altstadtfest Goslar | API Endpoint | API Endpoint | `-` |
-| 072_karriere | Karriere Goslar | Job Portal | Alle 2 Stunden | `072_karriere_card.json` |
+| 072_karriere | Karriere Goslar | Job Portal | Stündlich | `ui-kit/goslar-ui.css, ui-kit/goslar-ui.js, 072_karriere_card.json, 072_jobs.json, 072_job_details.json, 072_karriere_index.html, 072_karriere_detail.html` |
 
 <!-- CRAWLER_TABLE_END -->
 
@@ -153,7 +153,6 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed setup instructions.
 |:-----|:--------|
 | 5015 | Health Monitor Dashboard |
 | 5016 | Altstadtfest API |
-| 5017 | Karriere Goslar |
 
 ## Output
 
