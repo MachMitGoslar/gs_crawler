@@ -10,7 +10,8 @@ COPY jobs_logic.py .
 COPY script.py .
 COPY refresh_jobs.py .
 COPY jobs.html .
-COPY job_detail.html .
+COPY jobs.css .
+COPY jobs.js .
 COPY crontab /etc/cron.d/mycron
 
 RUN chmod 0600 /etc/cron.d/mycron \

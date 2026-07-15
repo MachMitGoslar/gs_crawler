@@ -6,8 +6,6 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from pathlib import Path
 from random import SystemRandom
-from urllib.parse import quote
-
 from api_clients import fetch_logo
 from config import DEFAULT_LOCATION
 from jobs_logic import build_ba_job_url, build_jobs_payload, normalize_external_url
@@ -20,99 +18,37 @@ LOGO_OUTPUT_DIR = OUTPUT_DIR / "072_logos"
 LOGO_MANIFEST_FILE = LOGO_OUTPUT_DIR / "manifest.json"
 CARD_JSON_FILE = "072_karriere_card.json"
 JOBS_JSON_FILE = "072_jobs.json"
-DETAILS_JSON_FILE = "072_job_details.json"
 INDEX_HTML_FILE = "072_karriere_index.html"
-DETAIL_HTML_FILE = "072_karriere_detail.html"
 EXPORT_UI_KIT_FILES = ["goslar-ui.css", "goslar-ui.js"]
+EXPORT_STATIC_FILES = ["jobs.css", "jobs.js"]
 BASE_URL = "https://crawler.goslar.app/crawler"
 INDEX_URL = f"{BASE_URL}/{INDEX_HTML_FILE}?location=Goslar&wo=Goslar"
 EMPTY_DESCRIPTION = "Aktuell sind keine passenden Jobangebote fuer den Landkreis Goslar verfuegbar."
 MAX_LOGO_WORKERS = 8
 
 
-def static_detail_url(job: dict) -> str | None:
-    job_id = str(job.get("id") or "").strip()
-    if not job_id:
-        return None
-    if is_bundesapi_detail_job(job):
-        return f"{DETAIL_HTML_FILE}?source={quote(str(job.get('source') or 'bundesapi'))}&id={quote(job_id)}"
-    return job.get("detail_url") or job.get("click_url")
-
-
-def is_bundesapi_detail_job(job: dict) -> bool:
+def build_application_url(job: dict) -> str | None:
     raw = job.get("raw") if isinstance(job.get("raw"), dict) else {}
-    if raw.get("refnr"):
-        return True
-    return job.get("source") in {"bundesapi", "ausbildung", "selbststaendigkeit", "praktikum"}
+    external_url = normalize_external_url(raw.get("externeUrl")) or normalize_external_url(job.get("detail_url"))
+    if external_url:
+        return external_url
 
+    job_id = str(job.get("id") or "").strip()
+    if job_id and (raw.get("refnr") or job.get("source") in {"bundesapi", "ausbildung", "selbststaendigkeit", "praktikum"}):
+        return build_ba_job_url(job_id)
 
-def build_detail_key(job: dict) -> str:
-    return f"{job.get('source') or 'bundesapi'}:{job.get('id')}"
+    return normalize_external_url(job.get("click_url"))
 
 
 def prepare_jobs(payload: dict, logo_urls: dict[str, str | None]) -> dict:
     jobs = payload.get("results") or []
     for job in jobs:
-        job["click_url"] = static_detail_url(job)
+        job["click_url"] = build_application_url(job)
         job["fallback_url"] = job.get("click_url")
         job["logo_url"] = logo_urls.get(extract_logo_hash(job))
     payload["filters"] = {"location": DEFAULT_LOCATION, "wo": DEFAULT_LOCATION}
     return payload
 
-
-def build_detail_from_job(job: dict, logo_urls: dict[str, str | None]) -> dict:
-    raw = job.get("raw") if isinstance(job.get("raw"), dict) else {}
-    job_id = str(job.get("id") or "").strip()
-    external_url = normalize_external_url(raw.get("externeUrl")) or normalize_external_url(job.get("detail_url"))
-    if not external_url and job_id:
-        external_url = build_ba_job_url(job_id)
-
-    return {
-        "id": job_id,
-        "title": job.get("title") or "Stellenangebot",
-        "employer": job.get("employer") or "",
-        "summary": job.get("category_label") or job.get("source_label") or "",
-        "description_html": build_static_description(job),
-        "published_at": job.get("published_at"),
-        "first_published_at": raw.get("datumErsteVeroeffentlichung") or job.get("published_at"),
-        "application_period": raw.get("veroeffentlichungszeitraum"),
-        "starts_at": job.get("starts_at"),
-        "employment_type": raw.get("stellenangebotsart") or job.get("category_label"),
-        "contract_duration": raw.get("vertragsdauer"),
-        "compensation": raw.get("verguetungsangabe"),
-        "location": build_location_label(job),
-        "external_url": external_url,
-        "logo_url": logo_urls.get(extract_logo_hash(job)),
-        "raw": raw,
-    }
-
-
-def build_static_description(job: dict) -> str:
-    parts = [
-        job.get("title"),
-        job.get("employer"),
-        build_location_label(job),
-        job.get("category_label"),
-    ]
-    text = " · ".join(str(part) for part in parts if part)
-    if not text:
-        return "Weitere Informationen findest du über den Bewerbungslink."
-    return f"<p>{text}</p><p>Weitere Informationen findest du über den Bewerbungslink.</p>"
-
-
-def build_details(jobs: list[dict], logo_urls: dict[str, str | None]) -> dict[str, dict]:
-    details: dict[str, dict] = {}
-
-    for job in jobs:
-        job_id = str(job.get("id") or "").strip()
-        if not job_id or not is_bundesapi_detail_job(job):
-            continue
-
-        detail = build_detail_from_job(job, logo_urls)
-        details[build_detail_key(job)] = detail
-        details.setdefault(f"bundesapi:{job_id}", detail)
-
-    return details
 
 
 def extract_logo_hash(job: dict | None) -> str:
@@ -235,7 +171,7 @@ def json_for_script(data: object) -> str:
     )
 
 
-def write_html(payload: dict, details: dict[str, dict]) -> None:
+def write_html(payload: dict) -> None:
     common = {
         '<link href="/ui-kit/goslar-ui.css" rel="stylesheet" />': '<link href="ui-kit/goslar-ui.css" rel="stylesheet" />',
         "__APP_BASE_PATH__": json.dumps(""),
@@ -250,19 +186,8 @@ def write_html(payload: dict, details: dict[str, dict]) -> None:
             "__STATIC_INDEX_URL__": json.dumps(INDEX_HTML_FILE),
         },
     )
-    detail_html = render_template(
-        "job_detail.html",
-        {
-            **common,
-            "__DETAILS_DATA_URL__": json.dumps(DETAILS_JSON_FILE),
-            "__DETAILS_DATA_JSON__": json_for_script(details),
-            "__STATIC_INDEX_URL__": json.dumps(INDEX_HTML_FILE),
-        },
-    )
     (OUTPUT_DIR / INDEX_HTML_FILE).write_text(index_html, encoding="utf-8")
-    (OUTPUT_DIR / DETAIL_HTML_FILE).write_text(detail_html, encoding="utf-8")
     print(f"Gespeichert: {OUTPUT_DIR / INDEX_HTML_FILE}")
-    print(f"Gespeichert: {OUTPUT_DIR / DETAIL_HTML_FILE}")
 
 
 def copy_ui_kit() -> None:
@@ -271,6 +196,13 @@ def copy_ui_kit() -> None:
     for filename in EXPORT_UI_KIT_FILES:
         target = target_dir / filename
         shutil.copyfile(UI_KIT_DIR / filename, target)
+        print(f"Kopiert: {target}")
+
+
+def copy_static_assets() -> None:
+    for filename in EXPORT_STATIC_FILES:
+        target = OUTPUT_DIR / filename
+        shutil.copyfile(SCRIPT_DIR / filename, target)
         print(f"Kopiert: {target}")
 
 
@@ -302,12 +234,10 @@ def main() -> None:
     raw_payload = build_jobs_payload({})
     logo_urls = export_logos(raw_payload.get("results") or [])
     payload = prepare_jobs(raw_payload, logo_urls)
-    details = build_details(payload.get("results") or [], logo_urls)
-
     write_json(JOBS_JSON_FILE, payload)
-    write_json(DETAILS_JSON_FILE, details)
     write_json(CARD_JSON_FILE, build_card(payload, now_str))
-    write_html(payload, details)
+    write_html(payload)
+    copy_static_assets()
     copy_ui_kit()
 
 

@@ -206,8 +206,11 @@ crawlers:
     schedule: "0 2,14 * * *"
     schedule_human: "2x täglich (02:00, 14:00)"
     expected_files:
+      - "ui-kit/goslar-ui.css"
+      - "ui-kit/goslar-ui.js"
       - "042-freiwilligenagentur.json"
       - "042-freiwilligenagentur-alle.json"
+      - "042_freiwilligenagentur_index.html"
     env_file:
       - .env
     implementation: custom
@@ -428,9 +431,9 @@ crawlers:
       - "ui-kit/goslar-ui.js"
       - "072_karriere_card.json"
       - "072_jobs.json"
-      - "072_job_details.json"
       - "072_karriere_index.html"
-      - "072_karriere_detail.html"
+      - "jobs.css"
+      - "jobs.js"
     ports: []
     implementation: custom
     notes: "Statischer Karriereportal-Export fuer Landkreis Goslar. Laedt stündlich Jobdaten und schreibt HTML plus JSON nach /app/output."

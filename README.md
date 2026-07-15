@@ -69,7 +69,7 @@ _Community organizations and volunteer opportunities_
 | ID | Name | Type | Schedule | Output Files |
 |:---|:-----|:-----|:---------|:-------------|
 | 031_goslarer_geschichten | Goslarer Geschichten | Forum Crawler | Täglich 09:00 | `031-goslarer_geschichten.json` |
-| 042_freiwilligen | Freiwilligenagentur | Volunteer Portal | 2x täglich (02:00, 14:00) | `042-freiwilligenagentur.json, 042-freiwilligena...` |
+| 042_freiwilligen | Freiwilligenagentur | Volunteer Portal | 2x täglich (02:00, 14:00) | `ui-kit/goslar-ui.css, ui-kit/goslar-ui.js, 042-freiwilligenagentur.json, 042-freiwilligenagentur-alle.json, 042_freiwilligenagentur_index.html` |
 
 ### Environmental Monitoring
 _Weather, water, and environmental data_
@@ -108,7 +108,7 @@ _API endpoints and services_
 | ID | Name | Type | Schedule | Output Files |
 |:---|:-----|:-----|:---------|:-------------|
 | 068_altstadtfest | Altstadtfest Goslar | API Endpoint | API Endpoint | `-` |
-| 072_karriere | Karriere Goslar | Job Portal | Stündlich | `ui-kit/goslar-ui.css, ui-kit/goslar-ui.js, 072_karriere_card.json, 072_jobs.json, 072_job_details.json, 072_karriere_index.html, 072_karriere_detail.html` |
+| 072_karriere | Karriere Goslar | Job Portal | Stündlich | `ui-kit/goslar-ui.css, ui-kit/goslar-ui.js, 072_karriere_card.json, 072_jobs.json, 072_karriere_index.html, jobs.css, jobs.js` |
 
 <!-- CRAWLER_TABLE_END -->
 
