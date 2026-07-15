@@ -25,4 +25,4 @@ ENV PYTHONDONTWRITEBYTECODE=1
 
 EXPOSE 8000
 
-CMD ["sh", "-c", "printenv | sed 's/^/export /' > /app/env.sh && python3 /app/refresh_jobs.py && python3 /app/script.py & cron -f"]
+CMD ["sh", "-c", "printenv | sed 's/^/export /' > /app/env.sh; cron; python3 /app/refresh_jobs.py & exec python3 /app/script.py"]

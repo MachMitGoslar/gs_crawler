@@ -64,7 +64,7 @@ def normalize_bundesapi_job(job: dict[str, Any]) -> dict[str, Any]:
             "country": work_location.get("land"),
         },
         "detail_url": detail_url,
-        "click_url": detail_url or fallback_url,
+        "click_url": fallback_url,
         "fallback_url": fallback_url,
         "logo_url": app_path(f"/logo?source=bundesapi&hash={quote(logo_hash)}") if logo_hash else None,
         "raw": job,
@@ -339,6 +339,10 @@ def filter_jobs_to_landkreis_goslar(jobs: list[dict[str, Any]]) -> list[dict[str
 def build_bundesapi_job_detail_payload(refnr: str) -> dict[str, Any]:
     """Baut den Detail-Response für die interne BundesAPI-Detailansicht."""
     detail = fetch_job_detail(refnr)
+    entry_period = detail.get("eintrittszeitraum") or {}
+    published_at = detail.get("aktuelleVeroeffentlichungsdatum")
+    first_published_at = detail.get("datumErsteVeroeffentlichung")
+    application_period = detail.get("veroeffentlichungszeitraum")
     logo_hash = detail.get("arbeitgeberKundennummerHash")
     application_url = normalize_external_url(detail.get("externeUrl")) or build_ba_job_url(refnr)
     location_parts = []
@@ -350,10 +354,10 @@ def build_bundesapi_job_detail_payload(refnr: str) -> dict[str, Any]:
         "employer": detail.get("arbeitgeberName") or detail.get("arbeitgeber") or "",
         "summary": detail.get("beruf") or detail.get("titel") or detail.get("studiengang") or detail.get("hauptberuf") or "",
         "description_html": str(detail.get("stellenangebotsBeschreibung") or "Keine Detailbeschreibung vorhanden."),
-        "published_at": detail.get("aktuelleVeroeffentlichungsdatum"),
-        "first_published_at": detail.get("datumErsteVeroeffentlichung"),
-        "application_period": detail.get("veroeffentlichungszeitraum"),
-        "starts_at": (detail.get("eintrittszeitraum") or {}).get("von"),
+        "published_at": published_at,
+        "first_published_at": first_published_at,
+        "application_period": application_period,
+        "starts_at": normalize_entry_period(entry_period, published_at, first_published_at, application_period),
         "employment_type": detail.get("stellenangebotsart"),
         "contract_duration": detail.get("vertragsdauer"),
         "compensation": detail.get("verguetungsangabe"),
@@ -362,6 +366,38 @@ def build_bundesapi_job_detail_payload(refnr: str) -> dict[str, Any]:
         "logo_url": app_path(f"/logo?source=bundesapi&hash={quote(str(logo_hash))}") if logo_hash else None,
         "raw": detail,
     }
+
+
+def normalize_entry_period(entry_period: Any, *published_values: Any) -> Any:
+    """Gibt fuer Sofort-Beginne einen lesbaren Wert statt eines Datums zurueck."""
+    if not isinstance(entry_period, dict):
+        return entry_period
+
+    for key, value in entry_period.items():
+        normalized_key = str(key).casefold()
+        normalized_value = str(value).casefold()
+        if "sofort" in normalized_key and value:
+            return "ab sofort"
+        if "sofort" in normalized_value:
+            return "ab sofort"
+
+    starts_at = entry_period.get("von")
+    start_date = date_token(starts_at)
+    published_dates = {date_token(value) for value in published_values if date_token(value)}
+    if start_date and start_date in published_dates:
+        return "ab sofort"
+
+    return starts_at
+
+
+def date_token(value: Any) -> str:
+    """Normalisiert ISO- und deutsche Datumswerte auf yyyy-mm-dd."""
+    text = str(value or "").strip()
+    if len(text) >= 10 and text[4:5] == "-" and text[7:8] == "-":
+        return text[:10]
+    if len(text) >= 10 and text[2:3] == "." and text[5:6] == ".":
+        return f"{text[6:10]}-{text[3:5]}-{text[0:2]}"
+    return ""
 
 
 def first_query_value(query: dict[str, list[str]], key: str, default: str = "") -> str:

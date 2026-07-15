@@ -1,6 +1,7 @@
 """HTTP-Handler für HTML-, JSON-, Logo- und Detail-Endpunkte."""
 
 import json
+import sys
 from http.server import BaseHTTPRequestHandler
 from typing import Any
 from urllib.error import HTTPError, URLError
@@ -18,6 +19,9 @@ from jobs_logic import (
 )
 
 
+STATIC_ASSET_EXTENSIONS = (".woff2", ".woff", ".ttf", ".otf", ".eot", ".svg", ".css", ".js", ".map")
+
+
 class JobRequestHandler(BaseHTTPRequestHandler):
     """Bedient alle GET-Endpunkte des lokalen Job-Portals."""
 
@@ -30,6 +34,10 @@ class JobRequestHandler(BaseHTTPRequestHandler):
         query = parse_qs(parsed.query)
         filters = parse_filter_params(query)
         location = filters.get("wo", DEFAULT_LOCATION)
+
+        if self.is_static_asset_request(path):
+            self.send_text(404, f"Static asset not found: {path}\n")
+            return
 
         if path in {"/", "/jobs.html"}:
             self.send_html(200, render_html_page(location))
@@ -92,6 +100,10 @@ class JobRequestHandler(BaseHTTPRequestHandler):
         separator = "" if path.startswith("/") else "/"
         return f"{APP_BASE_PATH}{separator}{path}"
 
+    def is_static_asset_request(self, path: str) -> bool:
+        """Erkennt fehlgeleitete Asset-Requests, die nicht zur API gehören."""
+        return path.casefold().endswith(STATIC_ASSET_EXTENSIONS)
+
     def handle_job_details_data_request(self, query: dict[str, list[str]]) -> None:
         """Liefert die JSON-Daten für die interne Detailansicht eines BA-Jobs."""
         source = first_query_value(query, "source")
@@ -131,6 +143,10 @@ class JobRequestHandler(BaseHTTPRequestHandler):
         """Sendet HTML mit passendem Content-Type."""
         self.send_bytes(status_code, html.encode("utf-8"), "text/html; charset=utf-8")
 
+    def send_text(self, status_code: int, text: str) -> None:
+        """Sendet Plain-Text mit passendem Content-Type."""
+        self.send_bytes(status_code, text.encode("utf-8"), "text/plain; charset=utf-8")
+
     def send_empty(self, status_code: int) -> None:
         """Sendet eine leere Response ohne Body."""
         self.send_response(status_code)
@@ -146,5 +162,5 @@ class JobRequestHandler(BaseHTTPRequestHandler):
         self.wfile.write(body)
 
     def log_message(self, format: str, *args: Any) -> None:
-        """Unterdrückt das Standard-Logging des BaseHTTPRequestHandler."""
-        return
+        """Schreibt HTTP-Zugriffe in die Container-Logs."""
+        print(f"{self.address_string()} - {format % args}", file=sys.stderr, flush=True)
