@@ -120,6 +120,11 @@ def vendor_offer_description(vendor: dict) -> str:
     ).strip()
 
 
+def vendor_image_url(vendor: dict, market_image: str | None) -> str | None:
+    """Prefer vendor-specific images and fall back to the market image."""
+    return vendor.get("marketStallImageUrl") or vendor.get("logoFileUrl") or market_image
+
+
 # ── Main ───────────────────────────────────────────────────────────────────────
 def main():
     now_str = datetime.now().isoformat(sep="T", timespec="minutes")
@@ -200,7 +205,7 @@ def main():
             "id":                 i,
             "title":              vendor_name,
             "description":        description,
-            "image_url":          vendor.get("logoFileUrl"),
+            "image_url":          vendor_image_url(vendor, market_image),
             "call_to_action_url": f"{BASE_URL}/070_wochenmarkt_{vendor_id}.json",
             "published_at":       now_str,
         })
@@ -230,6 +235,8 @@ def main():
             images.append({"url": vendor["marketStallImageUrl"]})
         if vendor.get("logoFileUrl"):
             images.append({"url": vendor["logoFileUrl"]})
+        if not images and market_image:
+            images.append({"url": market_image})
 
         write_json(os.path.join(OUTPUT_DIR, f"070_wochenmarkt_{vendor_id}.json"), {
             "id":                 i,
