@@ -430,6 +430,43 @@ body.gs-body {
   fill: currentColor;
 }
 
+.gs-scroll-top {
+  position: fixed;
+  right: max(18px, env(safe-area-inset-right));
+  bottom: max(18px, env(safe-area-inset-bottom));
+  z-index: 30;
+  width: 52px;
+  height: 52px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--gs-color-gold);
+  color: #ffffff;
+  font-size: 1.25rem;
+  font-weight: 800;
+  line-height: 1;
+  box-shadow: 0 14px 28px rgba(40, 34, 15, 0.24), 0 4px 10px rgba(40, 34, 15, 0.18);
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(8px);
+  transition: opacity 0.16s ease, transform 0.16s ease, box-shadow 0.18s ease;
+}
+
+.gs-scroll-top.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.gs-scroll-top:hover {
+  box-shadow: 0 16px 30px rgba(40, 34, 15, 0.28), 0 5px 12px rgba(40, 34, 15, 0.2);
+}
+
+.gs-scroll-top:focus-visible {
+  outline: 3px solid var(--gs-color-focus);
+  outline-offset: 4px;
+}
+
 .gs-hidden {
   display: none !important;
 }
@@ -456,5 +493,12 @@ body.gs-body {
   .gs-page-title,
   .gs-page-description {
     white-space: nowrap;
+  }
+
+  .gs-scroll-top {
+    width: 58px;
+    height: 58px;
+    right: 28px;
+    bottom: 28px;
   }
 }

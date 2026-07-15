@@ -37,6 +37,23 @@
 
   function initAll() {
     Array.prototype.slice.call(document.querySelectorAll("[data-gs-search]")).forEach(initSearch);
+    Array.prototype.slice.call(document.querySelectorAll("[data-gs-scroll-top]")).forEach(initScrollTop);
+  }
+
+  function initScrollTop(button) {
+    if (button.dataset.gsScrollTopReady === "true") return;
+    button.dataset.gsScrollTopReady = "true";
+
+    var threshold = Number(button.getAttribute("data-gs-scroll-threshold") || 420);
+    var syncVisibility = function () {
+      button.classList.toggle("is-visible", window.scrollY > threshold);
+    };
+
+    button.addEventListener("click", function () {
+      window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+    });
+    window.addEventListener("scroll", syncVisibility, { passive: true });
+    syncVisibility();
   }
 
   if (document.readyState === "loading") {

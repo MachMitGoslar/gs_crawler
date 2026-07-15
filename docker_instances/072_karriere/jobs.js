@@ -19,7 +19,6 @@
   document.getElementById('jobs-title').textContent = 'Karriere Goslar';
 
   initToolbar();
-  initScrollTopButton();
   load();
 
   async function load() {
@@ -582,17 +581,6 @@
     const scrollY = state.restoreScrollY;
     state.restoreScrollY = null;
     requestAnimationFrame(() => window.scrollTo({ top: scrollY, left: 0, behavior: 'auto' }));
-  }
-
-  function initScrollTopButton() {
-    const button = document.getElementById('scroll-top-button');
-    if (!button) return;
-    const syncVisibility = () => {
-      button.classList.toggle('is-visible', window.scrollY > 420);
-    };
-    button.addEventListener('click', () => window.scrollTo({ top: 0, left: 0, behavior: 'smooth' }));
-    window.addEventListener('scroll', syncVisibility, { passive: true });
-    syncVisibility();
   }
 
   window.addEventListener('pagehide', () => writeListState({ scrollY: window.scrollY }));
