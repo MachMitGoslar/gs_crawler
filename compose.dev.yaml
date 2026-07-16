@@ -56,6 +56,13 @@ services:
     container_name: gs_compiler_019_was_app
     restart: unless-stopped
 
+  gs_compiler_003_youth:
+    build: ./docker_instances/003_youth
+    volumes:
+      - ./httpdocs/crawler:/app/output
+    container_name: gs_compiler_003_youth
+    restart: unless-stopped
+
   gs_compiler_027_erster_freitag:
     build: ./docker_instances/027_erster_freitag
     volumes:

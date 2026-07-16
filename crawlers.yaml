@@ -137,6 +137,21 @@ crawlers:
       - "019_was_app.json"
     implementation: custom
 
+  - id: "003_youth"
+    name: "GoslarTeens in der GoslarApp"
+    category: events
+    type: "Youth Feed"
+    source: "https://jugend.goslar.de"
+    schedule: "0 9 * * *"
+    schedule_human: "Täglich 09:00"
+    expected_files:
+      - "ui-kit/goslar-ui.css"
+      - "ui-kit/goslar-ui.js"
+      - "003_youth.json"
+      - "003_youth_index.json"
+      - "003_youth_freizeitkarte.html"
+    implementation: custom
+
   - id: "027_erster_freitag"
     name: "Erster Freitag Events"
     category: events

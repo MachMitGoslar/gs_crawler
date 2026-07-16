@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Freizeitkarte GoslarTeens</title>
+  <link href="ui-kit/goslar-ui.css" rel="stylesheet" />
+  <link href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet" />
+  <style>
+    .youth-page { padding-bottom: 18px; }
+
+    .youth-category-panel {
+      margin-top: 16px;
+      padding: 0;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .youth-category-panel::-webkit-scrollbar {
+      display: none;
+    }
+
+    .youth-category-list {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 8px;
+      padding: 0 4px 2px;
+    }
+
+    .youth-category-chip {
+      min-height: 34px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      flex: 0 0 auto;
+      padding: 7px 12px;
+      border: 1px solid rgba(168, 143, 53, 0.18);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.76);
+      color: var(--gs-color-copy);
+      font: 700 12px/16px var(--gs-font-ui);
+      letter-spacing: -0.004em;
+      cursor: pointer;
+      user-select: none;
+      box-shadow: 0 1px 0 rgba(0, 0, 0, 0.03);
+    }
+
+    .youth-category-chip input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .youth-category-dot {
+      width: 9px;
+      height: 9px;
+      margin: 0;
+      border-radius: 999px;
+      background: var(--category-color, var(--gs-color-gold));
+      box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.72);
+    }
+
+    .youth-category-chip:has(input:checked) {
+      border-color: rgba(168, 143, 53, 0.35);
+      background: #ffffff;
+      color: var(--gs-color-text);
+    }
+
+    .youth-category-chip:has(input:checked)::after {
+      content: "";
+      width: 6px;
+      height: 10px;
+      margin-left: 1px;
+      border-right: 2px solid var(--gs-color-gold);
+      border-bottom: 2px solid var(--gs-color-gold);
+      transform: rotate(40deg) translateY(-1px);
+    }
+
+    .youth-category-chip:has(input:not(:checked)) {
+      opacity: 0.48;
+    }
+
+    .youth-map-shell {
+      margin-top: 18px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      border-radius: 22px;
+      background: var(--gs-color-card);
+      box-shadow: 0 18px 42px rgba(28, 25, 18, 0.13), 0 1px 0 rgba(0, 0, 0, 0.04);
+    }
+
+    #youth-map {
+      width: 100%;
+      height: min(70vh, 680px);
+      min-height: 540px;
+      background: #dbeedc;
+    }
+
+    .youth-map-hint,
+    .youth-map-error {
+      margin: 10px 4px 0;
+      color: var(--gs-color-copy);
+      font: 590 12px/20px var(--gs-font-ui);
+      letter-spacing: -0.004em;
+    }
+
+    .youth-map-error {
+      display: none;
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: #ffffff;
+      color: #9f2a20;
+    }
+
+    .youth-marker {
+      position: relative;
+      width: 20px;
+      height: 20px;
+      display: block;
+      border: 3px solid #ffffff;
+      border-radius: 999px 999px 999px 2px;
+      background: var(--marker-color, var(--gs-color-gold));
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      transform: rotate(-45deg);
+    }
+
+    .youth-marker::after {
+      content: "";
+      position: absolute;
+      inset: 4px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.92);
+    }
+
+    .leaflet-popup-content-wrapper {
+      border-radius: 14px;
+    }
+
+    .leaflet-popup-content {
+      margin: 10px 12px;
+      color: var(--gs-color-copy);
+      font: 590 12px/18px var(--gs-font-ui);
+      letter-spacing: -0.004em;
+    }
+
+    .leaflet-popup-content strong {
+      display: block;
+      margin-bottom: 2px;
+      color: var(--gs-color-text);
+      font: 700 14px/20px var(--gs-font-ui);
+    }
+
+    .youth-popup-address {
+      display: block;
+      margin-top: 3px;
+    }
+
+    .leaflet-container a.youth-popup-route {
+      min-height: 30px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 8px;
+      padding: 5px 12px;
+      border-radius: 999px;
+      background: var(--gs-color-gold);
+      color: #ffffff !important;
+      font: 700 12px/18px var(--gs-font-ui);
+      letter-spacing: -0.004em;
+      text-decoration: none;
+    }
+
+    .leaflet-container a.youth-popup-route:visited,
+    .leaflet-container a.youth-popup-route:hover,
+    .leaflet-container a.youth-popup-route:focus {
+      color: #ffffff !important;
+    }
+
+    @media (max-width: 720px) {
+      .youth-page {
+        padding: 36px 12px 12px;
+      }
+
+      .youth-page .gs-page-title {
+        margin-inline: 0;
+        font-size: 27px;
+        line-height: 34px;
+      }
+
+      .youth-page .gs-page-description {
+        margin: 2px 0 0;
+        max-width: 320px;
+        font-size: 12px;
+        line-height: 18px;
+      }
+
+      .youth-category-panel {
+        position: relative;
+        margin-top: 12px;
+        margin-inline: -12px;
+        padding-inline: 12px;
+        -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 12px, #000 calc(100% - 28px), transparent 100%);
+        mask-image: linear-gradient(90deg, transparent 0, #000 12px, #000 calc(100% - 28px), transparent 100%);
+      }
+
+      .youth-category-list {
+        gap: 7px;
+        padding: 0 18px 2px 0;
+      }
+
+      .youth-category-chip {
+        min-height: 30px;
+        gap: 7px;
+        padding: 6px 10px;
+        font-size: 11px;
+        line-height: 15px;
+      }
+
+      .youth-category-dot {
+        width: 8px;
+        height: 8px;
+        box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.72);
+      }
+
+      .youth-category-chip:has(input:checked)::after {
+        width: 5px;
+        height: 8px;
+      }
+
+      .youth-map-shell {
+        margin-top: 12px;
+        border-radius: 18px;
+        box-shadow: 0 12px 28px rgba(28, 25, 18, 0.12), 0 1px 0 rgba(0, 0, 0, 0.04);
+      }
+
+      #youth-map {
+        height: calc(100dvh - 166px);
+        min-height: 620px;
+      }
+
+      .youth-map-hint {
+        display: none;
+      }
+    }
+
+    @media (max-width: 390px) {
+      #youth-map {
+        min-height: 590px;
+      }
+    }
+  </style>
+</head>
+<body class="gs-body">
+  <main class="gs-page youth-page">
+    <header class="gs-page-header">
+      <h1 class="gs-page-title">Freizeitkarte</h1>
+      <p class="gs-page-description">Spiel- und Sportorte in Goslar. Immer die richtige Adresse für deine Freizeit!</p>
+    </header>
+
+    <section class="youth-category-panel" aria-label="Kategorien auswählen">
+      <div class="youth-category-list" id="category-list"></div>
+    </section>
+
+    <section class="youth-map-shell" aria-label="Freizeitkarte GoslarTeens">
+      <div id="youth-map"></div>
+    </section>
+
+    <p class="youth-map-error" id="map-error"></p>
+    <p class="youth-map-hint">Kategorien können oben ein- und ausgeblendet werden. Tippe auf einen Punkt, um den Namen des Ortes zu sehen.</p>
+  </main>
+
+  <button class="gs-scroll-top" type="button" data-gs-scroll-top aria-label="Nach oben scrollen">↑</button>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="ui-kit/goslar-ui.js"></script>
+  <script>
+    const YOUTH_MAP_DATA = __YOUTH_MAP_DATA__;
+    const CATEGORY_COLORS = ['#0b8fdc', '#3949ab', '#8e24aa', '#e65100', '#00897b', '#c62828', '#6d4c41', '#546e7a'];
+    const activeCategories = new Set((YOUTH_MAP_DATA.categories || []).map(category => category.id));
+    const markerRecords = [];
+
+    const map = L.map('youth-map', {
+      zoomControl: true,
+      scrollWheelZoom: false,
+    });
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap',
+    }).addTo(map);
+
+    initCategories();
+    initMarkers();
+    syncMarkers();
+
+    if (YOUTH_MAP_DATA.error) {
+      const error = document.getElementById('map-error');
+      error.textContent = YOUTH_MAP_DATA.error;
+      error.style.display = 'block';
+    }
+
+    function initCategories() {
+      const list = document.getElementById('category-list');
+      list.innerHTML = '';
+
+      for (const category of YOUTH_MAP_DATA.categories || []) {
+        const label = document.createElement('label');
+        label.className = 'youth-category-chip';
+        const color = CATEGORY_COLORS[(YOUTH_MAP_DATA.categories || []).indexOf(category) % CATEGORY_COLORS.length];
+        label.style.setProperty('--category-color', color);
+        label.innerHTML = '<span class="youth-category-dot" aria-hidden="true"></span>'
+          + '<input type="checkbox" checked value="' + esc(category.id) + '">'
+          + '<span>' + esc(category.name) + ' (' + Number(category.count || 0) + ')</span>';
+        label.querySelector('input').addEventListener('change', event => {
+          if (event.target.checked) activeCategories.add(category.id);
+          else activeCategories.delete(category.id);
+          syncMarkers();
+        });
+        list.appendChild(label);
+      }
+    }
+
+    function initMarkers() {
+      const bounds = [];
+      const colorByCategory = new Map((YOUTH_MAP_DATA.categories || []).map((category, index) => [category.id, CATEGORY_COLORS[index % CATEGORY_COLORS.length]]));
+
+      for (const point of YOUTH_MAP_DATA.points || []) {
+        const color = colorByCategory.get(point.categoryId) || '#a88f35';
+        const marker = L.marker([point.lat, point.lon], {
+          icon: L.divIcon({
+            className: '',
+            html: '<span class="youth-marker" style="--marker-color:' + color + '"></span>',
+            iconSize: [20, 20],
+            iconAnchor: [10, 20],
+          }),
+        }).bindPopup(buildPopupHtml(point));
+        markerRecords.push({ marker, categoryId: point.categoryId });
+        bounds.push([point.lat, point.lon]);
+      }
+
+      if (bounds.length) map.fitBounds(bounds, { padding: [22, 22] });
+      else map.setView([51.904, 10.428], 12);
+    }
+
+    function buildPopupHtml(point) {
+      let html = '<strong>' + esc(point.title) + '</strong><span>' + esc(point.category) + '</span>';
+      if (point.address) {
+        html += '<span class="youth-popup-address">' + esc(point.address) + '</span>'
+          + '<a class="youth-popup-route" href="' + esc(buildRouteUrl(point.address)) + '">Route</a>';
+      }
+      return html;
+    }
+
+    function buildRouteUrl(destination) {
+      if (isAppleDevice()) {
+        const params = new URLSearchParams({ daddr: destination, dirflg: 'd' });
+        return 'https://maps.apple.com/?' + params.toString();
+      }
+      const params = new URLSearchParams({ api: '1', destination, travelmode: 'driving' });
+      return 'https://www.google.com/maps/dir/?' + params.toString();
+    }
+
+    function isAppleDevice() {
+      return /Mac|iPhone|iPad|iPod/.test(navigator.platform || '') || /iPhone|iPad|iPod/.test(navigator.userAgent || '');
+    }
+
+    function syncMarkers() {
+      for (const record of markerRecords) {
+        if (activeCategories.has(record.categoryId)) {
+          if (!map.hasLayer(record.marker)) record.marker.addTo(map);
+        } else if (map.hasLayer(record.marker)) {
+          record.marker.remove();
+        }
+      }
+    }
+
+    function esc(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+  </script>
+</body>
+</html>

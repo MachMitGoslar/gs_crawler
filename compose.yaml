@@ -57,6 +57,13 @@ services:
     container_name: gs_compiler_019_was_app
     restart: unless-stopped
 
+  gs_compiler_003_youth:
+    image: ghcr.io/machmitgoslar/gs_crawler_003_youth:latest
+    volumes:
+      - ./httpdocs/crawler:/app/output
+    container_name: gs_compiler_003_youth
+    restart: unless-stopped
+
   gs_compiler_027_erster_freitag:
     image: ghcr.io/machmitgoslar/gs_crawler_027_erster_freitag:latest
     volumes:

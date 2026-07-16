@@ -1,0 +1,2 @@
+# Run daily at 09:00
+0 9 * * * cd /app ; python3 /app/script.py >> /proc/1/fd/1 2>&1
