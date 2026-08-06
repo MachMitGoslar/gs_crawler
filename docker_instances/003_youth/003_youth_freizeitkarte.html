@@ -93,7 +93,7 @@
       width: 100%;
       height: min(70vh, 680px);
       min-height: 540px;
-      background: #dbeedc;
+      background: #ece7dc;
     }
 
     .youth-map-hint,
@@ -114,13 +114,13 @@
 
     .youth-marker {
       position: relative;
-      width: 20px;
-      height: 20px;
+      width: 18px;
+      height: 18px;
       display: block;
-      border: 3px solid #ffffff;
+      border: 2px solid #ffffff;
       border-radius: 999px 999px 999px 2px;
       background: var(--marker-color, var(--gs-color-gold));
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 6px 14px rgba(28, 25, 18, 0.28), 0 0 0 1px rgba(168, 143, 53, 0.2);
       transform: rotate(-45deg);
     }
 
@@ -132,12 +132,66 @@
       background: rgba(255, 255, 255, 0.92);
     }
 
+    .leaflet-container {
+      color: var(--gs-color-copy);
+      font-family: var(--gs-font-ui);
+      background: #ece7dc;
+    }
+
+    .leaflet-tile-pane {
+      filter: saturate(0.72) sepia(0.1) contrast(0.94) brightness(1.04);
+    }
+
+    .leaflet-control-zoom {
+      overflow: hidden;
+      border: 1px solid rgba(168, 143, 53, 0.18) !important;
+      border-radius: 16px !important;
+      background: rgba(255, 255, 255, 0.92);
+      box-shadow: 0 10px 24px rgba(28, 25, 18, 0.16) !important;
+      backdrop-filter: blur(10px);
+    }
+
+    .leaflet-bar a,
+    .leaflet-bar a:hover {
+      width: 34px;
+      height: 34px;
+      border-bottom-color: rgba(168, 143, 53, 0.14);
+      background: transparent;
+      color: var(--gs-color-gold);
+      font: 700 18px/34px var(--gs-font-ui);
+    }
+
+    .leaflet-bar a:last-child {
+      border-bottom: 0;
+    }
+
+    .leaflet-control-attribution {
+      margin: 0 8px 8px 0 !important;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.78) !important;
+      color: rgba(63, 63, 62, 0.76);
+      font: 590 10px/14px var(--gs-font-ui);
+      letter-spacing: -0.004em;
+      backdrop-filter: blur(8px);
+    }
+
+    .leaflet-control-attribution a {
+      color: rgba(63, 63, 62, 0.86);
+      text-decoration: none;
+    }
+
     .leaflet-popup-content-wrapper {
-      border-radius: 14px;
+      border: 1px solid rgba(168, 143, 53, 0.12);
+      border-radius: 18px;
+      box-shadow: 0 18px 36px rgba(28, 25, 18, 0.18);
+    }
+
+    .leaflet-popup-tip {
+      box-shadow: 0 5px 12px rgba(28, 25, 18, 0.12);
     }
 
     .leaflet-popup-content {
-      margin: 10px 12px;
+      margin: 12px 14px;
       color: var(--gs-color-copy);
       font: 590 12px/18px var(--gs-font-ui);
       letter-spacing: -0.004em;
@@ -150,6 +204,7 @@
       font: 700 14px/20px var(--gs-font-ui);
     }
 
+    .youth-popup-type,
     .youth-popup-address {
       display: block;
       margin-top: 3px;
@@ -161,7 +216,7 @@
       align-items: center;
       justify-content: center;
       margin-top: 8px;
-      padding: 5px 12px;
+      padding: 5px 14px;
       border-radius: 999px;
       background: var(--gs-color-gold);
       color: #ffffff !important;
@@ -174,6 +229,47 @@
     .leaflet-container a.youth-popup-route:hover,
     .leaflet-container a.youth-popup-route:focus {
       color: #ffffff !important;
+    }
+
+    .youth-submit-section {
+      margin-top: 18px;
+    }
+
+    .youth-submit-title {
+      margin: 0 4px;
+      color: var(--gs-color-gold);
+      font: 700 18px/28px var(--gs-font-ui);
+      letter-spacing: -0.004em;
+    }
+
+    .youth-submit-text {
+      margin: 3px 4px 0;
+      color: var(--gs-color-copy);
+      font: 590 12px/20px var(--gs-font-ui);
+      letter-spacing: -0.004em;
+    }
+
+    .youth-submit-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 8px 4px 0;
+      color: var(--gs-color-gold);
+      font: 700 12px/20px var(--gs-font-ui);
+      letter-spacing: -0.004em;
+    }
+
+    .youth-submit-links a {
+      color: var(--gs-color-gold);
+      text-decoration: underline;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 3px;
+    }
+
+    .youth-submit-links a:visited,
+    .youth-submit-links a:hover,
+    .youth-submit-links a:focus {
+      color: var(--gs-color-gold);
     }
 
     @media (max-width: 720px) {
@@ -241,6 +337,11 @@
       .youth-map-hint {
         display: none;
       }
+
+      .youth-submit-section {
+        margin-top: 12px;
+      }
+
     }
 
     @media (max-width: 390px) {
@@ -267,6 +368,16 @@
 
     <p class="youth-map-error" id="map-error"></p>
     <p class="youth-map-hint">Kategorien können oben ein- und ausgeblendet werden. Tippe auf einen Punkt, um den Namen des Ortes zu sehen.</p>
+
+    <section class="youth-submit-section" aria-labelledby="submit-place-title">
+      <h2 class="youth-submit-title" id="submit-place-title">Fehlt ein Ort?</h2>
+      <p class="youth-submit-text">Kennst du einen weiteren Treffpunkt, Spielort oder Sportplatz? Schick ihn an die Jugendpflege Goslar.</p>
+      <div class="youth-submit-links" aria-label="Kontaktmöglichkeiten">
+        <a href="mailto:jugendpflege@goslar.de">Mail</a>
+        <a href="https://www.snapchat.com/add/jugend.goslar">Snapchat</a>
+        <a href="https://chat.whatsapp.com/1Z22Fkprh0O1KdjvVge4vy">WhatsApp</a>
+      </div>
+    </section>
   </main>
 
   <button class="gs-scroll-top" type="button" data-gs-scroll-top aria-label="Nach oben scrollen">↑</button>
@@ -274,14 +385,22 @@
   <script src="ui-kit/goslar-ui.js"></script>
   <script>
     const YOUTH_MAP_DATA = __YOUTH_MAP_DATA__;
-    const CATEGORY_COLORS = ['#0b8fdc', '#3949ab', '#8e24aa', '#e65100', '#00897b', '#c62828', '#6d4c41', '#546e7a'];
+    const CATEGORY_COLORS = ['#3d8f9e', '#6f7eb8', '#9c6c97', '#bd7b3a', '#4c9a7d', '#b65b54', '#8a6f55', '#748287'];
+    const IS_TOUCH_DEVICE = window.matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
     const activeCategories = new Set((YOUTH_MAP_DATA.categories || []).map(category => category.id));
     const markerRecords = [];
 
     const map = L.map('youth-map', {
-      zoomControl: true,
+      zoomControl: false,
       scrollWheelZoom: false,
+      touchZoom: true,
+      tap: true,
+      dragging: !IS_TOUCH_DEVICE,
+      attributionControl: false,
     });
+
+    L.control.zoom({ position: 'bottomright' }).addTo(map);
+    L.control.attribution({ position: 'bottomright', prefix: false }).addTo(map);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
@@ -329,8 +448,8 @@
           icon: L.divIcon({
             className: '',
             html: '<span class="youth-marker" style="--marker-color:' + color + '"></span>',
-            iconSize: [20, 20],
-            iconAnchor: [10, 20],
+            iconSize: [18, 18],
+            iconAnchor: [9, 18],
           }),
         }).bindPopup(buildPopupHtml(point));
         markerRecords.push({ marker, categoryId: point.categoryId });
@@ -342,15 +461,17 @@
     }
 
     function buildPopupHtml(point) {
-      let html = '<strong>' + esc(point.title) + '</strong><span>' + esc(point.category) + '</span>';
+      let html = '<strong>' + esc(point.title) + '</strong><span class="youth-popup-type">' + esc(point.category) + '</span>';
       if (point.address) {
-        html += '<span class="youth-popup-address">' + esc(point.address) + '</span>'
-          + '<a class="youth-popup-route" href="' + esc(buildRouteUrl(point.address)) + '">Route</a>';
+        html += '<span class="youth-popup-address">' + esc(point.address) + '</span>';
       }
+      html += '<a class="youth-popup-route" href="' + esc(buildRouteUrl(point)) + '">Route</a>';
       return html;
     }
 
-    function buildRouteUrl(destination) {
+    function buildRouteUrl(point) {
+      const destination = point.address || [point.lat, point.lon].filter(value => Number.isFinite(Number(value))).join(',');
+
       if (isAppleDevice()) {
         const params = new URLSearchParams({ daddr: destination, dirflg: 'd' });
         return 'https://maps.apple.com/?' + params.toString();

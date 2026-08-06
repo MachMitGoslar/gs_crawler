@@ -18,6 +18,8 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 COMPOSE_FILE="$PROJECT_ROOT/compose.dev.yaml"
+WEBSERVER_COMPOSE_FILE="$PROJECT_ROOT/compose.webserver.yaml"
+COMPOSE_ARGS=(-f "$COMPOSE_FILE" -f "$WEBSERVER_COMPOSE_FILE")
 
 cd "$PROJECT_ROOT"
 
@@ -68,12 +70,13 @@ case "${1:-help}" in
         fi
 
         echo "🚀 Starting containers..."
-        docker compose -f "$COMPOSE_FILE" up -d --build
+        docker compose "${COMPOSE_ARGS[@]}" up -d --build
         echo ""
         echo -e "${GREEN}✅ Containers started${NC}"
         echo ""
         echo "Health Monitor: http://localhost:5015"
         echo "Altstadtfest:   http://localhost:5016"
+        echo "Webserver:      http://localhost:8888/crawler/"
         echo ""
         echo "Run './scripts/dev.sh logs' to follow logs"
         ;;
@@ -81,16 +84,16 @@ case "${1:-help}" in
     down)
         print_header
         echo "🛑 Stopping containers..."
-        docker compose -f "$COMPOSE_FILE" down
+        docker compose "${COMPOSE_ARGS[@]}" down
         echo -e "${GREEN}✅ Containers stopped${NC}"
         ;;
 
     logs)
         SERVICE="${2:-}"
         if [ -n "$SERVICE" ]; then
-            docker compose -f "$COMPOSE_FILE" logs -f "$SERVICE"
+            docker compose "${COMPOSE_ARGS[@]}" logs -f "$SERVICE"
         else
-            docker compose -f "$COMPOSE_FILE" logs -f
+            docker compose "${COMPOSE_ARGS[@]}" logs -f
         fi
         ;;
 
@@ -102,12 +105,12 @@ case "${1:-help}" in
         fi
 
         echo "🔨 Building all containers..."
-        docker compose -f "$COMPOSE_FILE" build
+        docker compose "${COMPOSE_ARGS[@]}" build
         echo -e "${GREEN}✅ Build complete${NC}"
         ;;
 
     ps)
-        docker compose -f "$COMPOSE_FILE" ps
+        docker compose "${COMPOSE_ARGS[@]}" ps
         ;;
 
     test)
@@ -122,20 +125,20 @@ case "${1:-help}" in
             echo "Usage: ./scripts/dev.sh shell <service_name>"
             echo ""
             echo "Available services:"
-            docker compose -f "$COMPOSE_FILE" ps --services
+            docker compose "${COMPOSE_ARGS[@]}" ps --services
             exit 1
         fi
-        docker compose -f "$COMPOSE_FILE" exec "$SERVICE" /bin/sh
+        docker compose "${COMPOSE_ARGS[@]}" exec "$SERVICE" /bin/sh
         ;;
 
     restart)
         SERVICE="${2:-}"
         if [ -n "$SERVICE" ]; then
             echo "🔄 Restarting $SERVICE..."
-            docker compose -f "$COMPOSE_FILE" restart "$SERVICE"
+            docker compose "${COMPOSE_ARGS[@]}" restart "$SERVICE"
         else
             echo "🔄 Restarting all containers..."
-            docker compose -f "$COMPOSE_FILE" restart
+            docker compose "${COMPOSE_ARGS[@]}" restart
         fi
         echo -e "${GREEN}✅ Restart complete${NC}"
         ;;
