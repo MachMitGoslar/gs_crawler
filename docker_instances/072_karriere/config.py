@@ -16,7 +16,7 @@ APP_BASE_PATH = os.getenv("KARRIERE_BASE_PATH", "/karriere").rstrip("/") or ""
 HTML_TEMPLATE_PATH = os.path.join(BASE_DIR, "jobs.html")
 DETAIL_HTML_TEMPLATE_PATH = os.path.join(BASE_DIR, "job_detail.html")
 
-BUNDESAPI_BASE_URL = "https://rest.arbeitsagentur.de/jobboerse/jobsuche-service/pc/v4/jobs"
+BUNDESAPI_BASE_URL = "https://rest.arbeitsagentur.de/jobboerse/jobsuche-service/pc/v6/jobs"
 BUNDESAPI_JOBDETAILS_BASE_URL = "https://rest.arbeitsagentur.de/jobboerse/jobsuche-service/pc/v4/jobdetails"
 BUNDESAPI_KEY = "jobboerse-jobsuche"
 ARBEITGEBERLOGO_BASE_URL = "https://rest.arbeitsagentur.de/vermittlung/ag-darstellung-service/ct/v1/arbeitgeberlogo"

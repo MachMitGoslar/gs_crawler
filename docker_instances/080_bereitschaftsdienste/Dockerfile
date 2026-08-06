@@ -1,5 +1,5 @@
-# Migriert zu Base-Image mit gemeinsamem UI-Kit
-FROM ghcr.io/machmitgoslar/gs_crawler_python_ui_kit_crawler:latest
+# Das Python-Basis-Image enthaelt auch das gemeinsame UI-Kit
+FROM ghcr.io/machmitgoslar/gs_crawler_python_basic_crawler:latest
 
 # Kopiere container-spezifische Dateien
 COPY script.py .

@@ -1,4 +1,4 @@
-FROM ghcr.io/machmitgoslar/gs_crawler_python_ui_kit_crawler:latest
+FROM ghcr.io/machmitgoslar/gs_crawler_python_basic_crawler:latest
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends curl \

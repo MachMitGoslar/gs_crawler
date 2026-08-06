@@ -113,9 +113,7 @@ def get_base_image_requirements(docker_dir):
 
     try:
         content = dockerfile.read_text()
-        if "python_ui_kit_crawler" in content:
-            return PROJECT_ROOT / "base_images" / "python_basic_crawler" / "requirements.txt"
-        elif "python_basic_crawler" in content:
+        if "python_basic_crawler" in content:
             return PROJECT_ROOT / "base_images" / "python_basic_crawler" / "requirements.txt"
         elif "python_selenium_crawler" in content:
             return PROJECT_ROOT / "base_images" / "python_selenium_crawler" / "requirements.txt"

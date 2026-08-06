@@ -30,6 +30,7 @@ Dieses Verzeichnis enthält wiederverwendbare Base-Images, die die Redundanz in 
 - requests, beautifulsoup4, pillow, lxml
 - Cron-Daemon
 - Gemeinsame Helper-Funktionen
+- Gemeinsames UI-Kit unter `/app/ui-kit`
 
 ### 2. `gs_crawler/python_selenium_crawler`
 **Für:** Erweiterte Crawler mit Browser-Automatisierung  
@@ -41,15 +42,7 @@ Dieses Verzeichnis enthält wiederverwendbare Base-Images, die die Redundanz in 
 - Firefox ESR + Selenium WebDriver
 - matplotlib, numpy für Datenverarbeitung
 
-### 3. `gs_crawler/python_ui_kit_crawler`
-**Für:** Python-Crawler mit statischen HTML-Seiten im Goslar UI-Kit.  
-**Verwendet von:** 056 Serviceportal, 080 Bereitschaftsdienste
-
-**Enthält:**
-- Alles von `python_basic_crawler`
-- Gemeinsames UI-Kit unter `/app/ui-kit`
-
-### 4. `gs_crawler/php_basic_crawler`
+### 3. `gs_crawler/php_basic_crawler`
 **Für:** PHP-basierte Crawler  
 **Verwendet von:** 1 Container (ferienpass)  
 **Reduziert:** ~50 Zeilen redundanten Code  
@@ -58,7 +51,7 @@ Dieses Verzeichnis enthält wiederverwendbare Base-Images, die die Redundanz in 
 - PHP 8.2 CLI
 - Cron-Daemon
 
-### 5. `gs_crawler/flask_monitor`
+### 4. `gs_crawler/flask_monitor`
 **Für:** Flask-basierte Monitoring-Anwendungen  
 **Verwendet von:** 1 Container (health_monitor)  
 **Reduziert:** ~30 Zeilen redundanten Code  
