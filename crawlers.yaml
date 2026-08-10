@@ -206,8 +206,11 @@ crawlers:
     schedule: "0 2,14 * * *"
     schedule_human: "2x täglich (02:00, 14:00)"
     expected_files:
+      - "ui-kit/goslar-ui.css"
+      - "ui-kit/goslar-ui.js"
       - "042-freiwilligenagentur.json"
       - "042-freiwilligenagentur-alle.json"
+      - "042_freiwilligenagentur_index.html"
     env_file:
       - .env
     implementation: custom
@@ -348,6 +351,8 @@ crawlers:
     schedule: "0 9 * * *"
     schedule_human: "Täglich 09:00"
     expected_files:
+      - "ui-kit/goslar-ui.css"
+      - "ui-kit/goslar-ui.js"
       - "056-serviceportal.json"
       - "056_serviceportal_index.html"
       - "056_serviceportal_termin.html"
@@ -362,6 +367,24 @@ crawlers:
     schedule_human: "Täglich 06:00"
     expected_files:
         - "defi-kataster/060-defi-kataster.json"
+    implementation: custom
+
+  - id: "080_bereitschaftsdienste"
+    name: "Bereitschaftsdienste Goslar"
+    category: specialized
+    type: "Emergency Services"
+    source: "https://www.goslar.de/"
+    schedule: "*/15 * * * *"
+    schedule_human: "Alle 15 Minuten (API nur nach Endzeit)"
+    expected_files:
+      - "ui-kit/goslar-ui.css"
+      - "ui-kit/goslar-ui.js"
+      - "080_bereitschaftsdienste_card.json"
+      - "080_bereitschaftsdienste_card.png"
+      - "080_bereitschaftsdienste_index.html"
+      - "080_bereitschaftsdienste_medizinisch.html"
+      - "080_bereitschaftsdienste_staedtisch.html"
+      - "080_bereitschaftsdienste_sicherheit.html"
     implementation: custom
 
 
@@ -401,11 +424,16 @@ crawlers:
     category: api
     type: "Job Portal"
     source: "https://github.com/bundesAPI"
-    schedule: "0 */2 * * *"
-    schedule_human: "Alle 2 Stunden"
+    schedule: "0 * * * *"
+    schedule_human: "Stündlich"
     expected_files:
+      - "ui-kit/goslar-ui.css"
+      - "ui-kit/goslar-ui.js"
       - "072_karriere_card.json"
-    ports:
-      - "5017:8000"
+      - "072_jobs.json"
+      - "072_karriere_index.html"
+      - "jobs.css"
+      - "jobs.js"
+    ports: []
     implementation: custom
-    notes: "Lokales Job-Portal fuer Landkreis Goslar. Schreibt alle 2 Stunden eine zufaellige Job-Card als JSON und stellt eine HTTP-Oberflaeche bereit."
+    notes: "Statischer Karriereportal-Export fuer Landkreis Goslar. Laedt stündlich Jobdaten und schreibt HTML plus JSON nach /app/output."

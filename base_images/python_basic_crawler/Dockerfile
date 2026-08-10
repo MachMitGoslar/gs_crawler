@@ -17,6 +17,10 @@ RUN python3 -m venv .venv && \
 # Kopiere Helper-Dateien
 COPY helpers.py .
 
+# Gemeinsames UI-Kit fuer Crawler-HTML-Seiten
+COPY goslar-ui.css /app/ui-kit/goslar-ui.css
+COPY goslar-ui.js /app/ui-kit/goslar-ui.js
+
 # Kopiere und bereite Startup-Script vor
 COPY start_up.sh .
 RUN chmod +x start_up.sh

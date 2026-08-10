@@ -2,9 +2,11 @@ import json
 import os
 import random
 import re
+import shutil
 import sys
 from datetime import datetime
 from html import unescape
+from pathlib import Path
 
 import requests
 from bs4 import BeautifulSoup
@@ -18,8 +20,12 @@ DETAIL_URL_TEMPLATE = (
     "https://www.freinet-online.de/query/iframe/print.php"
     f"?agid={AGENCY_ID}&styleid=2&frametyp=2&do=go&submit=Suchen&hideund=1&detail={{angebot_id}}"
 )
-INDEX_JSON_URL = "https://crawler.goslar.app/crawler/042-freiwilligenagentur-alle.json"
-OUTPUT_DIR = "output"
+INDEX_HTML_FILE = "042_freiwilligenagentur_index.html"
+INDEX_HTML_URL = f"https://crawler.goslar.app/crawler/{INDEX_HTML_FILE}"
+OUTPUT_DIR = Path("output")
+SCRIPT_DIR = Path(__file__).resolve().parent
+UI_KIT_DIR = SCRIPT_DIR / "ui-kit"
+EXPORT_UI_KIT_FILES = ["goslar-ui.css", "goslar-ui.js"]
 
 
 def get_tag_text(node, tag_name):
@@ -133,18 +139,47 @@ def build_card(featured_offer):
         "title": featured_offer["title"],
         "description": normalize_description(featured_offer["description"]),
         "image_url": featured_offer["image_url"],
-        "call_to_action_url": INDEX_JSON_URL,
+        "call_to_action_url": INDEX_HTML_URL,
         "published_at": featured_offer["published_at"],
         "widget_type": None,
     }
 
 
 def write_json(filename, payload):
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
-    path = os.path.join(OUTPUT_DIR, filename)
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    path = OUTPUT_DIR / filename
     with open(path, "w", encoding="utf-8") as handle:
         json.dump(payload, handle, ensure_ascii=False, indent=2)
     print(f"Written: {path}")
+
+
+def json_for_script(data):
+    return (
+        json.dumps(data, ensure_ascii=False)
+        .replace("<", "\\u003c")
+        .replace(">", "\\u003e")
+        .replace("&", "\\u0026")
+        .replace("\u2028", "\\u2028")
+        .replace("\u2029", "\\u2029")
+    )
+
+
+def write_html(offers):
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    html = (SCRIPT_DIR / INDEX_HTML_FILE).read_text(encoding="utf-8")
+    html = html.replace("__OFFERS_JSON__", json_for_script(offers))
+    target = OUTPUT_DIR / INDEX_HTML_FILE
+    target.write_text(html, encoding="utf-8")
+    print(f"Written: {target}")
+
+
+def copy_ui_kit():
+    target_dir = OUTPUT_DIR / "ui-kit"
+    target_dir.mkdir(parents=True, exist_ok=True)
+    for filename in EXPORT_UI_KIT_FILES:
+        target = target_dir / filename
+        shutil.copyfile(UI_KIT_DIR / filename, target)
+        print(f"Copied: {target}")
 
 
 def main():
@@ -164,6 +199,8 @@ def main():
 
     write_json("042-freiwilligenagentur.json", build_card(featured_offer))
     write_json("042-freiwilligenagentur-alle.json", ordered_index)
+    write_html(ordered_index)
+    copy_ui_kit()
 
     print(f"Fetched {len(offers)} active Freinet offers.")
 

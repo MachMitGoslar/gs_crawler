@@ -78,12 +78,48 @@ def fetch_jobs(filters: dict[str, str], offer_type: str | None = None) -> list[d
         query_params["page"] = page
         query_params["size"] = size
         payload = fetch_bundesapi_json(f"{BUNDESAPI_BASE_URL}?{urlencode(query_params)}")
-        for job in payload.get("stellenangebote", []):
+        for raw_job in payload.get("ergebnisliste", []):
+            job = normalize_v6_job(raw_job)
             refnr = str(job.get("refnr") or "")
             if refnr and refnr not in jobs_by_refnr:
                 jobs_by_refnr[refnr] = job
 
     return list(jobs_by_refnr.values())
+
+
+def normalize_v6_job(job: dict[str, Any]) -> dict[str, Any]:
+    """Überführt einen v6-Suchtreffer in das intern verwendete v4-Feldformat."""
+    locations = job.get("stellenlokationen") or []
+    first_location = locations[0] if locations else {}
+    address = first_location.get("adresse") or {}
+    entry_period = job.get("eintrittszeitraum") or {}
+    publication_period = job.get("veroeffentlichungszeitraum") or {}
+
+    normalized = dict(job)
+    normalized.update(
+        {
+            "refnr": job.get("referenznummer"),
+            "titel": job.get("stellenangebotsTitel"),
+            "beruf": job.get("hauptberuf"),
+            "arbeitgeber": job.get("firma"),
+            "aktuelleVeroeffentlichungsdatum": (
+                job.get("datumErsteVeroeffentlichung") or publication_period.get("von")
+            ),
+            "eintrittsdatum": entry_period.get("von"),
+            "arbeitsort": {
+                "ort": address.get("ort"),
+                "plz": address.get("postleitzahl") or address.get("plz"),
+                "strasse": address.get("strasse"),
+                "region": address.get("region"),
+                "land": address.get("land"),
+            },
+            "externeUrl": job.get("externeURL") or job.get("externeUrl"),
+            "kundennummerHash": (
+                job.get("arbeitgeberKundennummerHash") or job.get("kundennummerHash")
+            ),
+        }
+    )
+    return normalized
 
 
 def build_job_query(filters: dict[str, str], search_location: str, offer_type: str | None = None) -> dict[str, Any]:
@@ -112,6 +148,8 @@ def fetch_bundesapi_json(url: str) -> dict[str, Any]:
         f"X-API-Key: {BUNDESAPI_KEY}",
         "-H",
         "Accept: application/json",
+        "-w",
+        "\n%{http_code}",
         url,
     ]
     completed = subprocess.run(
@@ -123,10 +161,15 @@ def fetch_bundesapi_json(url: str) -> dict[str, Any]:
     )
     if completed.returncode != 0:
         raise RuntimeError(f"curl failed with exit code {completed.returncode}: {completed.stderr.strip()}")
+    if "\n" not in completed.stdout:
+        raise RuntimeError(f"invalid response from BundesAPI: {completed.stdout[:300]}")
+    body, status_code = completed.stdout.rsplit("\n", 1)
+    if status_code != "200":
+        raise RuntimeError(f"HTTP {status_code}: {body[:300]}")
     try:
-        return json.loads(completed.stdout)
+        return json.loads(body)
     except json.JSONDecodeError as exc:
-        raise RuntimeError(f"invalid JSON from BundesAPI: {completed.stdout[:400]}") from exc
+        raise RuntimeError(f"invalid JSON from BundesAPI: {body[:400]}") from exc
 
 
 def fetch_logo(logo_hash: str) -> tuple[bytes, str]:

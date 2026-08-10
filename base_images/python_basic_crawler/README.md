@@ -37,6 +37,8 @@ RUN chmod 0600 /etc/cron.d/mycron && \
 
 - `helpers.py` - Gemeinsame Helper-Funktionen
 - `start_up.sh` - Startup-Script (führt script.py aus und startet cron)
+- `ui-kit/goslar-ui.css` - Gemeinsame Styles für Crawler-HTML-Seiten
+- `ui-kit/goslar-ui.js` - Gemeinsames Such-, Filter- und Scroll-Verhalten
 - `.venv/` - Python Virtual Environment mit allen Abhängigkeiten
 
 ## Output

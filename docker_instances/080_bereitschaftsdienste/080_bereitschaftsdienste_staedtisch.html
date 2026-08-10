@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Städtische Notdienste Goslar</title>
+  <link rel="stylesheet" href="ui-kit/goslar-ui.css" />
+  <style>
+    .city-service-text {
+      margin: 20px 0 28px;
+      color: var(--gs-color-text);
+      font: 700 16px/28px var(--gs-font-ui);
+      letter-spacing: -0.004em;
+    }
+
+    .city-service-footer {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(146px, 44%);
+      align-items: center;
+      gap: 16px;
+    }
+  </style>
+</head>
+<body class="gs-body">
+  <main class="gs-page gs-page--with-back" aria-label="Städtische Notdienste Goslar">
+    <a class="gs-back-link" href="080_bereitschaftsdienste_index.html" aria-label="Zurück">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M20 11H7.83l5.59-5.59L12 4 4 12l8 8 1.42-1.41L7.83 13H20v-2Z" />
+      </svg>
+    </a>
+
+    <header class="gs-page-header">
+      <h1 class="gs-page-title">Städtische Notdienste</h1>
+      <p class="gs-page-description">Wichtige Rufnummern bei Störungen und Problemen.</p>
+    </header>
+
+    <section class="gs-content" aria-label="Städtische Notdienste">
+      <article class="gs-info-card">
+        <div class="gs-info-card__header">
+          <h2 class="gs-info-card__title">EURAWASSER Goslar</h2>
+          <a class="gs-icon-link" href="https://www.eurawasser.de/" target="_blank" rel="noopener noreferrer" aria-label="EURAWASSER extern öffnen">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H14V3ZM5 5h6v2H7v10h10v-4h2v6H5V5Z" />
+            </svg>
+          </a>
+        </div>
+
+        <div class="gs-info-card__body">
+          <h3 class="city-service-text">bei Rohrbrüchen, Ausfällen oder Problemen mit der Abwasserentsorgung</h3>
+
+          <div class="city-service-footer">
+            <span class="gs-meta">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.28-.28.67-.36 1.02-.25 1.12.37 2.32.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1C10.61 21 3 13.39 3 4c0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2Z" />
+              </svg>
+              <span>05321 3376-11</span>
+            </span>
+            <a class="gs-action" href="tel:+495321337611">Anrufen</a>
+          </div>
+        </div>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

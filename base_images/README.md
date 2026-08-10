@@ -30,6 +30,7 @@ Dieses Verzeichnis enthält wiederverwendbare Base-Images, die die Redundanz in 
 - requests, beautifulsoup4, pillow, lxml
 - Cron-Daemon
 - Gemeinsame Helper-Funktionen
+- Gemeinsames UI-Kit unter `/app/ui-kit`
 
 ### 2. `gs_crawler/python_selenium_crawler`
 **Für:** Erweiterte Crawler mit Browser-Automatisierung  

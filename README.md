@@ -25,7 +25,7 @@ To add/modify a crawler:
 3. Commit the changes
 
 <!-- CRAWLER_TABLE_START -->
-**Total Crawlers:** 28 (19 custom containers, 9 config-driven)
+**Total Crawlers:** 29 (20 custom containers, 9 config-driven)
 
 ### Infrastructure
 _System monitoring and management_
@@ -69,7 +69,7 @@ _Community organizations and volunteer opportunities_
 | ID | Name | Type | Schedule | Output Files |
 |:---|:-----|:-----|:---------|:-------------|
 | 031_goslarer_geschichten | Goslarer Geschichten | Forum Crawler | Täglich 09:00 | `031-goslarer_geschichten.json` |
-| 042_freiwilligen | Freiwilligenagentur | Volunteer Portal | 2x täglich (02:00, 14:00) | `042-freiwilligenagentur.json, 042-freiwilligena...` |
+| 042_freiwilligen | Freiwilligenagentur | Volunteer Portal | 2x täglich (02:00, 14:00) | `ui-kit/goslar-ui.css, ui-kit/goslar-ui.js, 042-freiwilligenagentur.json, 042-freiwilligenagentur-alle.json, 042_freiwilligenagentur_index.html` |
 
 ### Environmental Monitoring
 _Weather, water, and environmental data_
@@ -98,8 +98,9 @@ _Unique data sources requiring custom processing_
 |:---|:-----|:-----|:---------|:-------------|
 | 032_webcams_goslar | Webcams Goslar | Webcam Processor | Täglich 09:00 | `032_webcams_goslar.json, 032_webcams.gif` |
 | 033_goslar24-7 | Goslar24-7 Webcams | Webcam Processor | Stündlich | `033_gif_schuhhof.json, 033_gif_schuhhof.gif, 03...` |
-| 056_serviceportal | Serviceportal Goslar | Service Portal | Täglich 09:00 | `056-serviceportal.json, 056_serviceportal_index.html, 056_serviceportal_termin.html` |
-| 060_defi_kataster | Defibrillatoren Kataster | Defi Locations | Täglich 06:00 | `060-defi-kataster.json` |
+| 056_serviceportal | Serviceportal Goslar | Service Portal | Täglich 09:00 | `ui-kit/goslar-ui.css, ui-kit/goslar-ui.js, 056-serviceportal.json, 056_serviceportal_index.html, 056_serviceportal_termin.html, 056_serviceportal_image.png` |
+| 060_defi_kataster | Defibrillatoren Kataster | Defi Locations | Täglich 06:00 | `defi-kataster/060-defi-kataster.json` |
+| 080_bereitschaftsdienste | Bereitschaftsdienste Goslar | Emergency Services | Alle 15 Minuten (API nur nach Endzeit) | `ui-kit/goslar-ui.css, ui-kit/goslar-ui.js, 080_bereitschaftsdienste_card.json, 080_bereitschaftsdienste_card.png, 080_bereitschaftsdienste_index.html, 080_bereitschaftsdienste_medizinisch.html, 080_bereitschaftsdienste_staedtisch.html, 080_bereitschaftsdienste_sicherheit.html` |
 
 ### API Services
 _API endpoints and services_
@@ -107,7 +108,7 @@ _API endpoints and services_
 | ID | Name | Type | Schedule | Output Files |
 |:---|:-----|:-----|:---------|:-------------|
 | 068_altstadtfest | Altstadtfest Goslar | API Endpoint | API Endpoint | `-` |
-| 072_karriere | Karriere Goslar | Job Portal | Alle 2 Stunden | `072_karriere_card.json` |
+| 072_karriere | Karriere Goslar | Job Portal | Stündlich | `ui-kit/goslar-ui.css, ui-kit/goslar-ui.js, 072_karriere_card.json, 072_jobs.json, 072_karriere_index.html, jobs.css, jobs.js` |
 
 <!-- CRAWLER_TABLE_END -->
 
@@ -152,7 +153,6 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed setup instructions.
 |:-----|:--------|
 | 5015 | Health Monitor Dashboard |
 | 5016 | Altstadtfest API |
-| 5017 | Karriere Goslar |
 
 ## Output
 

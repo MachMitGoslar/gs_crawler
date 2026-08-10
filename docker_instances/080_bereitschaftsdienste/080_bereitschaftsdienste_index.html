@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bereitschaftsdienste Goslar</title>
+  <link rel="stylesheet" href="ui-kit/goslar-ui.css" />
+  <style>
+    .emergency-icon {
+      width: 86px;
+      height: 86px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      color: var(--gs-color-gold);
+      font-size: 38px;
+      line-height: 1;
+    }
+
+    .emergency-icon--medical { background: #f2ecda; }
+    .emergency-icon--city { background: #e8eef9; }
+    .emergency-icon--safety { background: #fde9e7; }
+  </style>
+</head>
+<body class="gs-body">
+  <main class="gs-page" aria-label="Bereitschaftsdienste Goslar">
+    <header class="gs-page-header">
+      <h1 class="gs-page-title">Bereitschaftsdienste</h1>
+      <p class="gs-page-description">Alle Notdienste der Stadt Goslar auf einen Blick – schnell finden, direkt erreichen und im Ernstfall sofort handeln.</p>
+    </header>
+
+    <section class="gs-content gs-content--loose" aria-label="Notdienst-Kategorien">
+      <a class="gs-widget" href="080_bereitschaftsdienste_medizinisch.html">
+        <span class="emergency-icon emergency-icon--medical" aria-hidden="true">⚕</span>
+        <span class="gs-widget__content">
+          <span class="gs-widget__title">Medizinische Notdienste</span>
+          <span class="gs-widget__copy">Apotheken, Ärzte und Zahnärzte in Ihrer Nähe</span>
+        </span>
+      </a>
+
+      <a class="gs-widget" href="080_bereitschaftsdienste_staedtisch.html">
+        <span class="emergency-icon emergency-icon--city" aria-hidden="true">🔧</span>
+        <span class="gs-widget__content">
+          <span class="gs-widget__title">Städtische Notdienste</span>
+          <span class="gs-widget__copy">Wasser, Abwasser, Straßenbeleuchtung, uvm.</span>
+        </span>
+      </a>
+
+      <a class="gs-widget" href="080_bereitschaftsdienste_sicherheit.html">
+        <span class="emergency-icon emergency-icon--safety" aria-hidden="true">🛡</span>
+        <span class="gs-widget__content">
+          <span class="gs-widget__title">Behörden &amp; Sicherheit</span>
+          <span class="gs-widget__copy">Polizei, Feuerwehr, Rettungsdienst und nora Notruf-App</span>
+        </span>
+      </a>
+    </section>
+  </main>
+</body>
+</html>

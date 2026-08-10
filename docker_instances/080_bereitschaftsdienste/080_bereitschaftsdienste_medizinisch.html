@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Medizinische Notdienste Goslar</title>
+  <link rel="stylesheet" href="ui-kit/goslar-ui.css" />
+  <style>
+    .medical-meta-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 12px;
+      margin-top: 35px;
+    }
+
+    .medical-meta-row .gs-meta:last-child {
+      justify-self: end;
+    }
+  </style>
+</head>
+<body class="gs-body">
+  <main class="gs-page gs-page--with-back" aria-label="Medizinische Notdienste Goslar">
+    <a class="gs-back-link" href="080_bereitschaftsdienste_index.html" aria-label="Zurück">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M20 11H7.83l5.59-5.59L12 4 4 12l8 8 1.42-1.41L7.83 13H20v-2Z" />
+      </svg>
+    </a>
+
+    <header class="gs-page-header">
+      <h1 class="gs-page-title">Medizinische Notdienste</h1>
+      <p class="gs-page-description">Medizinische Notdienste der Stadt Goslar auf einen Blick – schnell finden und direkt erreichen.</p>
+    </header>
+
+    <section class="gs-content" aria-label="Medizinische Notdienste">
+      <article class="gs-info-card">
+        <div class="gs-info-card__header">
+          <h2 class="gs-info-card__title">Apotheken Notdienst</h2>
+          <a class="gs-icon-link" href="__PHARMACY_EXTERNAL_HREF__" target="_blank" rel="noopener noreferrer" aria-label="Apotheken Notdienst extern öffnen">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H14V3ZM5 5h6v2H7v10h10v-4h2v6H5V5Z" />
+            </svg>
+          </a>
+        </div>
+        <div class="gs-info-card__body">
+          <h3 class="gs-info-card__name">__PHARMACY_NAME__</h3>
+          <p class="gs-info-card__copy">__PHARMACY_ADDRESS__</p>
+          <div class="medical-meta-row">
+            <span class="gs-meta"><span aria-hidden="true">⌾</span><span id="pharmacy-distance" class="dynamic-distance">__PHARMACY_DISTANCE__</span></span>
+            <span class="gs-meta"><span aria-hidden="true">☎</span>__PHARMACY_PHONE__</span>
+          </div>
+          <div class="gs-actions">
+            <a class="gs-action route-link" id="pharmacy-route" href="__PHARMACY_ROUTE_HREF__" data-lat="__PHARMACY_LAT__" data-lon="__PHARMACY_LON__" target="_blank" rel="noopener noreferrer">Route</a>
+            <a class="gs-action" href="__PHARMACY_TEL_HREF__">Anrufen</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="gs-info-card">
+        <div class="gs-info-card__header">
+          <h2 class="gs-info-card__title">Ärztlicher Bereitschaftsdienst</h2>
+          <a class="gs-icon-link" href="__DOCTOR_EXTERNAL_HREF__" target="_blank" rel="noopener noreferrer" aria-label="Ärztlichen Bereitschaftsdienst extern öffnen">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H14V3ZM5 5h6v2H7v10h10v-4h2v6H5V5Z" />
+            </svg>
+          </a>
+        </div>
+        <div class="gs-info-card__body">
+          <h3 class="gs-info-card__name">__DOCTOR_NAME__</h3>
+          <p class="gs-info-card__copy">__DOCTOR_ADDRESS__</p>
+          <div class="medical-meta-row">
+            <span class="gs-meta"><span aria-hidden="true">⌾</span><span class="dynamic-distance">__DOCTOR_DISTANCE__</span></span>
+            <span class="gs-meta"><span aria-hidden="true">☎</span>__DOCTOR_PHONE__</span>
+          </div>
+          <div class="gs-actions">
+            <a class="gs-action route-link" href="__DOCTOR_ROUTE_HREF__" data-lat="__DOCTOR_LAT__" data-lon="__DOCTOR_LON__" target="_blank" rel="noopener noreferrer">Route</a>
+            <a class="gs-action" href="__DOCTOR_TEL_HREF__">Anrufen</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="gs-info-card">
+        <div class="gs-info-card__header">
+          <h2 class="gs-info-card__title">Zahnärztlicher Notdienst</h2>
+          <a class="gs-icon-link" href="__DENTIST_EXTERNAL_HREF__" target="_blank" rel="noopener noreferrer" aria-label="Zahnärztlichen Notdienst extern öffnen">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H14V3ZM5 5h6v2H7v10h10v-4h2v6H5V5Z" />
+            </svg>
+          </a>
+        </div>
+        <div class="gs-info-card__body">
+          <h3 class="gs-info-card__name">__DENTIST_NAME__</h3>
+          <p class="gs-info-card__copy">__DENTIST_ADDRESS__</p>
+          <p class="gs-info-card__copy">__DENTIST_DATE__</p>
+          <div class="medical-meta-row">
+            <span class="gs-meta"><span aria-hidden="true">⌾</span><span class="dynamic-distance">__DENTIST_DISTANCE__</span></span>
+            <span class="gs-meta"><span aria-hidden="true">☎</span>__DENTIST_PHONE__</span>
+          </div>
+          <div class="gs-actions">
+            <a class="gs-action route-link" href="__DENTIST_ROUTE_HREF__" data-lat="__DENTIST_LAT__" data-lon="__DENTIST_LON__" target="_blank" rel="noopener noreferrer">Route</a>
+            <a class="gs-action" href="__DENTIST_TEL_HREF__">Anrufen</a>
+          </div>
+        </div>
+      </article>
+    </section>
+  </main>
+  <script>
+    const routeLinks = Array.from(document.querySelectorAll('.route-link'));
+    let userPosition = null;
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        position => {
+          userPosition = {
+            lat: position.coords.latitude,
+            lon: position.coords.longitude,
+          };
+          updateDistancesFromUserPosition();
+        },
+        () => {},
+        { enableHighAccuracy: true, timeout: 8000, maximumAge: 300000 }
+      );
+    }
+
+    for (const link of routeLinks) {
+      link.addEventListener('click', event => {
+        const lat = Number(link.dataset.lat || NaN);
+        const lon = Number(link.dataset.lon || NaN);
+        if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
+        event.preventDefault();
+        const destination = lat + ',' + lon;
+        const origin = userPosition ? userPosition.lat + ',' + userPosition.lon : '';
+        window.location.href = buildRouteUrl(origin, destination);
+      });
+    }
+
+    function updateDistancesFromUserPosition() {
+      for (const link of routeLinks) {
+        const lat = Number(link.dataset.lat || NaN);
+        const lon = Number(link.dataset.lon || NaN);
+        if (!Number.isFinite(lat) || !Number.isFinite(lon)) continue;
+        const card = link.closest('.gs-info-card');
+        const target = card?.querySelector('.dynamic-distance');
+        if (!target) continue;
+        target.textContent = formatDistance(distanceKm(userPosition.lat, userPosition.lon, lat, lon));
+      }
+    }
+
+    function buildRouteUrl(origin, destination) {
+      if (isAppleDevice()) {
+        const params = new URLSearchParams({ daddr: destination, dirflg: 'd' });
+        if (origin) params.set('saddr', origin);
+        return 'https://maps.apple.com/?' + params.toString();
+      }
+      const params = new URLSearchParams({ api: '1', destination, travelmode: 'driving' });
+      if (origin) params.set('origin', origin);
+      return 'https://www.google.com/maps/dir/?' + params.toString();
+    }
+
+    function isAppleDevice() {
+      return /Mac|iPhone|iPad|iPod/.test(navigator.platform || '') || /iPhone|iPad|iPod/.test(navigator.userAgent || '');
+    }
+
+    function distanceKm(lat1, lon1, lat2, lon2) {
+      const earthRadius = 6371;
+      const dLat = toRad(lat2 - lat1);
+      const dLon = toRad(lon2 - lon1);
+      const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+      return earthRadius * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+
+    function toRad(value) {
+      return value * Math.PI / 180;
+    }
+
+    function formatDistance(value) {
+      return value.toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' km entfernt';
+    }
+  </script>
+</body>
+</html>

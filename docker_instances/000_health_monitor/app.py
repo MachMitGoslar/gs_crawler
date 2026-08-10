@@ -157,7 +157,13 @@ if CONTAINERS is None:
         },
         'gs_compiler_042_freiwilligen': {
             'name': 'Freiwilligenagentur',
-            'expected_files': ['042-freiwilligenagentur.json', '042-freiwilligenagentur-alle.json'],
+            'expected_files': [
+                'ui-kit/goslar-ui.css',
+                'ui-kit/goslar-ui.js',
+                '042-freiwilligenagentur.json',
+                '042-freiwilligenagentur-alle.json',
+                '042_freiwilligenagentur_index.html',
+            ],
             'source': 'https://www.freiwilligenagentur-goslar.de/',
             'schedule': '2x täglich (02:00, 14:00)',
             'type': 'Volunteer Portal'
@@ -246,11 +252,19 @@ if CONTAINERS is None:
             'schedule': 'Alle 2 Stunden',
             'type': 'Market Crawler'
         },
-        'gs_compiler_072-karriere': {
+        'gs_compiler_072_karriere': {
             'name': 'Karriere Goslar',
-            'expected_files': ['072_karriere_card.json'],
+            'expected_files': [
+                'ui-kit/goslar-ui.css',
+                'ui-kit/goslar-ui.js',
+                '072_karriere_card.json',
+                '072_jobs.json',
+                '072_karriere_index.html',
+                'jobs.css',
+                'jobs.js',
+            ],
             'source': 'https://rest.arbeitsagentur.de/',
-            'schedule': 'Alle 2 Stunden',
+            'schedule': 'Stündlich',
             'type': 'Job Portal'
         }
     }
