@@ -18,9 +18,12 @@ CARD_OUTPUT_FILES = (
 )
 
 STATIC_ASSETS = ("index.html", "script.js", "style.css")
+UI_KIT_FILES = ("goslar-ui.css", "goslar-ui.js")
+UI_KIT_OUTPUT_DIR = "ui-kit"
 LOCATIONS_FILE = "data.json"
 SOURCE_LOCATIONS_FILE = SCRIPT_DIR / LOCATIONS_FILE
 MAP_OUTPUT_DIR = ""
+LEGACY_MAP_OUTPUT_DIR = "060_defi_kataster"
 
 
 MAP_URL = "https://crawler.goslar.app/crawler/defi-kataster/index.html"
@@ -55,24 +58,51 @@ def write_json(data):
 
 
 def write_locations():
-    map_dir = OUTPUT_DIR / MAP_OUTPUT_DIR
-    map_dir.mkdir(parents=True, exist_ok=True)
-    path = map_dir / LOCATIONS_FILE
-    shutil.copyfile(SOURCE_LOCATIONS_FILE, path)
-    print(f"Gespeichert: {path}")
+    for map_dir in map_output_dirs():
+        map_dir.mkdir(parents=True, exist_ok=True)
+        path = map_dir / LOCATIONS_FILE
+        shutil.copyfile(SOURCE_LOCATIONS_FILE, path)
+        print(f"Gespeichert: {path}")
 
 
 def publish_static_assets():
-    map_dir = OUTPUT_DIR / MAP_OUTPUT_DIR
-    map_dir.mkdir(parents=True, exist_ok=True)
+    for map_dir in map_output_dirs():
+        map_dir.mkdir(parents=True, exist_ok=True)
 
-    for asset in STATIC_ASSETS:
-        source = SCRIPT_DIR / asset
-        if not source.exists():
-            continue
-        target = map_dir / asset
-        shutil.copyfile(source, target)
-        print(f"Kopiert: {target}")
+        for asset in STATIC_ASSETS:
+            source = SCRIPT_DIR / asset
+            if not source.exists():
+                continue
+            target = map_dir / asset
+            shutil.copyfile(source, target)
+            print(f"Kopiert: {target}")
+
+
+def publish_ui_kit():
+    source_dir = resolve_ui_kit_dir()
+
+    for map_dir in map_output_dirs():
+        target_dir = map_dir / UI_KIT_OUTPUT_DIR
+        target_dir.mkdir(parents=True, exist_ok=True)
+
+        for filename in UI_KIT_FILES:
+            source = source_dir / filename
+            target = target_dir / filename
+            shutil.copyfile(source, target)
+            print(f"Kopiert: {target}")
+
+
+def resolve_ui_kit_dir():
+    image_ui_kit_dir = Path("/app/ui-kit")
+    if image_ui_kit_dir.exists():
+        return image_ui_kit_dir
+    return REPO_ROOT / "base_images" / "python_basic_crawler"
+
+
+def map_output_dirs():
+    current_dir = OUTPUT_DIR / MAP_OUTPUT_DIR
+    legacy_dir = OUTPUT_DIR.parent / LEGACY_MAP_OUTPUT_DIR
+    return (current_dir, legacy_dir)
 
 
 def main():
@@ -80,6 +110,7 @@ def main():
     write_json(CARD)
     write_locations()
     publish_static_assets()
+    publish_ui_kit()
 
 
 if __name__ == "__main__":
