@@ -261,7 +261,8 @@
 }
 
 .defi-marker--limited .defi-marker__shape {
-  fill: #c7aa44;
+  fill: #989898;
+  opacity: 0.72;
 }
 
 .defi-marker__label {
