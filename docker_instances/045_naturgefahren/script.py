@@ -108,7 +108,7 @@ try:
 
     # JSON-Datensatz erstellen
     data = {
-        "title": "Goslar, " + description,
+        "title": "Naturgefahren",
         "description": description,
         "call_to_action_url": target_url,
         # "call_to_action_url": driver.current_url,

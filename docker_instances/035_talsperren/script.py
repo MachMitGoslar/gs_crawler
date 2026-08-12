@@ -96,8 +96,8 @@ try:
 
     # JSON erzeugen
     daten = {
-        "title": messzeitpunkt,
-        "description": description,
+        "title": "Talsperren",
+        "description": messzeitpunkt+description,
         "image_url": "https://crawler.goslar.app/crawler/fuellstand_prozent.png",
         "call_to_action_url": url,
         "published_at": datetime.now().strftime("%Y-%m-%dT%H:%M")
