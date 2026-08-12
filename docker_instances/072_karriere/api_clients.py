@@ -78,13 +78,29 @@ def fetch_jobs(filters: dict[str, str], offer_type: str | None = None) -> list[d
         query_params["page"] = page
         query_params["size"] = size
         payload = fetch_bundesapi_json(f"{BUNDESAPI_BASE_URL}?{urlencode(query_params)}")
-        for raw_job in payload.get("ergebnisliste", []):
+        for raw_job in extract_job_results(payload):
             job = normalize_v6_job(raw_job)
-            refnr = str(job.get("refnr") or "")
+            refnr = str(job.get("refnr") or job.get("referenznummer") or "")
             if refnr and refnr not in jobs_by_refnr:
                 jobs_by_refnr[refnr] = job
 
     return list(jobs_by_refnr.values())
+
+
+def extract_job_results(payload: dict[str, Any]) -> list[dict[str, Any]]:
+    """Extrahiert Jobtreffer aus bekannten BA-Response-Varianten."""
+    for key in ("ergebnisliste", "stellenangebote", "items", "content", "results"):
+        value = payload.get(key)
+        if isinstance(value, list):
+            return [item for item in value if isinstance(item, dict)]
+
+    embedded = payload.get("_embedded")
+    if isinstance(embedded, dict):
+        for value in embedded.values():
+            if isinstance(value, list):
+                return [item for item in value if isinstance(item, dict)]
+
+    return []
 
 
 def normalize_v6_job(job: dict[str, Any]) -> dict[str, Any]:
@@ -98,10 +114,10 @@ def normalize_v6_job(job: dict[str, Any]) -> dict[str, Any]:
     normalized = dict(job)
     normalized.update(
         {
-            "refnr": job.get("referenznummer"),
-            "titel": job.get("stellenangebotsTitel"),
-            "beruf": job.get("hauptberuf"),
-            "arbeitgeber": job.get("firma"),
+            "refnr": job.get("referenznummer") or job.get("refnr") or job.get("id"),
+            "titel": job.get("stellenangebotsTitel") or job.get("titel") or job.get("title"),
+            "beruf": job.get("hauptberuf") or job.get("beruf"),
+            "arbeitgeber": job.get("firma") or job.get("arbeitgeber") or job.get("employer"),
             "aktuelleVeroeffentlichungsdatum": (
                 job.get("datumErsteVeroeffentlichung") or publication_period.get("von")
             ),
