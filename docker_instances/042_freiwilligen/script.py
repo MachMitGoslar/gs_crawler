@@ -96,7 +96,7 @@ def build_offer_entry(offer, fallback_timestamp):
 
     return {
         "id": int(offer_id),
-        "title": title,
+        "title": "Freiwilligenagentur",
         "description": description,
         "image_url": avatar or None,
         "call_to_action_url": DETAIL_URL_TEMPLATE.format(angebot_id=offer_id),

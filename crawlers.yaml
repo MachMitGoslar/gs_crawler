@@ -366,7 +366,12 @@ crawlers:
     schedule: "0 6 * * *"
     schedule_human: "Täglich 06:00"
     expected_files:
+        - "defi-kataster/ui-kit/goslar-ui.css"
+        - "defi-kataster/ui-kit/goslar-ui.js"
         - "defi-kataster/060-defi-kataster.json"
+        - "defi-kataster/index.html"
+        - "defi-kataster/script.js"
+        - "defi-kataster/style.css"
     implementation: custom
 
   - id: "080_bereitschaftsdienste"

@@ -3,7 +3,6 @@ let currentRouteLine = null;
 let routeInfoPanel = null;
 let currentDistanceFilter = "all";
 let currentRoutingControl = null;
-const backToListBtn = document.getElementById("back-to-list");
 
 const southWest = L.latLng(51.6, 10),
     northEast = L.latLng(52.1, 10.75),
@@ -13,7 +12,7 @@ const southWest = L.latLng(51.6, 10),
 const map = L.map("map", {
     center: [51.9075, 10.4283],
     maxBounds: bounds,
-    zoom: 12,
+    zoom: 13,
     maxZoom: 18,
     minZoom: 10,
     gestureHandling: true,
@@ -31,6 +30,25 @@ const map = L.map("map", {
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution: "© OpenStreetMap"
 }).addTo(map);
+
+function refreshMapLayout(delay = 0) {
+  window.setTimeout(() => {
+    map.invalidateSize({ pan: false });
+  }, delay);
+}
+
+map.whenReady(() => {
+  refreshMapLayout();
+  refreshMapLayout(250);
+});
+
+window.addEventListener("load", () => refreshMapLayout(100));
+window.addEventListener("resize", () => refreshMapLayout(100));
+window.addEventListener("orientationchange", () => refreshMapLayout(250));
+
+if (window.visualViewport) {
+  window.visualViewport.addEventListener("resize", () => refreshMapLayout(100));
+}
 
 /* ============================= */
 /* ROUTE INFO PANEL UNTEN       */
@@ -55,25 +73,28 @@ createRouteInfoPanel();
 /* MARKER ICONS                 */
 /* ============================= */
 
-const defiIcon24h = L.icon({
-  iconUrl:
-    "https://cdn.jsdelivr.net/gh/pointhi/leaflet-color-markers@v1.0.0/img/marker-icon-2x-green.png",
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-});
+const defiIcon24h = createDefiIcon("open");
+const defiIconLimited = createDefiIcon("limited");
 
-const defiIconLimited = L.icon({
-  iconUrl:
-    "https://cdn.jsdelivr.net/gh/pointhi/leaflet-color-markers@v1.0.0/img/marker-icon-2x-red.png",
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-});
+function createDefiIcon(status) {
+  const statusLabel = status === "open" ? "24/7 verfügbar" : "Zeitlich eingeschränkt";
 
-const markerGroup = L.markerClusterGroup({
-  showCoverageOnHover: false,
-  maxClusterRadius: 160,
-  disableClusteringAtZoom: 17
-}).addTo(map);
+  return L.divIcon({
+    className: `defi-marker defi-marker--${status}`,
+    html: `
+      <svg class="defi-marker__svg" viewBox="0 0 28 40" aria-hidden="true" focusable="false">
+        <path class="defi-marker__shape" d="M14 40C14 40 2 25.5 2 14C2 7.373 7.373 2 14 2C20.627 2 26 7.373 26 14C26 25.5 14 40 14 40Z" />
+        <circle class="defi-marker__dot" cx="14" cy="14" r="4" />
+      </svg>
+      <span class="defi-marker__label">${statusLabel}</span>
+    `,
+    iconSize: [28, 40],
+    iconAnchor: [14, 40],
+    popupAnchor: [0, -36],
+  });
+}
+
+const markerGroup = L.layerGroup().addTo(map);
 
 
 /*=============================/
@@ -119,6 +140,14 @@ navigator.geolocation.watchPosition(
       userAccuracyCircle.setRadius(displayRadius);
     }
 
+    if (!hasCenteredOnUserPosition) {
+      map.setView(latlng, Math.max(map.getZoom(), 17), {
+        animate: false
+      });
+      hasCenteredOnUserPosition = true;
+      refreshMapLayout();
+    }
+
     applySearchAndRender();
   },
   () => {},
@@ -148,6 +177,7 @@ function handlePermission() {
 let lastUserPosition = null;
 let userMarker = null;
 let userAccuracyCircle = null;
+let hasCenteredOnUserPosition = false;
 
 handlePermission();
 
@@ -205,12 +235,10 @@ function applySearchAndRender() {
   let filtered = [...allData];
 
 
-  /* =============================
-     3️⃣ NUR GEÖFFNETE (optional)
-  ============================== */
-  filtered = filtered.filter(item =>
-    isCurrentlyOpenStructured(item.opening_hours)
-  );
+  filtered = filtered.map(item => ({
+    ...item,
+    _isOpen: isCurrentlyOpenStructured(item.opening_hours)
+  }));
 
   /* =============================
      4️⃣ ENTFERNUNGSBERECHNUNG
@@ -251,19 +279,11 @@ function applySearchAndRender() {
       }
     }
 
-    /* =============================
-       6️⃣ SORTIERUNG NACH DISTANZ
-    ============================== */
-    filtered.sort((a, b) => a._distance - b._distance);
+    filtered.sort(sortByOpenStatusAndDistance);
 
   } else {
 
-    /* =============================
-       Fallback: Alphabetisch
-    ============================== */
-    filtered.sort((a, b) =>
-      a.title.localeCompare(b.title)
-    );
+    filtered.sort(sortByOpenStatusAndTitle);
   }
 
   render(filtered);
@@ -292,7 +312,9 @@ function render(data) {
 
   data.forEach((item) => {
 
-    const isOpen = isCurrentlyOpenStructured(item.opening_hours);
+    const isOpen = typeof item._isOpen === "boolean"
+      ? item._isOpen
+      : isCurrentlyOpenStructured(item.opening_hours);
 
     const marker = L.marker([item.lat, item.lng], {
       icon: isOpen ? defiIcon24h : defiIconLimited
@@ -309,6 +331,9 @@ function render(data) {
     div.innerHTML = `
       <div class="location__header">
         <h3>${item.title}</h3>
+        <span class="location__status ${isOpen ? "location__status--open" : "location__status--closed"}">
+          ${isOpen ? "Geöffnet" : "Geschlossen"}
+        </span>
       </div>
       <p class="location__label">
         Wo liegt der Defi?
@@ -350,21 +375,32 @@ function render(data) {
       });
 
       map.setView([item.lat, item.lng], 17);
-      startRoute(item);
-
-      // Button anzeigen
-      backToListBtn.classList.add("back-to-list-btn--visible");
+      refreshMapLayout(250);
+      focusLocationCard(div);
     });
 
     listEl.appendChild(div);
 
     marker.on("click", () => {
       focusLocationCard(div);
+      refreshMapLayout(100);
     });
 
   }); // ← forEach sauber schließen
 
+  refreshMapLayout();
+
   } // ← render() sauber schließen
+
+function sortByOpenStatusAndDistance(a, b) {
+  if (a._isOpen !== b._isOpen) return a._isOpen ? -1 : 1;
+  return a._distance - b._distance;
+}
+
+function sortByOpenStatusAndTitle(a, b) {
+  if (a._isOpen !== b._isOpen) return a._isOpen ? -1 : 1;
+  return a.title.localeCompare(b.title);
+}
 
 function focusLocationCard(card) {
   if (!card) return;
@@ -378,6 +414,7 @@ function focusLocationCard(card) {
     behavior: "smooth",
     block: "center",
   });
+  refreshMapLayout(250);
 }
 
 /* ============================= */
@@ -404,15 +441,8 @@ function openNativeRoute(lat, lng, label = "") {
 
   if (isIOS || isApplePlatform) {
     const appleMapsAppUrl = `maps://?daddr=${lat},${lng}&q=${encodedLabel}&dirflg=w`;
-    const appleMapsWebUrl = `https://maps.apple.com/?daddr=${lat},${lng}&q=${encodedLabel}&dirflg=w`;
 
     window.location.href = appleMapsAppUrl;
-
-    setTimeout(() => {
-      if (!document.hidden) {
-        window.location.href = appleMapsWebUrl;
-      }
-    }, 900);
 
     return;
   }
@@ -603,66 +633,3 @@ function getWalkingDistance(start, destination) {
     L.Routing.waypoint(destination)
   ]);
 }
-/* ============================= */
-/* THEME TOGGLE                 */
-/* ============================= */
-
-const themeToggleBtn = document.getElementById("theme-toggle");
-
-const savedTheme = localStorage.getItem("theme");
-
-if (savedTheme === "light") {
-  document.body.classList.add("light");
-  themeToggleBtn.textContent = "☀️";
-}
-
-themeToggleBtn.addEventListener("click", () => {
-  document.body.classList.toggle("light");
-
-  const isLight = document.body.classList.contains("light");
-
-  themeToggleBtn.textContent = isLight ? "☀️" : "🌙";
-
-  localStorage.setItem("theme", isLight ? "light" : "dark");
-});
-
-backToListBtn.addEventListener("click", () => {
-
-  document.querySelector(".locations").scrollIntoView({
-    behavior: "smooth"
-  });
-
-  backToListBtn.classList.remove("back-to-list-btn--visible");
-});
-
-window.addEventListener("scroll", () => {
-
-  const mapSection = document.getElementById("map");
-  const rect = mapSection.getBoundingClientRect();
-
-  if (rect.top > window.innerHeight / 2) {
-    backToListBtn.classList.remove("back-to-list-btn--visible");
-  }
-});
-document.addEventListener("DOMContentLoaded", () => {
-
-  const backToListBtn = document.getElementById("back-to-list");
-
-  if (!backToListBtn) return;
-
-  backToListBtn.addEventListener("click", () => {
-
-    const headerHeight = document.querySelector(".page-header").offsetHeight;
-    const listSection = document.querySelector(".locations");
-
-    const y = listSection.offsetTop - headerHeight - 10;
-
-    window.scrollTo({
-      top: y,
-      behavior: "smooth"
-    });
-
-    backToListBtn.classList.remove("back-to-list-btn--visible");
-  });
-
-});
