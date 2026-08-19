@@ -27,8 +27,8 @@ if wasapp_table:
             
     datensatz = {
         "published_at": published_at,
-        "title": wasapp_table.get_text(strip=True) if wasapp_table else None,
-        "description": "",
+        "title": "WasApp?",
+        "description": wasapp_table.get_text(strip=True) if wasapp_table else None,
         "image_url": "",
         "call_to_action_url": "https://machmit.goslar.de/wasapp#c8489"
     }

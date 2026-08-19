@@ -219,7 +219,7 @@ def build_card(payload: dict, now_str: str) -> dict:
 
     selected_job = SystemRandom().choice(jobs)
     return {
-        "title": selected_job.get("title") or "Karriere Goslar",
+        "title": "Karriere Goslar",
         "description": build_card_description(selected_job),
         "image_url": None,
         "call_to_action_url": INDEX_URL,
