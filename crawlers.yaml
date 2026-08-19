@@ -211,6 +211,7 @@ crawlers:
       - "042-freiwilligenagentur.json"
       - "042-freiwilligenagentur-alle.json"
       - "042_freiwilligenagentur_index.html"
+      - "042_freiwilligenagentur_detail.html"
     env_file:
       - .env
     implementation: custom

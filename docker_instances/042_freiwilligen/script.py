@@ -5,11 +5,11 @@ import re
 import shutil
 import sys
 from datetime import datetime
-from html import unescape
+from html import escape, unescape
 from pathlib import Path
 
 import requests
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Comment
 
 PORTAL_ID = "114"
 AGENCY_ID = "25"
@@ -21,11 +21,17 @@ DETAIL_URL_TEMPLATE = (
     f"?agid={AGENCY_ID}&styleid=2&frametyp=2&do=go&submit=Suchen&hideund=1&detail={{angebot_id}}"
 )
 INDEX_HTML_FILE = "042_freiwilligenagentur_index.html"
+DETAIL_HTML_FILE = "042_freiwilligenagentur_detail.html"
 INDEX_HTML_URL = f"https://crawler.goslar.app/crawler/{INDEX_HTML_FILE}"
 OUTPUT_DIR = Path("output")
 SCRIPT_DIR = Path(__file__).resolve().parent
 UI_KIT_DIR = SCRIPT_DIR / "ui-kit"
 EXPORT_UI_KIT_FILES = ["goslar-ui.css", "goslar-ui.js"]
+ALLOWED_DESCRIPTION_TAGS = {"br", "p", "div", "ul", "ol", "li", "strong", "b", "em", "i", "u", "span", "font"}
+REMOVED_DESCRIPTION_TAGS = {"script", "style", "iframe", "object", "embed", "link", "meta"}
+SAFE_COLOR_PATTERN = re.compile(
+    r"^(#[0-9a-fA-F]{3,8}|[a-zA-Z]+|rgba?\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}(?:\s*,\s*(?:0|1|0?\.\d+))?\s*\))$"
+)
 
 
 def get_tag_text(node, tag_name):
@@ -35,6 +41,13 @@ def get_tag_text(node, tag_name):
     return " ".join(tag.stripped_strings).strip()
 
 
+def get_tag_markup(node, tag_name):
+    tag = node.find(tag_name)
+    if tag is None:
+        return ""
+    return unescape("".join(str(child) for child in tag.contents)).strip()
+
+
 def normalize_whitespace(value):
     return " ".join(value.split()).strip()
 
@@ -42,6 +55,66 @@ def normalize_whitespace(value):
 def normalize_description(value):
     value = re.sub(r"<[^>]+>", " ", unescape(value or ""))
     return normalize_whitespace(value)
+
+
+def sanitize_color(value):
+    value = normalize_whitespace(value).strip("'\"")
+    if SAFE_COLOR_PATTERN.fullmatch(value):
+        return value
+    return ""
+
+
+def extract_safe_color_from_style(style):
+    for declaration in str(style or "").split(";"):
+        if ":" not in declaration:
+            continue
+        name, value = declaration.split(":", 1)
+        if name.strip().lower() == "color":
+            return sanitize_color(value.strip())
+    return ""
+
+
+def sanitize_description_html(value):
+    value = unescape(value or "").strip()
+    if not value:
+        return ""
+
+    if "<" not in value and ">" not in value:
+        return "<br>".join(escape(line.strip()) for line in value.splitlines() if line.strip())
+
+    soup = BeautifulSoup(value, "html.parser")
+
+    for comment in soup.find_all(string=lambda text: isinstance(text, Comment)):
+        comment.extract()
+
+    for tag in list(soup.find_all(True)):
+        name = tag.name.lower()
+        if name in REMOVED_DESCRIPTION_TAGS:
+            tag.decompose()
+            continue
+
+        if name not in ALLOWED_DESCRIPTION_TAGS:
+            tag.unwrap()
+            continue
+
+        safe_color = extract_safe_color_from_style(tag.get("style"))
+        if name == "font" and not safe_color:
+            safe_color = sanitize_color(tag.get("color", ""))
+
+        tag.attrs = {}
+        if safe_color:
+            tag["style"] = f"color: {safe_color}"
+
+        if name == "font":
+            tag.name = "span"
+
+    return str(soup).strip()
+
+
+def html_to_plain_text(value):
+    if not value:
+        return ""
+    return normalize_whitespace(BeautifulSoup(value, "html.parser").get_text(" ", strip=True))
 
 
 def unix_to_iso8601(timestamp_text, fallback):
@@ -69,9 +142,12 @@ def build_offer_entry(offer, fallback_timestamp):
     if not title:
         return None
 
-    short_description = normalize_description(get_tag_text(offer, "kurz_beschreibung"))
-    full_description = normalize_description(get_tag_text(offer, "beschreibung"))
+    short_description_html = sanitize_description_html(get_tag_markup(offer, "kurz_beschreibung"))
+    full_description_html = sanitize_description_html(get_tag_markup(offer, "beschreibung"))
+    short_description = html_to_plain_text(short_description_html)
+    full_description = html_to_plain_text(full_description_html)
     description = short_description or full_description
+    description_html = short_description_html or full_description_html
 
     organization = normalize_whitespace(get_tag_text(offer, "einrichtungsname"))
     place_parts = [
@@ -94,12 +170,22 @@ def build_offer_entry(offer, fallback_timestamp):
     if published_at == fallback_timestamp:
         published_at = unix_to_iso8601(get_tag_text(offer, "erstellt"), fallback_timestamp)
 
+    print_url = DETAIL_URL_TEMPLATE.format(angebot_id=offer_id)
+
     return {
         "id": int(offer_id),
-        "title": "Freiwilligenagentur",
+        "title": title,
         "description": description,
+        "description_html": description_html,
+        "short_description": short_description,
+        "short_description_html": short_description_html,
+        "full_description": full_description,
+        "full_description_html": full_description_html,
+        "organization": organization or None,
+        "location": location or None,
         "image_url": avatar or None,
-        "call_to_action_url": DETAIL_URL_TEMPLATE.format(angebot_id=offer_id),
+        "call_to_action_url": f"{DETAIL_HTML_FILE}?id={offer_id}",
+        "print_url": print_url,
         "published_at": published_at,
     }
 
@@ -173,6 +259,15 @@ def write_html(offers):
     print(f"Written: {target}")
 
 
+def write_detail_html(offers):
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    html = (SCRIPT_DIR / DETAIL_HTML_FILE).read_text(encoding="utf-8")
+    html = html.replace("__OFFERS_JSON__", json_for_script(offers))
+    target = OUTPUT_DIR / DETAIL_HTML_FILE
+    target.write_text(html, encoding="utf-8")
+    print(f"Written: {target}")
+
+
 def copy_ui_kit():
     target_dir = OUTPUT_DIR / "ui-kit"
     target_dir.mkdir(parents=True, exist_ok=True)
@@ -200,6 +295,7 @@ def main():
     write_json("042-freiwilligenagentur.json", build_card(featured_offer))
     write_json("042-freiwilligenagentur-alle.json", ordered_index)
     write_html(ordered_index)
+    write_detail_html(ordered_index)
     copy_ui_kit()
 
     print(f"Fetched {len(offers)} active Freinet offers.")

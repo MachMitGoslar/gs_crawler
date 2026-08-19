@@ -103,15 +103,13 @@
         element.className = 'gs-list-widget volunteer-widget';
         if (offer.call_to_action_url) {
           element.href = offer.call_to_action_url;
-          element.target = '_blank';
-          element.rel = 'noopener noreferrer';
         }
 
         element.innerHTML = ''
           + '<div class="gs-list-widget__content">'
           + '<h2 class="gs-list-widget__title">' + escapeHtml(offer.title || 'Engagement-Angebot') + '</h2>'
           + '<p class="gs-list-widget__copy">' + escapeHtml(offer.description || '') + '</p>'
-          + '<div class="gs-list-widget__cta">Angebot öffnen →</div>'
+          + '<div class="gs-list-widget__cta">Details ansehen →</div>'
           + '<div class="volunteer-meta">' + escapeHtml(formatPublishedAt(offer.published_at)) + '</div>'
           + '</div>';
         list.appendChild(element);
