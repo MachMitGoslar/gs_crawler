@@ -96,7 +96,7 @@ def build_offer_entry(offer, fallback_timestamp):
 
     return {
         "id": int(offer_id),
-        "title": title,
+        "title": "Freiwilligenagentur",
         "description": description,
         "image_url": avatar or None,
         "call_to_action_url": DETAIL_URL_TEMPLATE.format(angebot_id=offer_id),
@@ -137,10 +137,10 @@ def parse_offers(xml_text):
 def build_card(featured_offer):
     return {
         "title": "Freiwilligenagentur",
-        "description": normalize_description(featured_offer["description"]),
-        "image_url": featured_offer["image_url"],
+        "description": format_offer_count(offer_count),
+        "image_url": None,
         "call_to_action_url": INDEX_HTML_URL,
-        "published_at": featured_offer["published_at"],
+        "published_at": published_at,
         "widget_type": None,
     }
 

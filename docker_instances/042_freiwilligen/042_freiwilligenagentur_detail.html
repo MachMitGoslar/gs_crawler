@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Engagement-Angebot · Freiwilligenagentur Goslar</title>
+  <link href="ui-kit/goslar-ui.css" rel="stylesheet" />
+  <style>
+    .volunteer-detail {
+      margin-top: 20px;
+    }
+
+    .volunteer-detail__top-image {
+      margin-top: 18px;
+    }
+
+    .volunteer-detail__hero {
+      display: grid;
+      gap: 14px;
+      margin-top: 18px;
+      padding: 18px;
+      border-radius: var(--gs-radius-card);
+      background: var(--gs-color-card);
+    }
+
+    .volunteer-detail__image {
+      width: 100%;
+      max-height: 220px;
+      display: block;
+      object-fit: cover;
+      border-radius: var(--gs-radius-media);
+      background: var(--gs-color-background);
+    }
+
+    .volunteer-detail__meta {
+      display: grid;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .volunteer-detail__section {
+      margin-top: 16px;
+    }
+
+    .volunteer-detail__section-title {
+      margin: 0 0 6px;
+      color: var(--gs-color-text);
+      font: 700 16px/24px var(--gs-font-ui);
+      letter-spacing: -0.004em;
+    }
+
+    .volunteer-detail__copy {
+      margin: 0;
+      color: var(--gs-color-copy);
+      font: 590 13px/21px var(--gs-font-ui);
+      letter-spacing: -0.004em;
+      white-space: pre-line;
+    }
+
+    .volunteer-detail__rich-copy {
+      color: var(--gs-color-copy);
+      font: 590 13px/21px var(--gs-font-ui);
+      letter-spacing: -0.004em;
+    }
+
+    .volunteer-detail__rich-copy > :first-child {
+      margin-top: 0;
+    }
+
+    .volunteer-detail__rich-copy > :last-child {
+      margin-bottom: 0;
+    }
+
+    .volunteer-detail__rich-copy p,
+    .volunteer-detail__rich-copy div {
+      margin: 0 0 10px;
+    }
+
+    .volunteer-detail__rich-copy ul,
+    .volunteer-detail__rich-copy ol {
+      margin: 8px 0 10px;
+      padding-left: 20px;
+    }
+
+    .volunteer-detail__rich-copy li {
+      margin: 3px 0;
+    }
+
+    .volunteer-detail__actions {
+      margin-top: 22px;
+    }
+
+    .volunteer-detail__missing {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body class="gs-body">
+  <main class="gs-page gs-page--with-back">
+    <a class="gs-back-link" href="042_freiwilligenagentur_index.html" aria-label="Zurück zur Übersicht">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.7 5.3 9 12l6.7 6.7-1.4 1.4L6.2 12l8.1-8.1 1.4 1.4Z"/></svg>
+    </a>
+
+    <div class="volunteer-detail__top-image" id="detail-image" hidden></div>
+
+    <header class="gs-page-header">
+      <h1 class="gs-page-title" id="detail-title">Engagement-Angebot</h1>
+      <p class="gs-page-description" id="detail-subtitle">Freiwilligenagentur Goslar</p>
+    </header>
+
+    <article class="volunteer-detail" id="detail-content" hidden></article>
+
+    <section class="gs-info-card volunteer-detail__missing" id="detail-missing" hidden>
+      <div class="gs-info-card__body">
+        <h2 class="gs-info-card__title">Angebot nicht gefunden</h2>
+        <p class="gs-info-card__copy">Dieses Engagement-Angebot ist nicht mehr verfügbar oder der Link ist unvollständig.</p>
+        <div class="gs-actions">
+          <a class="gs-action" href="042_freiwilligenagentur_index.html">Zur Übersicht</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <button class="gs-scroll-top" type="button" data-gs-scroll-top aria-label="Nach oben scrollen">↑</button>
+
+  <script src="ui-kit/goslar-ui.js"></script>
+  <script>
+    const VOLUNTEER_OFFERS = __OFFERS_JSON__;
+
+    const params = new URLSearchParams(location.search);
+    const offerId = Number(params.get('id'));
+    const offer = (VOLUNTEER_OFFERS || []).find(item => Number(item.id) === offerId);
+
+    if (offer) {
+      renderDetail(offer);
+    } else {
+      document.getElementById('detail-missing').hidden = false;
+    }
+
+    function renderDetail(offer) {
+      document.title = (offer.title || 'Engagement-Angebot') + ' · Freiwilligenagentur Goslar';
+      document.getElementById('detail-title').textContent = offer.title || 'Engagement-Angebot';
+      document.getElementById('detail-subtitle').textContent = [
+        offer.organization,
+        offer.location,
+        formatPublishedAt(offer.published_at)
+      ].filter(Boolean).join(' · ') || 'Freiwilligenagentur Goslar';
+
+      const imageContainer = document.getElementById('detail-image');
+      if (offer.image_url) {
+        imageContainer.innerHTML = '<img class="volunteer-detail__image" src="' + escapeAttr(offer.image_url) + '" alt="" loading="lazy" />';
+        imageContainer.hidden = false;
+      }
+
+      const content = document.getElementById('detail-content');
+      content.hidden = false;
+
+      const description = offer.full_description || offer.description || offer.short_description || '';
+      const descriptionHtml = offer.full_description_html || offer.description_html || '';
+      const intro = offer.short_description && offer.short_description !== description
+        ? '<section class="volunteer-detail__section"><h2 class="volunteer-detail__section-title">Kurzbeschreibung</h2><div class="volunteer-detail__rich-copy">' + renderDescription(offer.short_description_html, offer.short_description) + '</div></section>'
+        : '';
+      const descriptionSection = '<section class="volunteer-detail__section"><h2 class="volunteer-detail__section-title">Beschreibung</h2><div class="volunteer-detail__rich-copy">' + renderDescription(descriptionHtml, description || 'Keine Beschreibung vorhanden.') + '</div></section>';
+
+      content.innerHTML = ''
+        + '<div class="volunteer-detail__hero">'
+        + intro
+        + descriptionSection
+        + '<div class="volunteer-detail__meta">'
+        + metaRow('Organisation', offer.organization)
+        + metaRow('Ort', offer.location)
+        + '</div>'
+        + '<div class="gs-actions volunteer-detail__actions">'
+        + '<a class="gs-action" href="042_freiwilligenagentur_index.html">Zur Übersicht</a>'
+        + (offer.print_url ? '<a class="gs-action" href="' + escapeAttr(offer.print_url) + '" target="_blank" rel="noopener noreferrer">PDF/Druckansicht</a>' : '')
+        + '</div>'
+        + '</div>';
+    }
+
+    function renderDescription(html, fallbackText) {
+      return html || escapeHtml(fallbackText || '');
+    }
+
+    function metaRow(label, value) {
+      if (!value) return '';
+      return '<p class="gs-meta"><strong>' + escapeHtml(label) + ':</strong> ' + escapeHtml(value) + '</p>';
+    }
+
+    function formatPublishedAt(value) {
+      if (!value) return '';
+      const match = String(value).match(/^(\d{4})-(\d{2})-(\d{2})/);
+      if (!match) return value;
+      return match[3] + '.' + match[2] + '.' + match[1];
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function escapeAttr(value) {
+      return escapeHtml(value).replace(/'/g, '&#39;');
+    }
+  </script>
+</body>
+</html>
