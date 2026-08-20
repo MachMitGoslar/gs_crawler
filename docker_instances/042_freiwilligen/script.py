@@ -220,13 +220,19 @@ def parse_offers(xml_text):
     return offers, offer_ids
 
 
-def build_card(featured_offer):
+def format_offer_count(offer_count):
+    if offer_count == 1:
+        return "1 Angebot zur ehrenamtlichen Unterstützung"
+    return f"{offer_count} Angebote zur ehrenamtlichen Unterstützung"
+
+
+def build_card(offer_count, published_at):
     return {
-        "title": featured_offer["title"],
-        "description": normalize_description(featured_offer["description"]),
-        "image_url": featured_offer["image_url"],
+        "title": "Freiwilligenagentur",
+        "description": format_offer_count(offer_count),
+        "image_url": None,
         "call_to_action_url": INDEX_HTML_URL,
-        "published_at": featured_offer["published_at"],
+        "published_at": published_at,
         "widget_type": None,
     }
 
@@ -291,8 +297,9 @@ def main():
 
     featured_offer = random.choice(offers)
     ordered_index = [featured_offer] + [offer for offer in offers if offer["id"] != featured_offer["id"]]
+    latest_published_at = max((offer["published_at"] for offer in offers), default=datetime.now().strftime("%Y-%m-%dT%H:%M"))
 
-    write_json("042-freiwilligenagentur.json", build_card(featured_offer))
+    write_json("042-freiwilligenagentur.json", build_card(len(offers), latest_published_at))
     write_json("042-freiwilligenagentur-alle.json", ordered_index)
     write_html(ordered_index)
     write_detail_html(ordered_index)
