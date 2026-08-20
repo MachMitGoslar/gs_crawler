@@ -42,6 +42,9 @@ categories:
   education:
     name: "Education"
     description: "Schools, courses, and educational opportunities"
+  mobility:
+    name: "Mobilität & Verkehr"
+    description: "ÖPNV, Fuhrparks und Verkehrsdaten"
   specialized:
     name: "Specialized"
     description: "Unique data sources requiring custom processing"
@@ -443,3 +446,17 @@ crawlers:
     ports: []
     implementation: custom
     notes: "Statischer Karriereportal-Export fuer Landkreis Goslar. Laedt stündlich Jobdaten und schreibt HTML plus JSON nach /app/output."
+
+  # === MOBILITÄT & VERKEHR ===
+  - id: "073_busflotte"
+    name: "Busflotte Stadtbus Goslar"
+    category: mobility
+    type: "Fleet Data"
+    source: "https://www.goebus.de/unternehmen/stadtbus-goslar"
+    schedule: "0 4 * * 1"
+    schedule_human: "Wöchentlich Montag 04:00"
+    expected_files:
+      - "busflotte/073_busflotte_card.json"
+      - "busflotte/073_busflotte_alle.json"
+    implementation: custom
+    notes: "Aktive Flotte (cat=fleet) der Stadtbus Goslar GmbH (cid=27) via offener GöBUS-JSON-API. Reines JSON: Card -> Index -> Detail je Fahrzeug. Bilder werden von goebus.de verlinkt, nicht gespiegelt."
