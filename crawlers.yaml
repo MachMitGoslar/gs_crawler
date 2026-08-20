@@ -115,6 +115,22 @@ crawlers:
     implementation: custom
     service_name: "gs_compiler_002_fepa"  # Override default service name
 
+  - id: "004_zufaellig-nix-vor"
+    name: "Zufällig nix vor?"
+    category: events
+    type: "Suggestion Feed"
+    source: "Serverbestand"
+    schedule: "0 7 * * *"
+    schedule_human: "Täglich 07:00"
+    expected_files:
+      - "ui-kit/goslar-ui.css"
+      - "ui-kit/goslar-ui.js"
+      - "004_zufaellig-nix-vor.json"
+      - "004_zufaellig-nix-vor-alle.json"
+      - "004_zufaellig-nix-vor.html"
+      - "004_zufaellig-nix-vor-alle.html"
+    implementation: custom
+
   - id: "014_kunst_in_ar"
     name: "Kunst in AR"
     category: events

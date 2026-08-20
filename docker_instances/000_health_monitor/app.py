@@ -85,6 +85,20 @@ if CONTAINERS is None:
             'schedule': '2x täglich (02:00, 14:00)',
             'type': 'JSON API'
         },
+        'gs_compiler_004_zufaellig-nix-vor': {
+            'name': 'Zufällig nix vor?',
+            'expected_files': [
+                'ui-kit/goslar-ui.css',
+                'ui-kit/goslar-ui.js',
+                '004_zufaellig-nix-vor.json',
+                '004_zufaellig-nix-vor-alle.json',
+                '004_zufaellig-nix-vor.html',
+                '004_zufaellig-nix-vor-alle.html',
+            ],
+            'source': 'Serverbestand',
+            'schedule': 'Täglich 07:00',
+            'type': 'Suggestion Feed'
+        },
         'gs_compiler_002_gz': {
             'name': 'Goslarsche Zeitung',
             'expected_files': ['002_goslarsche.json', '002_goslarsche-alle.json'],
