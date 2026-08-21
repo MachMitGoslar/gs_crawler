@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Zufällig nix vor?</title>
+  <link href="ui-kit/goslar-ui.css" rel="stylesheet" />
+  <style>
+    .suggestion-page {
+      padding-bottom: 32px;
+    }
+
+    .suggestion-hero {
+      overflow: hidden;
+      margin-top: 18px;
+      border-radius: var(--gs-radius-card);
+      background: var(--gs-color-card);
+      box-shadow: 0 18px 42px rgba(0, 0, 0, 0.10);
+    }
+
+    .suggestion-hero__media {
+      position: relative;
+      min-height: 238px;
+      background: linear-gradient(135deg, #fcce4c, #fff1bf);
+    }
+
+    .suggestion-hero__image {
+      width: 100%;
+      height: 100%;
+      min-height: 238px;
+      display: block;
+      object-fit: cover;
+    }
+
+    .suggestion-hero__badge {
+      position: absolute;
+      left: 14px;
+      top: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 11px;
+      border-radius: 999px;
+      background: rgba(252, 206, 76, 0.95);
+      color: #2b2100;
+      font: 760 12px/16px var(--gs-font-ui);
+      letter-spacing: -0.004em;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.16);
+    }
+
+    .suggestion-hero__info {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .suggestion-hero__info summary {
+      width: 17px;
+      height: 17px;
+      display: inline-grid;
+      place-items: center;
+      border-radius: 999px;
+      background: rgba(43, 33, 0, 0.14);
+      color: #2b2100;
+      font: 800 11px/17px var(--gs-font-ui);
+      list-style: none;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .suggestion-hero__info summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .suggestion-hero__info-text {
+      position: absolute;
+      z-index: 4;
+      top: calc(100% + 10px);
+      left: 50%;
+      width: min(270px, calc(100vw - 48px));
+      padding: 11px 12px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.98);
+      color: var(--gs-color-copy);
+      font: 590 12px/18px var(--gs-font-ui);
+      letter-spacing: -0.004em;
+      box-shadow: 0 16px 36px rgba(28, 25, 18, 0.18);
+      transform: translateX(-50%);
+    }
+
+    .suggestion-hero__info-text::before {
+      content: "";
+      position: absolute;
+      top: -6px;
+      left: 50%;
+      width: 12px;
+      height: 12px;
+      background: rgba(255, 255, 255, 0.98);
+      transform: translateX(-50%) rotate(45deg);
+    }
+
+    .suggestion-hero__body {
+      display: grid;
+      gap: 12px;
+      padding: 18px;
+    }
+
+    .suggestion-hero__title {
+      margin: 0;
+      color: var(--gs-color-text);
+      font: 780 20px/26px var(--gs-font-ui);
+      letter-spacing: -0.014em;
+    }
+
+    .suggestion-hero__copy {
+      margin: 0;
+      color: var(--gs-color-copy);
+      font: 590 13px/21px var(--gs-font-ui);
+      letter-spacing: -0.004em;
+    }
+
+    .suggestion-submit {
+      position: relative;
+      overflow: hidden;
+      margin-top: 16px;
+      padding: 0;
+      border: 1px solid rgba(168, 143, 53, 0.24);
+      background:
+        radial-gradient(circle at 92% 12%, rgba(252, 206, 76, 0.28), transparent 34%),
+        linear-gradient(135deg, #ffffff 0%, #fff8df 100%);
+    }
+
+    .suggestion-submit__body {
+      display: grid;
+      gap: 10px;
+      padding: 18px;
+    }
+
+    .suggestion-submit__eyebrow {
+      margin: 0;
+      color: var(--gs-color-gold);
+      font: 780 12px/17px var(--gs-font-ui);
+      letter-spacing: -0.004em;
+      text-transform: uppercase;
+    }
+
+    .suggestion-submit__title {
+      margin: 0;
+      color: var(--gs-color-text);
+      font: 780 20px/26px var(--gs-font-ui);
+      letter-spacing: -0.014em;
+    }
+
+    .suggestion-submit__copy {
+      margin: 0;
+      color: var(--gs-color-copy);
+      font: 590 13px/21px var(--gs-font-ui);
+      letter-spacing: -0.004em;
+    }
+
+    .suggestion-submit__action {
+      width: fit-content;
+      margin-top: 2px;
+      padding-inline: 18px;
+    }
+
+    .suggestion-more {
+      margin-top: 12px;
+    }
+
+    .suggestion-more__button {
+      width: 100%;
+      min-height: 48px;
+      font: 760 16px/22px var(--gs-font-ui);
+      letter-spacing: -0.006em;
+    }
+
+    @media (min-width: 980px) {
+      .suggestion-hero {
+        display: grid;
+        grid-template-columns: minmax(0, 1.05fr) minmax(360px, 0.95fr);
+        align-items: stretch;
+      }
+
+      .suggestion-hero__media {
+        min-height: 420px;
+      }
+
+      .suggestion-hero__image {
+        min-height: 420px;
+      }
+
+      .suggestion-hero__body {
+        align-content: center;
+        padding: 34px;
+      }
+
+      .suggestion-hero__title {
+        font-size: 20px;
+        line-height: 26px;
+      }
+
+      .suggestion-submit__body {
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 18px;
+        padding: 22px 24px;
+      }
+
+      .suggestion-submit__text {
+        min-width: 0;
+      }
+
+      .suggestion-submit__action {
+        margin-top: 0;
+      }
+
+      .suggestion-more {
+        display: grid;
+        justify-items: start;
+      }
+
+      .suggestion-more__button {
+        width: auto;
+      }
+    }
+  </style>
+</head>
+<body class="gs-body">
+  <main class="gs-page suggestion-page">
+    <header class="gs-page-header">
+      <h1 class="gs-page-title">Zufällig nix vor?</h1>
+      <p class="gs-page-description">Was man in Goslar erlebt haben muss – Empfehlungen von den Menschen hier.</p>
+    </header>
+
+    <section class="suggestion-hero" id="featured-suggestion" aria-label="Tipp des Tages"></section>
+
+    <section class="gs-info-card suggestion-submit">
+      <div class="suggestion-submit__body">
+        <div class="suggestion-submit__text">
+          <p class="suggestion-submit__eyebrow">MachMit!</p>
+          <h2 class="suggestion-submit__title">Und was ist deine Empfehlung?</h2>
+          <p class="suggestion-submit__copy">Kennst du einen Ort, ein Erlebnis oder einen kleinen Moment in Goslar, den andere ausprobieren sollten? Reiche deinen Tipp direkt ein.</p>
+        </div>
+        <a class="gs-action suggestion-submit__action" href="https://machmit.goslar.de/wasapp#h8536" target="_blank" rel="noopener noreferrer">Empfehlung einreichen</a>
+      </div>
+    </section>
+
+    <div class="suggestion-more">
+      <a class="gs-action suggestion-more__button" href="004_zufaellig-nix-vor-alle.html">Alle Vorschläge</a>
+    </div>
+  </main>
+
+  <button class="gs-scroll-top" type="button" data-gs-scroll-top aria-label="Nach oben scrollen">↑</button>
+
+    <script src="ui-kit/goslar-ui.js"></script>
+  <script>
+    const SUGGESTIONS = __SUGGESTIONS_JSON__;
+    const FEATURED_ID = Number('__FEATURED_ID__');
+
+    const featured = document.getElementById('featured-suggestion');
+
+    renderFeatured();
+
+    function renderFeatured() {
+      const suggestions = SUGGESTIONS || [];
+      const suggestion = suggestions.find(item => Number(item.id) === FEATURED_ID) || suggestions[0];
+      if (!suggestion) {
+        featured.hidden = true;
+        return;
+      }
+
+      renderHero(suggestion, 'Tipp des Tages');
+    }
+
+    function renderHero(suggestion, badge) {
+      featured.innerHTML = ''
+        + '<div class="suggestion-hero__media">'
+        + '<div class="suggestion-hero__badge">'
+        + '<span>' + escapeHtml(badge) + '</span>'
+        + '<details class="suggestion-hero__info">'
+        + '<summary aria-label="Information zum Tipp des Tages">i</summary>'
+        + '<div class="suggestion-hero__info-text">Persönlich, lokal und bunt gemischt. Der Tipp des Tages wechselt automatisch. Über die Suche findest du alle Vorschläge.</div>'
+        + '</details>'
+        + '</div>'
+        + (suggestion.image_url ? '<img class="suggestion-hero__image" src="' + escapeAttr(suggestion.image_url) + '" alt="" loading="eager" />' : '')
+        + '</div>'
+        + '<div class="suggestion-hero__body">'
+        + '<h2 class="suggestion-hero__title">' + escapeHtml(suggestion.title || 'Zufällig nix vor?') + '</h2>'
+        + '<p class="suggestion-hero__copy">' + escapeHtml(suggestion.description || '') + '</p>'
+        + '</div>';
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function escapeAttr(value) {
+      return escapeHtml(value).replace(/'/g, '&#39;');
+    }
+  </script>
+</body>
+</html>

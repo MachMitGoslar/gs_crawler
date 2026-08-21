@@ -49,6 +49,7 @@ _Event calendars and activities_
 | ID | Name | Type | Schedule | Output Files |
 |:---|:-----|:-----|:---------|:-------------|
 | 002_ferienpass | Ferienpass Events | JSON API | 2x täglich (02:00, 14:00) | `002_fepa_events.json` |
+| 004_zufaellig-nix-vor | Zufällig nix vor? | Suggestion Feed | Täglich 07:00 | `ui-kit/goslar-ui.css, ui-kit/goslar-ui.js, 004_...` |
 | 014_kunst_in_ar | Kunst in AR | Event Crawler | Täglich 08:00 | `017-kunst-in-ar-single.json` |
 | 019_was_app | WasApp Community | Community Feed | Alle 3 Minuten | `019_was_app.json` |
 | 027_erster_freitag | Erster Freitag Events | Event Crawler | Täglich 09:00 | `027-erster-freitag.json` |
