@@ -115,7 +115,7 @@ def generate_dev_compose(registry):
                 lines.append("      - ./crawlers.yaml:/app/configs/crawlers.yaml:ro")
 
             # Ports
-            if 'ports' in crawler:
+            if crawler.get('ports'):
                 lines.append("    ports:")
                 for port in crawler['ports']:
                     lines.append(f'      - "{port}"')
@@ -241,7 +241,7 @@ def generate_prod_compose(registry):
                 lines.append("      - ./crawlers.yaml:/app/configs/crawlers.yaml:ro")
 
             # Ports
-            if 'ports' in crawler:
+            if crawler.get('ports'):
                 lines.append("    ports:")
                 for port in crawler['ports']:
                     lines.append(f'      - "{port}"')

@@ -114,6 +114,14 @@ services:
     restart: unless-stopped
 
   # === EDUCATION ===
+  # === MOBILITÄT & VERKEHR ===
+  gs_compiler_073_busflotte:
+    image: ghcr.io/machmitgoslar/gs_crawler_073_busflotte:latest
+    volumes:
+      - ./httpdocs/crawler:/app/output
+    container_name: gs_compiler_073_busflotte
+    restart: unless-stopped
+
   # === SPECIALIZED ===
   gs_compiler_032_webcams_goslar:
     image: ghcr.io/machmitgoslar/gs_crawler_032_webcams_goslar:latest
