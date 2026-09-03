@@ -130,7 +130,7 @@ crawlers:
     name: "WasApp Community"
     category: events
     type: "Community Feed"
-    source: "https://machmit.goslar.de/wasapp"
+    source: "https://machmit.goslar.de/projects/01-goslar-app"
     schedule: "*/3 * * * *"
     schedule_human: "Alle 3 Minuten"
     expected_files:
