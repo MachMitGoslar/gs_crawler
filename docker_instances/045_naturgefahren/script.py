@@ -159,5 +159,5 @@ os.makedirs("045_naturgefahren", exist_ok=True)
 with open("/output/045_naturgefahren/045_naturgefahren_de.json", "x", encoding="utf-8") as f:
     json.dump(data, f, ensure_ascii=False, indent=2)
 
-print("✅ Ergebnis gespeichert in 'output/045_naturgefahren/045_naturgefahren_de.json'")
+print(f"✅ Ergebnis gespeichert in '{output_file}'")
 print(json.dumps(data, ensure_ascii=False, indent=2))
