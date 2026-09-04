@@ -67,9 +67,12 @@ def is_active(properties, now):
     expires = properties.get("expires")
     if expires:
         try:
-            if datetime.fromisoformat(expires) < now:
+            expires_at = datetime.fromisoformat(expires.replace("Z", "+00:00"))
+            if expires_at.tzinfo is None:
+                expires_at = expires_at.replace(tzinfo=timezone.utc)
+            if expires_at < now:
                 return False
-        except ValueError:
+        except (TypeError, ValueError):
             pass
     return True
 
@@ -154,9 +157,14 @@ data = {
     "published_at": zeitstempel
 }
 
-os.makedirs("output", exist_ok=True)
-os.makedirs("045_naturgefahren", exist_ok=True)
-with open("/output/045_naturgefahren/045_naturgefahren_de.json", "x", encoding="utf-8") as f:
+output_dir = (
+    "/app/output/045_naturgefahren"
+    if os.path.exists("/app/output")
+    else "output/045_naturgefahren"
+)
+os.makedirs(output_dir, exist_ok=True)
+output_file = os.path.join(output_dir, "045_naturgefahren_de.json")
+with open(output_file, "w", encoding="utf-8") as f:
     json.dump(data, f, ensure_ascii=False, indent=2)
 
 print(f"✅ Ergebnis gespeichert in '{output_file}'")
