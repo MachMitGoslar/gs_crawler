@@ -17,13 +17,21 @@ else:
 
 CARD_FILE = "046_bio_stadt_goslar_card.json"
 ALLE_FILE = "046_bio_stadt_goslar_alle.json"
+STANDORTE_FILE = "046_bio_stadt_goslar_standorte.json"
 INDEX_HTML_FILE = "046_bio_stadt_goslar_index.html"
 DETAIL_HTML_FILE = "046_bio_stadt_goslar_detail.html"
 UI_KIT_FILES = ["goslar-ui.css", "goslar-ui.js"]
 
-INDEX_HTML_URL = f"https://crawler.goslar.app/crawler/046_bio_stadt_goslar/{INDEX_HTML_FILE}"
+# JSON-Routing wie bei 070_wochenmarkt: card.json verlinkt auf alle.json,
+# jeder Einkaufsführer-Eintrag in alle.json verlinkt auf eine eigene
+# Detail-JSON-Datei (statt auf die HTML-Seiten unten).
+BASE_URL = "https://crawler.goslar.app/crawler/046_bio_stadt_goslar"
 
-BASE_URL = (
+# HTML-Index/Detail bleiben vorerst in der Hinterhand: werden weiterhin
+# gebaut und aktuell gehalten, aber (noch) nicht verlinkt.
+INDEX_HTML_URL = f"{BASE_URL}/{INDEX_HTML_FILE}"
+
+SOURCE_URL = (
     "https://www.goslar.de/wirtschafts-und-zukunftsort/"
     "klima-umwelt-gewaesserschutz/umweltschutz/biostadt-goslar"
 )
@@ -81,10 +89,10 @@ def first_content_image(main, page_url):
 
 def scrape_hub():
     """Haupt-Seite Biostadt Goslar: Intro-Text + Banner-Bild."""
-    soup = fetch_soup(BASE_URL)
+    soup = fetch_soup(SOURCE_URL)
     main = soup.find("main") or soup
     intro = first_content_paragraph(main)
-    image_url = first_content_image(main, BASE_URL)
+    image_url = first_content_image(main, SOURCE_URL)
     return intro, image_url
 
 
@@ -92,7 +100,7 @@ def scrape_articles():
     """Die 4 Unterseiten als kurze Teaser-Kacheln mit Link zur Originalseite."""
     articles = []
     for index, slug in enumerate(ARTICLE_SLUGS, start=1):
-        url = f"{BASE_URL}/{slug}"
+        url = f"{SOURCE_URL}/{slug}"
         try:
             soup = fetch_soup(url)
         except requests.RequestException as exc:
@@ -154,6 +162,7 @@ def fetch_einkaufsfuehrer():
                 "website": website,
                 "image_url": image_url,
                 "description": description,
+                # Für die HTML-Reserve-Ansicht (?id=...), siehe write_html().
                 "call_to_action_url": f"{DETAIL_HTML_FILE}?id={item_id}",
             }
         )
@@ -162,14 +171,128 @@ def fetch_einkaufsfuehrer():
     return items
 
 
+def shop_detail_filename(item_id):
+    return f"046_bio_stadt_goslar_{item_id}.json"
+
+
+def build_top_index_entries(articles, shop_count, banner_image_url, published_at):
+    """Flache Liste für alle.json: Artikel-Teaser (Link raus) + eine Kachel
+    'Bio-Einkaufsführer', die auf die eigene Standorte-Index-Datei verlinkt."""
+    entries = []
+
+    for article in articles:
+        entries.append(
+            {
+                "id": f"artikel-{article['slug']}",
+                "title": article["title"],
+                "description": article["teaser"],
+                "image_url": article["image_url"],
+                "call_to_action_url": article["call_to_action_url"],
+                "published_at": published_at,
+            }
+        )
+
+    entries.append(
+        {
+            "id": "einkaufsfuehrer",
+            "title": "Bio-Einkaufsführer",
+            "description": f"{shop_count} Orte in und um Goslar, an denen Sie Bio-Lebensmittel kaufen können.",
+            "image_url": banner_image_url,
+            "call_to_action_url": "https://goslar.maps.arcgis.com/apps/instant/sidebar/index.html?appid=17912453a9f34f748f28252602e41d15&center=10.4386;51.915&level=10",
+            # Preparation for Stacked Index View
+            # "call_to_action_url": f"{BASE_URL}/{STANDORTE_FILE}",
+            "published_at": published_at,
+        }
+    )
+
+    return entries
+
+
+def build_standorte_index(shops, published_at):
+    """Eigene Index-Datei nur für die Bio-Einkaufsführer-Standorte, jeweils
+    mit Link auf ihre eigene Detail-JSON-Datei — Routing wie bei 070_wochenmarkt."""
+    return [
+        {
+            "id": shop["id"],
+            "title": shop["title"],
+            "description": shop["description"],
+            "image_url": shop["image_url"],
+            "call_to_action_url": f"{BASE_URL}/{shop_detail_filename(shop['id'])}",
+            "published_at": published_at,
+        }
+        for shop in shops
+    ]
+
+
+def build_shop_detail(shop, published_at):
+    parts = [
+        f"<p>{shop['title']} ist Teil des Bio-Einkaufsführers Goslar"
+        + (f" ({shop['category']})" if shop["category"] else "")
+        + ".</p>"
+    ]
+    if shop["address"]:
+        parts.append(f"<p>Adresse: {shop['address']}</p>")
+    if shop["opening_hours"]:
+        parts.append(f"<p>Öffnungszeiten: {shop['opening_hours']}</p>")
+
+    images = [{"url": shop["image_url"]}] if shop["image_url"] else []
+
+    return {
+        "id": shop["id"],
+        "title": shop["title"],
+        "summary": shop["description"],
+        "description": "".join(parts),
+        "images": images,
+        "call_to_action_url": shop["website"],
+        "published_at": published_at,
+    }
+
+
+def cleanup_shop_detail_files(current_ids):
+    """Entfernt Detail-JSON-Dateien von Orten, die nicht mehr im aktuellen
+    Einkaufsführer-Lauf vorkommen (Standorte können sich ändern)."""
+    if not OUTPUT_DIR.is_dir():
+        return
+
+    keep_filenames = {CARD_FILE, ALLE_FILE, STANDORTE_FILE, INDEX_HTML_FILE, DETAIL_HTML_FILE}
+    current_filenames = {shop_detail_filename(item_id) for item_id in current_ids}
+
+    for path in OUTPUT_DIR.glob("046_bio_stadt_goslar_*.json"):
+        if path.name in keep_filenames or path.name in current_filenames:
+            continue
+        path.unlink()
+        print(f"Removed stale file: {path}")
+
+
+def build_html_bundle(intro, banner_image_url, articles, shops, shop_count, published_at):
+    """Datenstruktur für die HTML-Reserve-Ansicht (Index+Detail mit UI-Kit)."""
+    map_text = (
+        f"Aktuell listet der Bio-Einkaufsführer {shop_count} Orte in und um Goslar, "
+        "an denen Sie Bio-Lebensmittel kaufen können."
+    )
+    return {
+        "title": "Biostadt Goslar",
+        "intro": intro,
+        "image_url": banner_image_url,
+        "source_url": SOURCE_URL,
+        "artikel": articles,
+        "einkaufsfuehrer": {
+            "count": shop_count,
+            "map_text": map_text,
+            "items": shops,
+        },
+        "published_at": published_at,
+    }
+
+
 def json_for_script(data):
     return (
         json.dumps(data, ensure_ascii=False)
         .replace("<", "\\u003c")
         .replace(">", "\\u003e")
         .replace("&", "\\u0026")
-        .replace("\u2028", "\\u2028")
-        .replace("\u2029", "\\u2029")
+        .replace('\u2028', "\\u2028")
+        .replace('\u2029', "\\u2029")
     )
 
 
@@ -210,45 +333,35 @@ def copy_ui_kit():
 def main():
     intro, banner_image_url = scrape_hub()
     articles = scrape_articles()
-    einkaufsfuehrer = fetch_einkaufsfuehrer()
+    shops = fetch_einkaufsfuehrer()
 
-    if not einkaufsfuehrer:
+    if not shops:
         print("ArcGIS-Feature-Service lieferte keine Einkaufsführer-Einträge. Breche ab, ohne Output zu überschreiben.")
         return
 
-    shop_count = len(einkaufsfuehrer)
-    map_text = (
-        f"Aktuell listet der Bio-Einkaufsführer {shop_count} Orte in und um Goslar, "
-        "an denen Sie Bio-Lebensmittel kaufen können."
-    )
+    shop_count = len(shops)
     published_at = datetime.now().strftime("%Y-%m-%dT%H:%M")
 
-    alle = {
-        "title": "Biostadt Goslar",
-        "intro": intro,
-        "image_url": banner_image_url,
-        "source_url": BASE_URL,
-        "artikel": articles,
-        "einkaufsfuehrer": {
-            "count": shop_count,
-            "map_text": map_text,
-            "items": einkaufsfuehrer,
-        },
-        "published_at": published_at,
-    }
-
+    # ── JSON-Routing (wie 070_wochenmarkt) ──────────────────────────────────
     card = {
         "title": "Biostadt Goslar",
         "description": f"Bio-Einkaufsführer mit aktuell {shop_count} Orten sowie Infos rund um Bio in Goslar.",
         "image_url": banner_image_url,
-        "call_to_action_url": INDEX_HTML_URL,
+        "call_to_action_url": f"{BASE_URL}/{ALLE_FILE}",
         "published_at": published_at,
     }
-
     write_json(CARD_FILE, card)
-    write_json(ALLE_FILE, alle)
-    write_html(INDEX_HTML_FILE, alle)
-    write_html(DETAIL_HTML_FILE, alle)
+    write_json(ALLE_FILE, build_top_index_entries(articles, shop_count, banner_image_url, published_at))
+    write_json(STANDORTE_FILE, build_standorte_index(shops, published_at))
+
+    for shop in shops:
+        write_json(shop_detail_filename(shop["id"]), build_shop_detail(shop, published_at))
+    cleanup_shop_detail_files([shop["id"] for shop in shops])
+
+    # ── UI-Strategie in der Hinterhand (nicht verlinkt, aber aktuell) ───────
+    html_bundle = build_html_bundle(intro, banner_image_url, articles, shops, shop_count, published_at)
+    write_html(INDEX_HTML_FILE, html_bundle)
+    write_html(DETAIL_HTML_FILE, html_bundle)
     copy_ui_kit()
 
 

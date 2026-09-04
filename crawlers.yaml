@@ -254,10 +254,11 @@ crawlers:
       - "046_bio_stadt_goslar/ui-kit/goslar-ui.js"
       - "046_bio_stadt_goslar/046_bio_stadt_goslar_card.json"
       - "046_bio_stadt_goslar/046_bio_stadt_goslar_alle.json"
+      - "046_bio_stadt_goslar/046_bio_stadt_goslar_standorte.json"
       - "046_bio_stadt_goslar/046_bio_stadt_goslar_index.html"
       - "046_bio_stadt_goslar/046_bio_stadt_goslar_detail.html"
     implementation: custom
-    notes: "Infos rund um Bio in Goslar (4 Unterseiten als Teaser) sowie Bio-Einkaufsführer als Index/Detail-Ansicht. Standorte des Einkaufsführers kommen live aus dem öffentlichen ArcGIS-FeatureServer hinter der Bio-Einkaufsführer-Karte auf goslar.de (kein PDF-Parsing)."
+    notes: "Infos rund um Bio in Goslar (4 Unterseiten als Teaser) sowie Bio-Einkaufsführer als eigene Standorte-Index-Datei mit je einer Detail-JSON pro Ort (JSON-Routing wie bei 070_wochenmarkt: card -> alle -> standorte -> Detail). Standorte kommen live aus dem öffentlichen ArcGIS-FeatureServer hinter der Bio-Einkaufsführer-Karte auf goslar.de (kein PDF-Parsing)."
 
   - id: "047_bodenwasser"
     name: "Bodenwasser Monitor"
