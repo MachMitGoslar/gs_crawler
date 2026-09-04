@@ -105,6 +105,13 @@ services:
     container_name: gs_compiler_045_naturgefahren
     restart: unless-stopped
 
+  gs_compiler_046_bio_stadt_goslar:
+    build: ./docker_instances/046_bio_stadt_goslar
+    volumes:
+      - ./httpdocs/crawler:/app/output
+    container_name: gs_compiler_046_bio_stadt_goslar
+    restart: unless-stopped
+
   gs_compiler_047_bodenwasser:
     build: ./docker_instances/047_bodenwasser
     volumes:
