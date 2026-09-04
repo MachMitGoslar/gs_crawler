@@ -4,7 +4,7 @@
 #
 # Usage:
 #   ./scripts/dev.sh setup     - First-time setup (build base images)
-#   ./scripts/dev.sh up        - Start all containers
+#   ./scripts/dev.sh up        - Start containers (asks which to rebuild)
 #   ./scripts/dev.sh down      - Stop all containers
 #   ./scripts/dev.sh logs      - Follow logs (optional: service name)
 #   ./scripts/dev.sh build     - Rebuild all containers
@@ -43,6 +43,50 @@ check_base_images() {
     return 0
 }
 
+# Prompts the user to choose which services to rebuild before "up".
+# Sets BUILD_ALL, NO_BUILD, SELECTED_SERVICES for the caller.
+select_services_to_build() {
+    local services=($(docker compose -f "$COMPOSE_FILE" config --services))
+
+    echo "Welche Container sollen neu gebaut werden?"
+    echo ""
+    local i=1
+    for s in "${services[@]}"; do
+        printf "  %2d) %s\n" "$i" "$s"
+        i=$((i + 1))
+    done
+    echo ""
+    echo "   a) Alle (Standard)"
+    echo "   n) Keinen (nur starten, kein Rebuild)"
+    echo ""
+    read -p "Auswahl (Enter = alle, Nummern getrennt durch Leerzeichen, z.B. '3 7'): " selection
+    selection="${selection:-a}"
+
+    BUILD_ALL=false
+    NO_BUILD=false
+    SELECTED_SERVICES=()
+
+    if [ "$selection" = "a" ] || [ "$selection" = "A" ]; then
+        BUILD_ALL=true
+    elif [ "$selection" = "n" ] || [ "$selection" = "N" ]; then
+        NO_BUILD=true
+    else
+        for num in $selection; do
+            local idx=$((num - 1))
+            if [[ "$num" =~ ^[0-9]+$ ]] && [ "$idx" -ge 0 ] && [ "$idx" -lt "${#services[@]}" ]; then
+                SELECTED_SERVICES+=("${services[$idx]}")
+            else
+                echo -e "${YELLOW}⚠️  Ungültige Nummer '$num' wird ignoriert${NC}"
+            fi
+        done
+
+        if [ "${#SELECTED_SERVICES[@]}" -eq 0 ]; then
+            echo -e "${YELLOW}⚠️  Keine gültige Auswahl, breche ab.${NC}"
+            exit 1
+        fi
+    fi
+}
+
 case "${1:-help}" in
     setup)
         print_header
@@ -67,8 +111,21 @@ case "${1:-help}" in
             exit 1
         fi
 
-        echo "🚀 Starting containers..."
-        docker compose -f "$COMPOSE_FILE" up -d --build
+        select_services_to_build
+
+        echo ""
+        if [ "$BUILD_ALL" = true ]; then
+            echo "🚀 Starting containers (rebuilding all)..."
+            docker compose -f "$COMPOSE_FILE" up -d --build
+        elif [ "$NO_BUILD" = true ]; then
+            echo "🚀 Starting containers (no rebuild)..."
+            docker compose -f "$COMPOSE_FILE" up -d
+        else
+            echo "🔨 Rebuilding: ${SELECTED_SERVICES[*]}"
+            docker compose -f "$COMPOSE_FILE" build "${SELECTED_SERVICES[@]}"
+            echo "🚀 Starting containers..."
+            docker compose -f "$COMPOSE_FILE" up -d
+        fi
         echo ""
         echo -e "${GREEN}✅ Containers started${NC}"
         echo ""
@@ -147,7 +204,7 @@ case "${1:-help}" in
         echo ""
         echo "Commands:"
         echo "  setup      First-time setup (builds base images)"
-        echo "  up         Start all containers"
+        echo "  up         Start containers (asks which to rebuild)"
         echo "  down       Stop all containers"
         echo "  logs [svc] Follow logs (optionally for specific service)"
         echo "  build      Rebuild all containers"
