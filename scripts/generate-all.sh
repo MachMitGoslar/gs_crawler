@@ -34,6 +34,15 @@ echo "2. Generating README.md tables..."
 python3 scripts/generate-readme.py
 
 echo ""
+echo "3. Refreshing Health Monitor..."
+if docker ps --format '{{.Names}}' 2>/dev/null | grep -qx "gs_health_monitor"; then
+    docker restart gs_health_monitor > /dev/null
+    echo "   Health Monitor neu gestartet (liest crawlers.yaml neu ein)"
+else
+    echo "   Health Monitor läuft nicht, übersprungen"
+fi
+
+echo ""
 echo "=== All files generated! ==="
 echo ""
 echo "Generated files:"

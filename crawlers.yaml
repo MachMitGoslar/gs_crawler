@@ -235,11 +235,11 @@ crawlers:
     name: "Naturgefahren Monitor"
     category: environment
     type: "Weather Alert"
-    source: "https://www.naturgefahrenportal.de/de/alerts"
+    source: "https://www.naturgefahrenportal.de/data/v2/alerts/dwd.json"
     schedule: "*/15 * * * *"
     schedule_human: "Alle 15 Minuten"
     expected_files:
-      - "045_naturgefahren_de.json"
+      - "045_naturgefahren/045_naturgefahren_de.json"
     implementation: custom
 
   - id: "047_bodenwasser"

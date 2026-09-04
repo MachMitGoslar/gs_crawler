@@ -77,7 +77,7 @@ _Weather, water, and environmental data_
 | ID | Name | Type | Schedule | Output Files |
 |:---|:-----|:-----|:---------|:-------------|
 | 035_talsperren | Talsperren Daten | Umwelt Monitor | Stündlich | `035-talsperren_alle.json` |
-| 045_naturgefahren | Naturgefahren Monitor | Weather Alert | Alle 15 Minuten | `045_naturgefahren_de.json` |
+| 045_naturgefahren | Naturgefahren Monitor | Weather Alert | Alle 15 Minuten | `045_naturgefahren/045_naturgefahren_de.json` |
 | 047_bodenwasser | Bodenwasser Monitor | Umwelt Monitor | 2x täglich (02:00, 14:00) | `047_bodenwasser.json, 047_bodenwasser.gif` |
 
 ### Education
