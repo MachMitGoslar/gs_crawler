@@ -234,7 +234,8 @@ def main():
         if vendor.get("marketStallImageUrl"):
             images.append({"url": vendor["marketStallImageUrl"]})
         if vendor.get("logoFileUrl"):
-            images.append({"url": vendor["logoFileUrl"]})
+            if vendor["marketStallImageUrl"] != vendor["logoFileUrl"]:
+                images.append({"url": vendor["logoFileUrl"]})
         if not images and market_image:
             images.append({"url": market_image})
 
