@@ -106,6 +106,13 @@ services:
     container_name: gs_compiler_045_naturgefahren
     restart: unless-stopped
 
+  gs_compiler_046_bio_stadt_goslar:
+    image: ghcr.io/machmitgoslar/gs_crawler_046_bio_stadt_goslar:latest
+    volumes:
+      - ./httpdocs/crawler:/app/output
+    container_name: gs_compiler_046_bio_stadt_goslar
+    restart: unless-stopped
+
   gs_compiler_047_bodenwasser:
     image: ghcr.io/machmitgoslar/gs_crawler_047_bodenwasser:latest
     volumes:
