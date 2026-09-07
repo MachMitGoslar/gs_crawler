@@ -42,6 +42,9 @@ categories:
   education:
     name: "Education"
     description: "Schools, courses, and educational opportunities"
+  mobility:
+    name: "Mobilität & Verkehr"
+    description: "ÖPNV, Fuhrparks und Verkehrsdaten"
   specialized:
     name: "Specialized"
     description: "Unique data sources requiring custom processing"
@@ -146,7 +149,7 @@ crawlers:
     name: "WasApp Community"
     category: events
     type: "Community Feed"
-    source: "https://machmit.goslar.de/wasapp"
+    source: "https://machmit.goslar.de/projects/01-goslar-app"
     schedule: "*/3 * * * *"
     schedule_human: "Alle 3 Minuten"
     expected_files:
@@ -227,6 +230,7 @@ crawlers:
       - "042-freiwilligenagentur.json"
       - "042-freiwilligenagentur-alle.json"
       - "042_freiwilligenagentur_index.html"
+      - "042_freiwilligenagentur_detail.html"
     env_file:
       - .env
     implementation: custom
@@ -253,6 +257,24 @@ crawlers:
     expected_files:
       - "045_naturgefahren_de.json"
     implementation: custom
+
+  - id: "046_bio_stadt_goslar"
+    name: "Biostadt Goslar"
+    category: environment
+    type: "Info & Einkaufsführer"
+    source: "https://www.goslar.de/wirtschafts-und-zukunftsort/klima-umwelt-gewaesserschutz/umweltschutz/biostadt-goslar"
+    schedule: "0 2,14 * * *"
+    schedule_human: "2x täglich (02:00, 14:00)"
+    expected_files:
+      - "046_bio_stadt_goslar/ui-kit/goslar-ui.css"
+      - "046_bio_stadt_goslar/ui-kit/goslar-ui.js"
+      - "046_bio_stadt_goslar/046_bio_stadt_goslar_card.json"
+      - "046_bio_stadt_goslar/046_bio_stadt_goslar_alle.json"
+      - "046_bio_stadt_goslar/046_bio_stadt_goslar_standorte.json"
+      - "046_bio_stadt_goslar/046_bio_stadt_goslar_index.html"
+      - "046_bio_stadt_goslar/046_bio_stadt_goslar_detail.html"
+    implementation: custom
+    notes: "Infos rund um Bio in Goslar (4 Unterseiten als Teaser) sowie Bio-Einkaufsführer als eigene Standorte-Index-Datei mit je einer Detail-JSON pro Ort (JSON-Routing wie bei 070_wochenmarkt: card -> alle -> standorte -> Detail). Standorte kommen live aus dem öffentlichen ArcGIS-FeatureServer hinter der Bio-Einkaufsführer-Karte auf goslar.de (kein PDF-Parsing)."
 
   - id: "047_bodenwasser"
     name: "Bodenwasser Monitor"
@@ -458,3 +480,17 @@ crawlers:
     ports: []
     implementation: custom
     notes: "Statischer Karriereportal-Export fuer Landkreis Goslar. Laedt stündlich Jobdaten und schreibt HTML plus JSON nach /app/output."
+
+  # === MOBILITÄT & VERKEHR ===
+  - id: "073_busflotte"
+    name: "Busflotte Stadtbus Goslar"
+    category: mobility
+    type: "Fleet Data"
+    source: "https://www.goebus.de/unternehmen/stadtbus-goslar"
+    schedule: "0 4 * * 1"
+    schedule_human: "Wöchentlich Montag 04:00"
+    expected_files:
+      - "busflotte/073_busflotte_card.json"
+      - "busflotte/073_busflotte_alle.json"
+    implementation: custom
+    notes: "Aktive Flotte (cat=fleet) der Stadtbus Goslar GmbH (cid=27) via offener GöBUS-JSON-API. Reines JSON: Card -> Index -> Detail je Fahrzeug. Bilder werden von goebus.de verlinkt, nicht gespiegelt."

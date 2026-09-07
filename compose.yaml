@@ -113,6 +113,13 @@ services:
     container_name: gs_compiler_045_naturgefahren
     restart: unless-stopped
 
+  gs_compiler_046_bio_stadt_goslar:
+    image: ghcr.io/machmitgoslar/gs_crawler_046_bio_stadt_goslar:latest
+    volumes:
+      - ./httpdocs/crawler:/app/output
+    container_name: gs_compiler_046_bio_stadt_goslar
+    restart: unless-stopped
+
   gs_compiler_047_bodenwasser:
     image: ghcr.io/machmitgoslar/gs_crawler_047_bodenwasser:latest
     volumes:
@@ -121,6 +128,14 @@ services:
     restart: unless-stopped
 
   # === EDUCATION ===
+  # === MOBILITÄT & VERKEHR ===
+  gs_compiler_073_busflotte:
+    image: ghcr.io/machmitgoslar/gs_crawler_073_busflotte:latest
+    volumes:
+      - ./httpdocs/crawler:/app/output
+    container_name: gs_compiler_073_busflotte
+    restart: unless-stopped
+
   # === SPECIALIZED ===
   gs_compiler_032_webcams_goslar:
     image: ghcr.io/machmitgoslar/gs_crawler_032_webcams_goslar:latest

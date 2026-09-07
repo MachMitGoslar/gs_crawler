@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bio-Einkaufsführer · Biostadt Goslar</title>
+  <link href="ui-kit/goslar-ui.css" rel="stylesheet" />
+  <style>
+    .biostadt-detail__top-image {
+      margin-top: 18px;
+    }
+
+    .biostadt-detail__image {
+      width: 100%;
+      max-height: 220px;
+      display: block;
+      object-fit: cover;
+      border-radius: var(--gs-radius-media);
+      background: var(--gs-color-background);
+    }
+
+    .biostadt-detail__hero {
+      display: grid;
+      gap: 14px;
+      margin-top: 18px;
+      padding: 18px;
+      border-radius: var(--gs-radius-card);
+      background: var(--gs-color-card);
+    }
+
+    .biostadt-detail__meta {
+      display: grid;
+      gap: 8px;
+    }
+
+    .biostadt-detail__actions {
+      margin-top: 8px;
+    }
+
+    .biostadt-detail__missing {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body class="gs-body">
+  <main class="gs-page gs-page--with-back">
+    <a class="gs-back-link" href="046_bio_stadt_goslar_index.html" aria-label="Zurück zur Übersicht">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.7 5.3 9 12l6.7 6.7-1.4 1.4L6.2 12l8.1-8.1 1.4 1.4Z"/></svg>
+    </a>
+
+    <div class="biostadt-detail__top-image" id="detail-image" hidden></div>
+
+    <header class="gs-page-header">
+      <h1 class="gs-page-title" id="detail-title">Bio-Einkaufsführer</h1>
+      <p class="gs-page-description" id="detail-subtitle">Biostadt Goslar</p>
+    </header>
+
+    <article class="biostadt-detail__hero" id="detail-content" hidden>
+      <div class="biostadt-detail__meta" id="detail-meta"></div>
+      <div class="gs-actions biostadt-detail__actions" id="detail-actions"></div>
+    </article>
+
+    <section class="gs-info-card biostadt-detail__missing" id="detail-missing" hidden>
+      <div class="gs-info-card__body">
+        <h2 class="gs-info-card__title">Ort nicht gefunden</h2>
+        <p class="gs-info-card__copy">Dieser Eintrag ist nicht mehr im Bio-Einkaufsführer verfügbar oder der Link ist unvollständig.</p>
+        <div class="gs-actions">
+          <a class="gs-action" href="046_bio_stadt_goslar_index.html">Zur Übersicht</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <button class="gs-scroll-top" type="button" data-gs-scroll-top aria-label="Nach oben scrollen">↑</button>
+
+  <script src="ui-kit/goslar-ui.js"></script>
+  <script>
+    const BIOSTADT = __BIOSTADT_JSON__;
+    const items = (BIOSTADT.einkaufsfuehrer || {}).items || [];
+
+    const params = new URLSearchParams(location.search);
+    const itemId = Number(params.get('id'));
+    const item = items.find(candidate => Number(candidate.id) === itemId);
+
+    if (item) {
+      renderDetail(item);
+    } else {
+      document.getElementById('detail-missing').hidden = false;
+    }
+
+    function renderDetail(item) {
+      document.title = (item.title || 'Bio-Einkaufsführer') + ' · Biostadt Goslar';
+      document.getElementById('detail-title').textContent = item.title || 'Bio-Einkaufsführer';
+      document.getElementById('detail-subtitle').textContent = item.category || 'Biostadt Goslar';
+
+      const imageContainer = document.getElementById('detail-image');
+      if (item.image_url) {
+        imageContainer.innerHTML = '<img class="biostadt-detail__image" src="' + escapeAttr(item.image_url) + '" alt="" loading="lazy" />';
+        imageContainer.hidden = false;
+      }
+
+      const content = document.getElementById('detail-content');
+      content.hidden = false;
+
+      const meta = document.getElementById('detail-meta');
+      meta.innerHTML = ''
+        + metaRow('Adresse', item.address)
+        + metaRow('Öffnungszeiten', item.opening_hours)
+        + metaRow('Kategorie', item.category);
+
+      const actions = document.getElementById('detail-actions');
+      actions.innerHTML = ''
+        + '<a class="gs-action" href="046_bio_stadt_goslar_index.html">Zur Übersicht</a>'
+        + (item.website ? '<a class="gs-action" href="' + escapeAttr(item.website) + '" target="_blank" rel="noopener noreferrer">Website</a>' : '');
+    }
+
+    function metaRow(label, value) {
+      if (!value) return '';
+      return '<p class="gs-meta"><strong>' + escapeHtml(label) + ':</strong> ' + escapeHtml(value) + '</p>';
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function escapeAttr(value) {
+      return escapeHtml(value).replace(/'/g, '&#39;');
+    }
+  </script>
+</body>
+</html>

@@ -25,7 +25,7 @@ To add/modify a crawler:
 3. Commit the changes
 
 <!-- CRAWLER_TABLE_START -->
-**Total Crawlers:** 30 (21 custom containers, 9 config-driven)
+**Total Crawlers:** 32 (23 custom containers, 9 config-driven)
 
 ### Infrastructure
 _System monitoring and management_
@@ -79,6 +79,7 @@ _Weather, water, and environmental data_
 |:---|:-----|:-----|:---------|:-------------|
 | 035_talsperren | Talsperren Daten | Umwelt Monitor | Stündlich | `035-talsperren_alle.json` |
 | 045_naturgefahren | Naturgefahren Monitor | Weather Alert | Alle 15 Minuten | `045_naturgefahren_de.json` |
+| 046_bio_stadt_goslar | Biostadt Goslar | Info & Einkaufsführer | 2x täglich (02:00, 14:00) | `046_bio_stadt_goslar/ui-kit/goslar-ui.css, 046_...` |
 | 047_bodenwasser | Bodenwasser Monitor | Umwelt Monitor | 2x täglich (02:00, 14:00) | `047_bodenwasser.json, 047_bodenwasser.gif` |
 
 ### Education
@@ -91,6 +92,13 @@ _Schools, courses, and educational opportunities_
 | 052_vhs_kinderuni | VHS Kinderuni | Education Portal | Täglich 09:00 | `052_vhs_kinderuni.json, 052_vhs_kinderuni_alle....` |
 | 053_tschuessschule_praktikum | TschüssSchule Praktikum | Education Portal | Täglich 06:00 | `053-tschuessschule-praktikum.json, 053-tschuess...` |
 | 054_tschuessschule_ausbildung | TschüssSchule Ausbildung | Education Portal | Täglich 06:00 | `054-tschuessschule-ausbildung.json, 054-tschues...` |
+
+### Mobilität & Verkehr
+_ÖPNV, Fuhrparks und Verkehrsdaten_
+
+| ID | Name | Type | Schedule | Output Files |
+|:---|:-----|:-----|:---------|:-------------|
+| 073_busflotte | Busflotte Stadtbus Goslar | Fleet Data | Wöchentlich Montag 04:00 | `busflotte/073_busflotte_card.json, busflotte/07...` |
 
 ### Specialized
 _Unique data sources requiring custom processing_

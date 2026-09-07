@@ -3,11 +3,9 @@ FROM ghcr.io/machmitgoslar/gs_crawler_python_basic_crawler:latest
 
 # Kopiere container-spezifische Dateien
 COPY script.py .
-COPY 042_freiwilligenagentur_index.html .
-COPY 042_freiwilligenagentur_detail.html .
+COPY 046_bio_stadt_goslar_index.html .
+COPY 046_bio_stadt_goslar_detail.html .
 COPY crontab /etc/cron.d/mycron
-
-
 
 # Konfiguriere Cron
 RUN chmod 0600 /etc/cron.d/mycron && \

@@ -21,6 +21,7 @@ DETAIL_URL_TEMPLATE = (
     f"?agid={AGENCY_ID}&styleid=2&frametyp=2&do=go&submit=Suchen&hideund=1&detail={{angebot_id}}"
 )
 INDEX_HTML_FILE = "042_freiwilligenagentur_index.html"
+DETAIL_HTML_FILE = "042_freiwilligenagentur_detail.html"
 INDEX_HTML_URL = f"https://crawler.goslar.app/crawler/{INDEX_HTML_FILE}"
 OUTPUT_DIR = Path("output")
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -94,12 +95,19 @@ def build_offer_entry(offer, fallback_timestamp):
     if published_at == fallback_timestamp:
         published_at = unix_to_iso8601(get_tag_text(offer, "erstellt"), fallback_timestamp)
 
+    print_url = DETAIL_URL_TEMPLATE.format(angebot_id=offer_id)
+
     return {
         "id": int(offer_id),
-        "title": "Freiwilligenagentur",
+        "title": title,
         "description": description,
+        "short_description": short_description,
+        "full_description": full_description,
+        "organization": organization or None,
+        "location": location or None,
         "image_url": avatar or None,
-        "call_to_action_url": DETAIL_URL_TEMPLATE.format(angebot_id=offer_id),
+        "call_to_action_url": f"{DETAIL_HTML_FILE}?id={offer_id}",
+        "print_url": print_url,
         "published_at": published_at,
     }
 
@@ -134,13 +142,19 @@ def parse_offers(xml_text):
     return offers, offer_ids
 
 
-def build_card(featured_offer):
+def format_offer_count(offer_count):
+    if offer_count == 1:
+        return "1 Angebot zur ehrenamtlichen Unterstützung"
+    return f"{offer_count} Angebote zur ehrenamtlichen Unterstützung"
+
+
+def build_card(offer_count, published_at):
     return {
-        "title": featured_offer["title"],
-        "description": normalize_description(featured_offer["description"]),
-        "image_url": featured_offer["image_url"],
+        "title": "Freiwilligenagentur",
+        "description": format_offer_count(offer_count),
+        "image_url": None,
         "call_to_action_url": INDEX_HTML_URL,
-        "published_at": featured_offer["published_at"],
+        "published_at": published_at,
         "widget_type": None,
     }
 
@@ -173,6 +187,15 @@ def write_html(offers):
     print(f"Written: {target}")
 
 
+def write_detail_html(offers):
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    html = (SCRIPT_DIR / DETAIL_HTML_FILE).read_text(encoding="utf-8")
+    html = html.replace("__OFFERS_JSON__", json_for_script(offers))
+    target = OUTPUT_DIR / DETAIL_HTML_FILE
+    target.write_text(html, encoding="utf-8")
+    print(f"Written: {target}")
+
+
 def copy_ui_kit():
     target_dir = OUTPUT_DIR / "ui-kit"
     target_dir.mkdir(parents=True, exist_ok=True)
@@ -196,10 +219,12 @@ def main():
 
     featured_offer = random.choice(offers)
     ordered_index = [featured_offer] + [offer for offer in offers if offer["id"] != featured_offer["id"]]
+    latest_published_at = max((offer["published_at"] for offer in offers), default=datetime.now().strftime("%Y-%m-%dT%H:%M"))
 
-    write_json("042-freiwilligenagentur.json", build_card(featured_offer))
+    write_json("042-freiwilligenagentur.json", build_card(len(offers), latest_published_at))
     write_json("042-freiwilligenagentur-alle.json", ordered_index)
     write_html(ordered_index)
+    write_detail_html(ordered_index)
     copy_ui_kit()
 
     print(f"Fetched {len(offers)} active Freinet offers.")
