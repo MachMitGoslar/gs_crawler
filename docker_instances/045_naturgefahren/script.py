@@ -1,7 +1,7 @@
 import json
 import os
 import random
-import time
+import pytz
 from datetime import datetime, timezone
 
 import requests
@@ -23,6 +23,7 @@ ADRESSE = "Charley-Jacob-Str. 3, 38640 Goslar"
 # daher wird hier nicht bei jedem Cron-Lauf erneut geokodiert.
 ADRESSE_LAT = 51.9063874
 ADRESSE_LON = 10.4301325
+TIMEZONE = "Europe/Berlin"
 
 SEVERITY_LABELS = {
     1: "Geringe Warnstufe",
@@ -67,6 +68,7 @@ def is_active(properties, now):
     expires = properties.get("expires")
     if expires:
         try:
+            # It is okay to check against UTC while the serve time is utc as well
             expires_at = datetime.fromisoformat(expires.replace("Z", "+00:00"))
             if expires_at.tzinfo is None:
                 expires_at = expires_at.replace(tzinfo=timezone.utc)
@@ -131,7 +133,8 @@ def fallback_bevoelkerungsschutz_artikel():
     return beschreibung, link
 
 
-zeitstempel = time.strftime("%d.%m.%Y - %H:%M")
+# Convert to choosen Timezone before displaying
+zeitstempel = datetime.now(pytz.timezone(TIMEZONE)).strftime("%d.%m.%Y - %H:%M")
 warnung = pick_strongest_warning(ADRESSE_LON, ADRESSE_LAT)
 
 if warnung:
