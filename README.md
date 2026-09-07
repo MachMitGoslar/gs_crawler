@@ -25,7 +25,7 @@ To add/modify a crawler:
 3. Commit the changes
 
 <!-- CRAWLER_TABLE_START -->
-**Total Crawlers:** 30 (21 custom containers, 9 config-driven)
+**Total Crawlers:** 31 (22 custom containers, 9 config-driven)
 
 ### Infrastructure
 _System monitoring and management_
@@ -78,6 +78,7 @@ _Weather, water, and environmental data_
 |:---|:-----|:-----|:---------|:-------------|
 | 035_talsperren | Talsperren Daten | Umwelt Monitor | Stündlich | `035-talsperren_alle.json` |
 | 045_naturgefahren | Naturgefahren Monitor | Weather Alert | Alle 15 Minuten | `045_naturgefahren/045_naturgefahren_de.json` |
+| 046_bio_stadt_goslar | Biostadt Goslar | Info & Einkaufsführer | 2x täglich (02:00, 14:00) | `046_bio_stadt_goslar/ui-kit/goslar-ui.css, 046_...` |
 | 047_bodenwasser | Bodenwasser Monitor | Umwelt Monitor | 2x täglich (02:00, 14:00) | `047_bodenwasser.json, 047_bodenwasser.gif` |
 
 ### Education
