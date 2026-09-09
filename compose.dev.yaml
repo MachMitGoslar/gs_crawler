@@ -42,6 +42,13 @@ services:
     container_name: gs_compiler_002_fepa
     restart: unless-stopped
 
+  gs_compiler_004_zufaellig-nix-vor:
+    build: ./docker_instances/004_zufaellig-nix-vor
+    volumes:
+      - ./httpdocs/crawler:/app/output
+    container_name: gs_compiler_004_zufaellig-nix-vor
+    restart: unless-stopped
+
   gs_compiler_014_kunst_in_ar:
     build: ./docker_instances/014_kunst_in_ar
     volumes:

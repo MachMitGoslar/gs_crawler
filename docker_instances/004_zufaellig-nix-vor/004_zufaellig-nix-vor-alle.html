@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Alle Vorschläge · Zufällig nix vor?</title>
+  <link href="ui-kit/goslar-ui.css" rel="stylesheet" />
+  <style>
+    .suggestion-page {
+      padding-bottom: 32px;
+    }
+
+    .suggestion-toolbar {
+      margin-top: 22px;
+    }
+
+    .suggestion-count {
+      margin: 10px 4px 0;
+      color: var(--gs-color-copy);
+      font: 590 12px/20px var(--gs-font-ui);
+      letter-spacing: -0.004em;
+    }
+
+    .suggestion-list {
+      display: grid;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .suggestion-card {
+      overflow: hidden;
+      min-height: 100%;
+      display: flex;
+      flex-direction: column;
+      border-radius: var(--gs-radius-card);
+      background: var(--gs-color-card);
+      color: inherit;
+      text-align: left;
+      text-decoration: none;
+      box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02);
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .suggestion-card:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 14px 28px rgba(28, 25, 18, 0.08);
+    }
+
+    .suggestion-card__image {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      display: block;
+      object-fit: cover;
+      background: var(--gs-color-background);
+    }
+
+    .suggestion-card__body {
+      min-width: 0;
+      flex: 1;
+      padding: 14px 16px 16px;
+    }
+
+    .suggestion-card__title {
+      margin: 0;
+      color: var(--gs-color-text);
+      font: 760 16px/22px var(--gs-font-ui);
+      letter-spacing: -0.008em;
+    }
+
+    .suggestion-card__copy {
+      margin: 8px 0 0;
+      color: var(--gs-color-copy);
+      font: 590 13px/20px var(--gs-font-ui);
+      letter-spacing: -0.004em;
+      overflow-wrap: anywhere;
+    }
+
+    .suggestion-card__cta {
+      margin-top: 12px;
+      color: var(--gs-color-gold);
+      font: 760 13px/18px var(--gs-font-ui);
+      letter-spacing: -0.004em;
+    }
+
+    .suggestion-empty {
+      display: none;
+      margin-top: 18px;
+      padding: 18px;
+      border-radius: var(--gs-radius-card);
+      background: var(--gs-color-card);
+      color: var(--gs-color-copy);
+      font: 590 13px/20px var(--gs-font-ui);
+    }
+
+    @media (min-width: 760px) {
+      .suggestion-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (min-width: 980px) {
+      .suggestion-list {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+  </style>
+</head>
+<body class="gs-body">
+  <main class="gs-page gs-page--with-back suggestion-page">
+    <a class="gs-back-link" href="004_zufaellig-nix-vor.html" aria-label="Zurück zum Tagesvorschlag">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.7 5.3 9 12l6.7 6.7-1.4 1.4L6.2 12l8.1-8.1 1.4 1.4Z"/></svg>
+    </a>
+
+    <header class="gs-page-header">
+      <h1 class="gs-page-title">Alle Vorschläge</h1>
+      <p class="gs-page-description">Durchsuche alle Empfehlungen für Goslar und Umgebung.</p>
+    </header>
+
+    <div class="gs-toolbar suggestion-toolbar">
+      <label class="gs-search" for="suggestion-search">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M9.8 17.1a7.3 7.3 0 1 1 5.2-2.1l4.1 4.1-1.5 1.5-4.1-4.1a7.2 7.2 0 0 1-3.7.6Zm0-2.1a5.2 5.2 0 1 0 0-10.4 5.2 5.2 0 0 0 0 10.4Z" />
+        </svg>
+        <input class="gs-search-input" id="suggestion-search" type="search" placeholder="Vorschläge suchen ..." autocomplete="off" />
+      </label>
+    </div>
+    <div class="suggestion-count" id="suggestion-count"></div>
+
+    <section class="suggestion-list" id="suggestion-list" aria-live="polite"></section>
+    <div class="suggestion-empty" id="suggestion-empty">Keine Vorschläge gefunden.</div>
+  </main>
+
+  <button class="gs-scroll-top" type="button" data-gs-scroll-top aria-label="Nach oben scrollen">↑</button>
+
+  <script src="ui-kit/goslar-ui.js"></script>
+  <script>
+    const SUGGESTIONS = __SUGGESTIONS_JSON__;
+    const state = { query: '' };
+
+    const searchInput = document.getElementById('suggestion-search');
+    const list = document.getElementById('suggestion-list');
+    const count = document.getElementById('suggestion-count');
+    const empty = document.getElementById('suggestion-empty');
+
+    searchInput.addEventListener('input', () => {
+      state.query = searchInput.value.trim();
+      renderSuggestions();
+    });
+
+    renderSuggestions();
+
+    function renderSuggestions() {
+      const suggestions = filterSuggestions(SUGGESTIONS || [], state.query);
+      list.innerHTML = '';
+      count.textContent = suggestions.length + ' von ' + (SUGGESTIONS || []).length + ' Vorschlägen';
+      empty.style.display = suggestions.length ? 'none' : 'block';
+
+      for (const suggestion of suggestions) {
+        const element = document.createElement(suggestion.call_to_action_url ? 'a' : 'article');
+        element.className = 'suggestion-card';
+        if (suggestion.call_to_action_url) {
+          element.href = suggestion.call_to_action_url;
+          element.target = '_blank';
+          element.rel = 'noopener noreferrer';
+        }
+
+        element.innerHTML = ''
+          + (suggestion.image_url ? '<img class="suggestion-card__image" src="' + escapeAttr(suggestion.image_url) + '" alt="" loading="lazy" />' : '')
+          + '<div class="suggestion-card__body">'
+          + '<h2 class="suggestion-card__title">' + escapeHtml(suggestion.title || 'Zufällig nix vor?') + '</h2>'
+          + '<p class="suggestion-card__copy">' + escapeHtml(suggestion.description || '') + '</p>'
+          + (suggestion.call_to_action_url ? '<div class="suggestion-card__cta">Vorschlag öffnen →</div>' : '')
+          + '</div>';
+        list.appendChild(element);
+      }
+    }
+
+    function filterSuggestions(suggestions, query) {
+      const normalizedQuery = normalizeSearch(query);
+      if (!normalizedQuery) return suggestions;
+      return suggestions.filter(suggestion => normalizeSearch([
+        suggestion.title,
+        suggestion.description,
+      ].filter(Boolean).join(' ')).includes(normalizedQuery));
+    }
+
+    function normalizeSearch(value) {
+      return String(value || '')
+        .toLocaleLowerCase('de-DE')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/ß/g, 'ss')
+        .trim();
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function escapeAttr(value) {
+      return escapeHtml(value).replace(/'/g, '&#39;');
+    }
+  </script>
+</body>
+</html>
