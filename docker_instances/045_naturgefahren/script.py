@@ -134,7 +134,7 @@ def fallback_bevoelkerungsschutz_artikel():
 
 
 # Convert to choosen Timezone before displaying
-zeitstempel = datetime.now(pytz.timezone(TIMEZONE)).strftime("%d.%m.%Y - %H:%M")
+zeitstempel = datetime.now(pytz.timezone(TIMEZONE)).isoformat(timespec="minutes")
 warnung = pick_strongest_warning(ADRESSE_LON, ADRESSE_LAT)
 
 if warnung:
@@ -149,7 +149,7 @@ else:
         beschreibung, target_url = fallback
         description = "aktuell keine Warnung: \n" + beschreibung
     else:
-        description = f"{zeitstempel}: Es liegen keine Warnungen für {ADRESSE} vor."
+        description = f"Es liegen keine Warnungen für {ADRESSE} vor."
         target_url = FALLBACK_URL
 
 data = {
