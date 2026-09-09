@@ -1,130 +1,174 @@
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.firefox.options import Options
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException
-from selenium.webdriver.firefox.service import Service as FirefoxService
-from webdriver_manager.firefox import GeckoDriverManager
-
-import time
 import json
 import os
+import random
+import pytz
+from datetime import datetime, timezone
+
 import requests
 from bs4 import BeautifulSoup
-from urllib.parse import urljoin
-import random
+
+# Naturgefahrenportal (DWD/BBK) stellt die Warndaten, die seine Karte anzeigt,
+# selbst als offenes JSON bereit (dieselbe Quelle, die das Frontend lädt).
+# Das ist stabiler als HTML/CSS zu parsen, das sich bei jedem Frontend-Deploy
+# ändern kann.
+DWD_ALERTS_URL = "https://www.naturgefahrenportal.de/data/v2/alerts/dwd.json"
+MOWAS_ALERTS_URL = "https://www.naturgefahrenportal.de/data/v2/alerts/mowas.json"
+NATURGEFAHRENPORTAL_URL = "https://www.naturgefahrenportal.de/de/alerts"
+
+INSIDES_URL = "https://insides.goslar-app.de/bevoelkerungsschutz"
+FALLBACK_URL = "https://www.goslar.de/stadt-und-verwaltung/verwaltung/brand-und-katastrophenschutz/selbstschutz-und-notfallvorsorge"
+
+ADRESSE = "Charley-Jacob-Str. 3, 38640 Goslar"
+# Einmalig via Nominatim (OpenStreetMap) geokodiert. Die Adresse ist fix,
+# daher wird hier nicht bei jedem Cron-Lauf erneut geokodiert.
+ADRESSE_LAT = 51.9063874
+ADRESSE_LON = 10.4301325
+TIMEZONE = "Europe/Berlin"
+
+SEVERITY_LABELS = {
+    1: "Geringe Warnstufe",
+    2: "Mäßige Warnstufe",
+    3: "Hohe Warnstufe",
+    4: "Extreme Warnstufe",
+}
+
+REQUEST_HEADERS = {"User-Agent": "gs_crawler-045-naturgefahren/1.0 (+https://goslar-app.de)"}
 
 
-# Setup (optional: Headless-Modus aktivieren)
-options = Options()
-options.add_argument("--headless")
-service = FirefoxService(GeckoDriverManager().install())
-driver = webdriver.Firefox(options=options, service=service, )
+def point_in_ring(x, y, ring):
+    inside = False
+    j = len(ring) - 1
+    for i in range(len(ring)):
+        xi, yi = ring[i]
+        xj, yj = ring[j]
+        if (yi > y) != (yj > y) and x < (xj - xi) * (y - yi) / (yj - yi) + xi:
+            inside = not inside
+        j = i
+    return inside
 
-insides_url = "https://insides.goslar-app.de/bevoelkerungsschutz"
 
-try:
-    driver.get("https://www.naturgefahrenportal.de/de/alerts")
-    wait = WebDriverWait(driver, 50)
+def point_in_polygon(x, y, coordinates):
+    if not point_in_ring(x, y, coordinates[0]):
+        return False
+    return not any(point_in_ring(x, y, hole) for hole in coordinates[1:])
 
 
-    search_box = wait.until(EC.visibility_of_any_elements_located((By.NAME, "searchlabelwarn")))[0]
+def point_in_geometry(x, y, geometry):
+    gtype = geometry.get("type")
+    if gtype == "Polygon":
+        return point_in_polygon(x, y, geometry["coordinates"])
+    if gtype == "MultiPolygon":
+        return any(point_in_polygon(x, y, polygon) for polygon in geometry["coordinates"])
+    return False
 
-    # Suchfeld finden)
-    #search_box = wait.until(EC.element_to_be_clickable((By.NAME, "searchlabelwarn")))
-    adresse = "Charley-Jacob-Str. 3, 38640 Goslar"
 
-    # Adresse setzen
-    search_box.send_keys(adresse)
+def is_active(properties, now):
+    if properties.get("status") != "Actual" or properties.get("msgType") == "Cancel":
+        return False
+    expires = properties.get("expires")
+    if expires:
+        try:
+            # It is okay to check against UTC while the serve time is utc as well
+            expires_at = datetime.fromisoformat(expires.replace("Z", "+00:00"))
+            if expires_at.tzinfo is None:
+                expires_at = expires_at.replace(tzinfo=timezone.utc)
+            if expires_at < now:
+                return False
+        except (TypeError, ValueError):
+            pass
+    return True
 
-    # Kurze Wartezeit, damit JS reagieren kann
-    # time.sleep(1)
 
-    # Leerzeichen + RETURN senden
-    search_box.send_keys(" ")
-    time.sleep(2)
-    search_box.send_keys(Keys.RETURN)
+def matching_warnings(alerts_url, lon, lat, now):
+    response = requests.get(alerts_url, headers=REQUEST_HEADERS, timeout=20)
+    response.raise_for_status()
+    features = response.json().get("features", [])
 
-    # Warten bis Antwort geladen ist
-    zeitstempel = time.strftime("%d.%m.%Y - %H:%M")
-    target_url = "https://www.goslar.de/stadt-und-verwaltung/verwaltung/brand-und-katastrophenschutz/selbstschutz-und-notfallvorsorge"
+    matches = []
+    for feature in features:
+        properties = feature.get("properties", {})
+        if not is_active(properties, now):
+            continue
+        if point_in_geometry(lon, lat, feature.get("geometry", {})):
+            matches.append(properties)
+    return matches
 
-    description_elem = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "h2.mb-1.text-xl")))
+
+def pick_strongest_warning(lon, lat):
+    now = datetime.now(timezone.utc)
+    matches = (
+        matching_warnings(DWD_ALERTS_URL, lon, lat, now)
+        + matching_warnings(MOWAS_ALERTS_URL, lon, lat, now)
+    )
+    if not matches:
+        return None
+    matches.sort(key=lambda p: p.get("severity", 0), reverse=True)
+    return matches[0]
+
+
+def fallback_bevoelkerungsschutz_artikel():
     try:
-        description_warn = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "h3.flex-1.text-left"))
-        )
-        warn_text = description_warn.text.strip()
-    except TimeoutException:
-        warn_text = None
-        print("Element ist NICHT vorhanden")
+        response = requests.get(INSIDES_URL, headers=REQUEST_HEADERS, timeout=20)
+        response.raise_for_status()
+    except requests.RequestException as exc:
+        print(f"⚠️  insides.goslar-app.de nicht erreichbar: {exc}")
+        return None
 
-    # description_warn = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "h3.flex-1.text-left")))
-    description = description_elem.text.strip()
-    description = description.replace("Für Charley-Jacob-Straße 3, 38640 Goslar", zeitstempel + ": Es")
+    soup = BeautifulSoup(response.text, "html.parser")
+    hauptbereich = soup.find("div", id="bevoelkerungsschutz")
+    eintraege = hauptbereich.find_all("div", class_="block_textimage") if hauptbereich else []
+    if not eintraege:
+        print("⚠️  Keine Bevölkerungsschutz-Einträge auf insides.goslar-app.de gefunden")
+        return None
 
-    print(description)
-    if warn_text:
-        description = zeitstempel + ":\n" + warn_text
-        target_url = driver.current_url
+    result = random.choice(eintraege)
+    text_div = result.find("div", class_="wrap_text_left")
+    p_tags = text_div.find_all("p") if text_div else []
+    beschreibung = p_tags[0].get_text(strip=True) if p_tags else ""
+    a_tag = p_tags[1].find("a") if len(p_tags) >= 2 else None
+    link = a_tag["href"] if a_tag and a_tag.has_attr("href") else FALLBACK_URL
+
+    if not beschreibung:
+        return None
+    return beschreibung, link
+
+
+# Convert to choosen Timezone before displaying
+zeitstempel = datetime.now(pytz.timezone(TIMEZONE)).strftime("%d.%m.%Y - %H:%M")
+warnung = pick_strongest_warning(ADRESSE_LON, ADRESSE_LAT)
+
+if warnung:
+    warnstufe = SEVERITY_LABELS.get(warnung.get("severity"), "Warnstufe")
+    headline = (warnung.get("headline") or {}).get("de", "").strip()
+    erlaeuterung = (warnung.get("description") or {}).get("de", "").strip()
+    description = f"{zeitstempel}:\n{warnstufe}: {headline}\n{erlaeuterung}".strip()
+    target_url = warnung.get("web") or NATURGEFAHRENPORTAL_URL
+else:
+    fallback = fallback_bevoelkerungsschutz_artikel()
+    if fallback:
+        beschreibung, target_url = fallback
+        description = "aktuell keine Warnung: \n" + beschreibung
     else:
-        if description.find("Es liegen keine Warnungen vor"):
-            # insides durchforsten und zufälligen Link wählen
-            # Ziel-URL
-            url = "https://insides.goslar-app.de/bevoelkerungsschutz"
+        description = f"{zeitstempel}: Es liegen keine Warnungen für {ADRESSE} vor."
+        target_url = FALLBACK_URL
 
-            # Seite laden
-            response = requests.get(url)
-            soup = BeautifulSoup(response.text, "html.parser")
-            savemepath = os.getcwd() + "/output"
-            os.makedirs(savemepath, exist_ok=True)
+data = {
+    "title": "Naturgefahren",
+    "description": description,
+    "call_to_action_url": target_url,
+    "image_url": "https://crawler.goslar.app/crawler/045_naturgefahren/mowas.svg",
+    "published_at": zeitstempel
+}
 
-            # Suche
-            hauptbereich = soup.find("div", id="bevoelkerungsschutz")
+output_dir = (
+    "/app/output/045_naturgefahren"
+    if os.path.exists("/app/output")
+    else "output/045_naturgefahren"
+)
+os.makedirs(output_dir, exist_ok=True)
+output_file = os.path.join(output_dir, "045_naturgefahren_de.json")
+with open(output_file, "w", encoding="utf-8") as f:
+    json.dump(data, f, ensure_ascii=False, indent=2)
 
-            eintraege = []
-            if hauptbereich:
-                # Suche nach allen direkten Einträgen (divs mit class="block_textimage" z.B.)
-                # Hier solltest du den genauen Container der einzelnen Einträge anpassen.
-                # Beispiel: alle divs mit wrap_image_right, die die Bilder enthalten
-                container_div = hauptbereich.find_all("div", class_="block_textimage")
-                result = random.choice(container_div)
-                # Beschreibung und Link aus wrap_text_left
-                text_div = result.find("div", class_="wrap_text_left")
-                p_tags = text_div.find_all("p") if text_div else []
-                beschreibung = p_tags[0].get_text(strip=True) if len(p_tags) >= 1 else ""
-                a_tag = p_tags[1].find("a") if len(p_tags) >= 2 else None
-                link = a_tag["href"] if a_tag and a_tag.has_attr("href") else None
-
-                description = "aktuell keine Warnung: \n" + beschreibung
-
-                # Bild wird aktuell nicht gebraucht aus, sonst aus wrap_image_right
-                # img_div = container_div.find("div", class_="wrap_image_right")
-                # img_tag = img_div.find("img") if img_div else None
-                # image_url = urljoin(url, img_tag["src"]) if img_tag and img_tag.has_attr("src") else None
-            target_url = link
-
-    # JSON-Datensatz erstellen
-    data = {
-        "title": "Naturgefahren",
-        "description": description,
-        "call_to_action_url": target_url,
-        # "call_to_action_url": driver.current_url,
-        # "image_url": "https://machmit.goslar.de/fileadmin/media-machmit/goslar-app/bevoelkerungsschutz.jpg",
-        "image_url": "",
-        "published_at": ""
-        # "published_at": time.strftime("%Y-%m-%dT%H:%M")
-    }
-
-    # Speichern
-    os.makedirs("output", exist_ok=True)
-    with open("output/045_naturgefahren_de.json", "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
-
-    print("✅ Ergebnis gespeichert in 'output/045_naturgefahren_de.json'")
-    print(json.dumps(data, ensure_ascii=False, indent=2))
-
-finally:
-    driver.quit()
+print(f"✅ Ergebnis gespeichert in '{output_file}'")
+print(json.dumps(data, ensure_ascii=False, indent=2))

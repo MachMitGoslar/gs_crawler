@@ -1,9 +1,10 @@
 # Migriert zu Base-Image für bessere Wartbarkeit
-FROM ghcr.io/machmitgoslar/gs_crawler_python_selenium_crawler:latest
+FROM ghcr.io/machmitgoslar/gs_crawler_python_basic_crawler:latest
 
 # Kopiere container-spezifische Dateien
 COPY script.py .
 COPY crontab /etc/cron.d/mycron
+COPY mowas.svg /output/045_naturgefahren/mowas.svg
 
 # helpers.py wird vom Base-Image bereitgestellt
 
