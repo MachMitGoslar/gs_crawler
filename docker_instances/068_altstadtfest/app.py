@@ -1,226 +1,256 @@
-from unittest import case
-import requests
-from PIL import Image
-from io import BytesIO
-import os
-import random
-from datetime import datetime, timedelta
 import json
 import random
-from flask import Flask, jsonify, request, render_template
+import threading
+from datetime import datetime, timedelta
 from logging import getLogger
-# from helpers import ensure_directory_exists
+from pathlib import Path
+
+from flask import Flask, jsonify, render_template
+
+import crawler
 
 app = Flask(__name__)
 logger = getLogger(__name__)
+
+DATA_FILE = Path("data.json")
+REFRESH_INTERVAL = timedelta(hours=6)
+
+_refresh_lock = threading.Lock()
+_refreshing = False
 
 
 class EventStatus:
     BEFORE = "before"
     RUNNING = "running"
-    UPCOMING = "upcoming"
     PAST = "past"
     ERROR = "error"
 
-BASE_URL = "http://crawler.goslar.app/api/"
 
-def parse_time_safe(timestr: str):
-    """Hilfsfunktion: Wandelt Zeitstring in time-Objekt, behandelt '24:00' als 23:59."""
-    timestr = timestr.strip()
-    if timestr == "24:00":
-        timestr = "23:59"
-    return datetime.strptime(timestr, "%H:%M").time()
+def load_data():
+    if not DATA_FILE.exists():
+        return None
+    try:
+        with open(DATA_FILE, encoding="utf-8") as f:
+            return json.load(f)
+    except Exception as e:
+        logger.error(f"Fehler beim Laden von {DATA_FILE}: {e}")
+        return None
 
-def get_events_for_checktime(events, check_datetime=None):
-    if check_datetime is None:
-        check_datetime = datetime.now()
-    print(f"Checkzeitpunkt: {check_datetime}")
-    # Veranstaltungen nach Datum gruppieren
-    events_by_date = {}
-    all_event_dates = []
-    for event in events:
+
+def is_stale(data):
+    crawled_at = data.get("crawled_at") if data else None
+    if not crawled_at:
+        return True
+    return datetime.now() - datetime.fromisoformat(crawled_at) > REFRESH_INTERVAL
+
+
+def refresh_in_background():
+    global _refreshing
+    with _refresh_lock:
+        if _refreshing:
+            return
+        _refreshing = True
+
+    def _run():
+        global _refreshing
         try:
-            event_date = datetime.strptime(event["Datum"], "%d.%m.%Y").date()
-            all_event_dates.append(event_date)
-            events_by_date.setdefault(event_date, []).append(event)
+            logger.info("Aktualisiere Altstadtfest-Daten im Hintergrund...")
+            crawler.crawl_and_save(DATA_FILE)
+            logger.info("Altstadtfest-Daten aktualisiert.")
         except Exception as e:
-            print(f"Fehler bei Event {event}: {e}")
+            logger.error(f"Hintergrund-Crawl fehlgeschlagen: {e}")
+        finally:
+            with _refresh_lock:
+                _refreshing = False
 
-    if not all_event_dates:
-        return {
-            "status": EventStatus.ERROR,
-            "message": {
-                "published_at": check_datetime.isoformat(sep='T', timespec='minutes'),
-                "title": "Problem",
-                "description": "Aktuell gibt es Probleme bei der Anzeige der Veranstaltungen.",
-                "call_to_action_url": "https://www.meingoslar.de/veranstaltungen/altstadtfest",
-                "image_url": "https://www.meingoslar.de/fileadmin/_processed_/a/e/csm_altstadtfest_header_2465a82a5e.webp"
-            }, 
-            "events": []
-            }
+    threading.Thread(target=_run, daemon=True).start()
 
-    first_day = min(all_event_dates)
-    last_day = max(all_event_dates)
-    current_day = check_datetime.date()
 
-    # --- Regel 3: nach letztem Veranstaltungstag
-    if current_day > last_day:
+def get_data():
+    """Liefert die zwischengespeicherten Daten und stößt bei Bedarf einen
+    Hintergrund-Refresh an (stale-while-revalidate), damit Requests nie auf
+    den Crawl warten müssen."""
+    data = load_data()
+    if data is None:
+        try:
+            data = crawler.crawl_and_save(DATA_FILE)
+        except Exception as e:
+            logger.error(f"Initialer Crawl fehlgeschlagen: {e}")
+            return None
+    elif is_stale(data):
+        refresh_in_background()
+    return data
 
-        return {
-            "status": EventStatus.PAST,
-            "message": {
-                "published_at": last_day.isoformat(sep='T', timespec='minutes'),
-                "title": "Wir sehen uns nächstes Jahr!",
-                "description": "Das Altstadtfest in Goslar findet nächstes Jahr wieder statt. Bis dahin, bleibt gesund!",
-                "call_to_action_url": "https://www.meingoslar.de/veranstaltungen/altstadtfest",
-                "image_url": "https://www.meingoslar.de/fileadmin/_processed_/a/e/csm_altstadtfest_header_2465a82a5e.webp"
-                },
-            "events": []
-        }
 
-    # --- Regel 2: vor erstem Veranstaltungstag
-    if current_day < first_day:
+def get_status(data, now=None):
+    now = now or datetime.now()
+    if not data or not data.get("events") or not data.get("first_day") or not data.get("last_day"):
+        return EventStatus.ERROR
 
-        day_events = events_by_date[first_day]
-        return {
-                "status": EventStatus.BEFORE,
-                "message": {
-                    "published_at": first_day.isoformat(sep='T', timespec='minutes'),
-                    "title": "Das Altstadtfest in Goslar startet bald!",
-                    "description": "Freut euch auf tolle Veranstaltungen beim Altstadtfest in Goslar. Bis dahin, bleibt gesund!",
-                    "call_to_action_url": "https://www.meingoslar.de/veranstaltungen/altstadtfest",
-                    "image_url": "https://www.meingoslar.de/fileadmin/_processed_/a/e/csm_altstadtfest_header_2465a82a5e.webp"
-                },
-                "events": []       
-            }
+    first_day = datetime.fromisoformat(data["first_day"]).date()
+    last_day = datetime.fromisoformat(data["last_day"]).date()
+    today = now.date()
 
-    # --- Regel 1: Tag = Veranstaltungstag
-    if current_day in events_by_date:
-        # Events des Tages nach Startzeit sortieren
-        day_events = sorted(
-            events_by_date[current_day],
-            key=lambda e: parse_time_safe(e["Uhrzeit"].split("-")[0])
+    if today < first_day:
+        return EventStatus.BEFORE
+    if today > last_day:
+        return EventStatus.PAST
+    return EventStatus.RUNNING
+
+
+def find_current_or_next(events, now):
+    """Sucht laufende Programmpunkte, sonst den/die nächsten für heute,
+    sonst den/die ersten des nächsten Tags mit Programm."""
+    today_str = now.strftime("%d.%m.%Y")
+    todays = [e for e in events if e["Datum"] == today_str]
+
+    running = [e for e in todays if datetime.fromisoformat(e["start"]) <= now <= datetime.fromisoformat(e["end"])]
+    if running:
+        return "running", running
+
+    upcoming_today = sorted(
+        (e for e in todays if datetime.fromisoformat(e["start"]) > now),
+        key=lambda e: e["start"],
+    )
+    if upcoming_today:
+        next_start = upcoming_today[0]["start"]
+        return "next", [e for e in upcoming_today if e["start"] == next_start]
+
+    future = sorted(
+        (e for e in events if datetime.fromisoformat(e["start"]) > now),
+        key=lambda e: e["start"],
+    )
+    if future:
+        next_start = future[0]["start"]
+        return "tomorrow", [e for e in future if e["start"] == next_start]
+
+    return "none", []
+
+
+def make_card(title, description, image_url, published_at=None):
+    return {
+        "published_at": (published_at or datetime.now()).isoformat(sep="T", timespec="minutes"),
+        "title": title,
+        "description": description,
+        "call_to_action_url": crawler.SOURCE_URL,
+        "image_url": image_url,
+    }
+
+
+def highlight_pool(data):
+    pool = list(data.get("highlights", []))
+    for e in data.get("events", []):
+        if e.get("highlight"):
+            pool.append({
+                "title": e["Programm"],
+                "description": f"{e['Datum']} | {e['Uhrzeit']} | {e['Bühne']} – {e['Beschreibung']}",
+            })
+    return pool
+
+
+def build_card(data):
+    image_url = data.get("image_url")
+    status = get_status(data)
+
+    if status == EventStatus.BEFORE:
+        pool = highlight_pool(data)
+        chosen = random.choice(pool) if pool else None
+        description = (
+            f"Highlight: {chosen['title']} – {chosen['description']}"
+            if chosen else
+            "Drei Tage Musik, Tanz und gute Laune erwarten euch in der Goslarer Altstadt."
         )
-                
+        return make_card("🏰 Das Altstadtfest Goslar steht vor der Tür!", description, image_url)
 
+    if status == EventStatus.PAST:
+        return make_card(
+            "Danke, dass ihr dabei wart! 🎉",
+            "Das Altstadtfest Goslar ist für dieses Jahr vorbei. Vielen Dank für drei wundervolle Tage "
+            "Musik, Tanz und gute Laune in der Altstadt! Wir freuen uns über euer Feedback, damit das Fest "
+            "im nächsten Jahr noch schöner wird.",
+            image_url,
+        )
 
-        # Prüfen ob Matches zum Abfragezeitpunkt laufen
-        running = []
-        for ev in day_events:
+    if status == EventStatus.ERROR:
+        return make_card(
+            "Problem beim Laden",
+            "Aktuell gibt es Probleme bei der Anzeige der Programmpunkte zum Altstadtfest.",
+            image_url,
+        ), 500
 
-            start_str, end_str = ev["Uhrzeit"].split("-")
-            start_dt = datetime.combine(current_day, parse_time_safe(start_str))
-            if start_dt > check_datetime:
-                running.append(ev)
+    # RUNNING: während des Wochenendes
+    now = datetime.now()
+    kind, matches = find_current_or_next(data["events"], now)
+    if not matches:
+        last_day = datetime.fromisoformat(data["last_day"]).date()
+        if now.date() >= last_day:
+            # Letzter Programmpunkt des Festes ist bereits vorbei.
+            return make_card(
+                "Danke, dass ihr dabei wart! 🎉",
+                "Das Altstadtfest Goslar ist für dieses Jahr vorbei. Vielen Dank für drei wundervolle Tage "
+                "Musik, Tanz und gute Laune in der Altstadt! Wir freuen uns über euer Feedback, damit das Fest "
+                "im nächsten Jahr noch schöner wird.",
+                image_url,
+            )
+        return make_card(
+            "Das Altstadtfest Goslar ist für heute vorbei!",
+            "Für heute ist Schluss – wir sehen uns morgen wieder auf dem Altstadtfest!",
+            image_url,
+        )
 
-        return { 
-            "status": EventStatus.RUNNING,
-            "message": "",
-            "events": running,
-        }
+    chosen = random.choice(matches)
+    program_line = f"{chosen['Uhrzeit']} | {chosen['Bühne']} | {chosen['Programm']}"
 
-        return []  # keine Matches und keine kommenden mehr → leer
+    if kind == "running":
+        title = "🎪 Jetzt live beim Altstadtfest"
+        description = f"Gerade auf der Bühne: {program_line}"
+    elif kind == "next":
+        title = "🎪 Als Nächstes beim Altstadtfest"
+        description = f"Kommt gleich: {program_line}"
+    else:
+        title = "🎪 Das Altstadtfest Goslar geht weiter"
+        description = f"Für heute ist Schluss. Es geht weiter mit: {program_line}"
 
-    return []
-
-
-def load_events():
-    """Lädt Events aus der JSON-Quelle"""
-    """json_data = BASE_URL + "events.json"""
-
-    with open('./events.json') as json_data:
-        try:
-            d = json.load(json_data)
-            print("Events geladen")
-            json_data.close()
-            return d
-        except Exception as e:
-            print(f"Fehler beim Laden der Events: {e}")
-            return []
-
-    
-def format_event(event):
-    # Felder aus JSON holen
-    print("Event:", event)
-    datum = event.get("Datum", "")
-    bühne = event.get("Bühne", "")
-    uhrzeit = event.get("Uhrzeit", "")
-    programm = event.get("Programm", "")
-
-    # uhrzeitangebe im "00:00-23:59" - Format
-    dt = datetime.strptime(datum + " " + uhrzeit.split("-")[0], "%d.%m.%Y %H:%M")
-    # Ausgabe im ISO-Format mit Minuten-Genauigkeit
-    iso_str = dt.isoformat(sep="T", timespec="minutes")
-    
-    # neue Struktur
-    return ({
-        "published_at": iso_str,
-        "title": "Empfehlung",
-        "description": f"{uhrzeit} | {bühne} | {programm}",
-        "call_to_action_url": "https://www.meingoslar.de/veranstaltungen/altstadtfest",
-        "image_url": "https://www.meingoslar.de/fileadmin/_processed_/a/e/csm_altstadtfest_header_2465a82a5e.webp"
-    })
-
-def format_events(events):
-    """Formatiert Events in die gewünschte Struktur"""
-    results = []
-    for ev in events:
-        results.append(format_event(ev))
-    return results
+    return make_card(title, description, image_url, published_at=datetime.fromisoformat(chosen["start"]))
 
 
 @app.route('/api/card.json')
-def api_current():
-    """API Endpoint für die aktuelle oder nächste Veranstaltung"""
-    events = load_events()
-    if not events:
-        return jsonify({"error": "Keine Veranstaltungen verfügbar"}), 404
-    
-    now = datetime.now()
-    logger.info(f"Aktueller Checkzeitpunkt: {now}")
-    result_structure = get_events_for_checktime(events, now)
+def api_card():
+    """API Endpoint für die Kachel: Highlights vorher, aktuelles Programm
+    während, Dank & Feedback-Aufruf danach."""
+    data = get_data()
+    if not data:
+        return jsonify(make_card(
+            "Problem beim Laden",
+            "Aktuell gibt es Probleme bei der Anzeige der Programmpunkte zum Altstadtfest.",
+            None,
+        )), 500
 
-    match result_structure['status']:
-        case EventStatus.ERROR:
-            return jsonify(result_structure["message"]), 500
-        case EventStatus.PAST:
-            return jsonify(result_structure["message"])
-        case EventStatus.BEFORE:
-            return jsonify(result_structure["message"])
-        case EventStatus.UPCOMING:
-            pass
-        case EventStatus.RUNNING:
-            pass
-            # Weiterverarbeitung unten
+    result = build_card(data)
+    if isinstance(result, tuple):
+        return jsonify(result[0]), result[1]
+    return jsonify(result)
 
-    if len(result_structure["events"]) > 0:
-        formatted_events = format_events(result_structure["events"])
-        
-        r_number = random.randint(0, len(formatted_events) - 1)
-        selected_event = formatted_events[r_number]
-        selected_event["call_to_action_url"] = BASE_URL + "programm.html"
-        selected_event["description"] = "Empfehlung: " + selected_event["description"]
-        return jsonify(selected_event)
 
-    if len(result_structure["events"]) == 0:
-         return jsonify({
-                    "published_at": datetime.now().isoformat(sep='T', timespec='minutes'),
-                    "title": "Das Altstadtfest in Goslar ist für heute vorbei!",
-                    "description": "Das Altstadtfest in Goslar ist für heute vorbei. Wir sehen uns morgen wieder! Mehr zu unserem Programm",
-                    "call_to_action_url": "https://www.meingoslar.de/veranstaltungen/altstadtfest",
-                    "image_url": "https://www.meingoslar.de/fileadmin/_processed_/a/e/csm_altstadtfest_header_2465a82a5e.webp"
-         })
-
-    formatted_events = format_events(result_structure)
-    
 @app.route('/api/programm.html')
 def api_programm():
-    """API Endpoint für das Programm"""
-    events = load_events()
-    if not events:
-        return jsonify({"error": "Keine Veranstaltungen verfügbar"}), 404
+    """Vollständige Programmübersicht nach Bühne und Tag gruppiert."""
+    data = get_data()
+    if not data:
+        return jsonify({"error": "Keine Programmdaten verfügbar"}), 404
 
-    return render_template("test.html", events=events)
+    stages = {}
+    for event in data["events"]:
+        stages.setdefault(event["Bühne"], {}).setdefault(event["Datum"], []).append(event)
+
+    return render_template(
+        "programm.html",
+        stages=stages,
+        highlights=data.get("highlights", []),
+        image_url=data.get("image_url"),
+        source_url=crawler.SOURCE_URL,
+    )
+
 
 @app.route('/health')
 def health():
@@ -228,19 +258,15 @@ def health():
     return jsonify({
         "status": "healthy",
         "timestamp": datetime.now().isoformat(),
-        "service": "altstadtfest-api"
+        "service": "altstadtfest-api",
     })
 
 
 if __name__ == "__main__":
     print("🎪 Altstadtfest API gestartet auf http://0.0.0.0:5000")
     print("Endpoints:")
-    print("  / - Alle kommenden Veranstaltungen")
-    print("  /api/current - Aktuelle/nächste Veranstaltung")
-    print("  /api/events - Alle kommenden Veranstaltungen")
-    print("  /api/random - Zufällige Veranstaltung")
-    print("  /health - Health Check")
-    
+    print("  /api/card.json    - Kachel (Highlights / aktuelles Programm / Danke & Feedback)")
+    print("  /api/programm.html - Vollständige Programmübersicht")
+    print("  /health            - Health Check")
+
     app.run(host='0.0.0.0', port=5000, debug=True)
-
-
