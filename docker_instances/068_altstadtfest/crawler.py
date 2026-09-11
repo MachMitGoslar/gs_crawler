@@ -9,6 +9,7 @@ und schreibt das Ergebnis nach data.json.
 import json
 import re
 from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 
 import requests
 from bs4 import BeautifulSoup
@@ -16,6 +17,10 @@ from bs4 import BeautifulSoup
 SOURCE_URL = "https://www.meingoslar.de/veranstaltungen/altstadtfest"
 BASE_URL = "https://www.meingoslar.de"
 DATA_FILE = "data.json"
+
+# Server läuft in Produktion mit GMT; crawled_at muss aber dieselbe lokale
+# Zeitbasis wie die Programmzeiten haben, damit app.py sie vergleichbar bleiben.
+BERLIN_TZ = ZoneInfo("Europe/Berlin")
 
 MONTHS = {
     "januar": 1, "februar": 2, "märz": 3, "maerz": 3, "april": 4, "mai": 5,
@@ -201,7 +206,7 @@ def build_data():
     return {
         "source_url": SOURCE_URL,
         "image_url": meta["image_url"] or f"{BASE_URL}/fileadmin/_processed_/a/e/csm_altstadtfest_header_2465a82a5e.webp",
-        "crawled_at": datetime.now().isoformat(timespec="minutes"),
+        "crawled_at": datetime.now(BERLIN_TZ).replace(tzinfo=None).isoformat(timespec="minutes"),
         "first_day": dates[0].isoformat() if dates else None,
         "last_day": dates[-1].isoformat() if dates else None,
         "events": events,

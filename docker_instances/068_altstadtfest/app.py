@@ -1,11 +1,13 @@
 import json
 import random
+import re
 import threading
 from datetime import datetime, timedelta
 from logging import getLogger
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
-from flask import Flask, jsonify, render_template
+from flask import Flask, jsonify, render_template, url_for
 
 import crawler
 
@@ -14,6 +16,16 @@ logger = getLogger(__name__)
 
 DATA_FILE = Path("data.json")
 REFRESH_INTERVAL = timedelta(hours=6)
+
+# Der Produktionsserver läuft in GMT, während das Programm mit lokalen
+# Goslarer Uhrzeiten (Europe/Berlin, naiv) aus dem Crawler kommt. Ohne
+# explizite Umrechnung wäre "jetzt" auf dem Server im Sommer 2h zu früh.
+BERLIN_TZ = ZoneInfo("Europe/Berlin")
+
+
+def now_local():
+    return datetime.now(BERLIN_TZ).replace(tzinfo=None)
+
 
 _refresh_lock = threading.Lock()
 _refreshing = False
@@ -41,7 +53,7 @@ def is_stale(data):
     crawled_at = data.get("crawled_at") if data else None
     if not crawled_at:
         return True
-    return datetime.now() - datetime.fromisoformat(crawled_at) > REFRESH_INTERVAL
+    return now_local() - datetime.fromisoformat(crawled_at) > REFRESH_INTERVAL
 
 
 def refresh_in_background():
@@ -83,7 +95,7 @@ def get_data():
 
 
 def get_status(data, now=None):
-    now = now or datetime.now()
+    now = now or now_local()
     if not data or not data.get("events") or not data.get("first_day") or not data.get("last_day"):
         return EventStatus.ERROR
 
@@ -129,10 +141,10 @@ def find_current_or_next(events, now):
 
 def make_card(title, description, image_url, published_at=None):
     return {
-        "published_at": (published_at or datetime.now()).isoformat(sep="T", timespec="minutes"),
+        "published_at": (published_at or now_local()).isoformat(sep="T", timespec="minutes"),
         "title": title,
         "description": description,
-        "call_to_action_url": crawler.SOURCE_URL,
+        "call_to_action_url": "https://crawler.goslar.app/altstadtfest/api/index.json",
         "image_url": image_url,
     }
 
@@ -179,7 +191,7 @@ def build_card(data):
         ), 500
 
     # RUNNING: während des Wochenendes
-    now = datetime.now()
+    now = now_local()
     kind, matches = find_current_or_next(data["events"], now)
     if not matches:
         last_day = datetime.fromisoformat(data["last_day"]).date()
@@ -212,6 +224,93 @@ def build_card(data):
         description = f"Für heute ist Schluss. Es geht weiter mit: {program_line}"
 
     return make_card(title, description, image_url, published_at=datetime.fromisoformat(chosen["start"]))
+
+
+def _slugify(text):
+    return re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")
+
+
+def _programm_link_entry(image_url):
+    """Letzter Eintrag von index.json: verlinkt auf die vollständige
+    Programmübersicht (Routing wie bei 046_bio_stadt_goslar / 070_wochenmarkt:
+    ein Kachel-Eintrag, dessen call_to_action_url auf die nächste JSON-/HTML-
+    Ebene zeigt)."""
+    return {
+        "id": "programm",
+        "title": "Vollständiges Programm ansehen",
+        "description": "Das komplette Bühnenprogramm des Altstadtfests nach Bühne und Tag.",
+        "image_url": image_url,
+        "call_to_action_url": url_for("api_programm", _external=True),
+        "published_at": now_local().isoformat(sep="T", timespec="minutes"),
+    }
+
+
+def _highlight_entry(highlight, image_url):
+    return {
+        "id": f"highlight-{_slugify(highlight['title'])}",
+        "title": highlight["title"],
+        "description": highlight["description"],
+        "image_url": image_url,
+        "call_to_action_url": crawler.SOURCE_URL,
+        "published_at": now_local().isoformat(sep="T", timespec="minutes"),
+    }
+
+
+def _event_entry(event, kind, image_url):
+    prefix = {
+        "running": "🎪 Jetzt live: ",
+        "next": "🎪 Als Nächstes: ",
+        "tomorrow": "🎪 Es geht weiter mit: ",
+    }.get(kind, "")
+    return {
+        "id": f"programm-{event['start']}-{_slugify(event['Bühne'])}",
+        "title": f"{prefix}{event['Programm']}",
+        "description": f"{event['Uhrzeit']} | {event['Bühne']} – {event['Beschreibung']}",
+        "image_url": image_url,
+        "call_to_action_url": crawler.SOURCE_URL,
+        "published_at": event["start"],
+    }
+
+
+def build_index_entries(data):
+    """Flache Liste für index.json: vor dem Fest die Highlights, während des
+    Festes das laufende/nächste Programm als einzelne Einträge – immer
+    gefolgt von einem Link-Eintrag auf die vollständige Programmübersicht als
+    letztem Eintrag."""
+    status = get_status(data)
+    image_url = data.get("image_url")
+
+    if status == EventStatus.ERROR:
+        return [], 500
+
+    programm_entry = _programm_link_entry(image_url)
+
+    if status == EventStatus.BEFORE:
+        entries = [_highlight_entry(h, image_url) for h in highlight_pool(data)]
+        entries.append(programm_entry)
+        return entries, 200
+
+    if status == EventStatus.PAST:
+        return [programm_entry], 200
+
+    # RUNNING: laufendes bzw. nächstes Programm, danach Link zur Übersicht
+    now = now_local()
+    kind, matches = find_current_or_next(data["events"], now)
+    entries = [_event_entry(e, kind, image_url) for e in sorted(matches, key=lambda ev: ev["Bühne"])]
+    entries.append(programm_entry)
+    return entries, 200
+
+
+@app.route('/api/index.json')
+def api_index():
+    """Startseiten-Feed: aktuelles/nächstes Programm als einzelne Einträge,
+    letzter Eintrag verlinkt auf die vollständige Programmübersicht."""
+    data = get_data()
+    if not data:
+        return jsonify([]), 500
+
+    entries, status_code = build_index_entries(data)
+    return jsonify(entries), status_code
 
 
 @app.route('/api/card.json')
@@ -257,7 +356,7 @@ def health():
     """Health Check Endpoint"""
     return jsonify({
         "status": "healthy",
-        "timestamp": datetime.now().isoformat(),
+        "timestamp": now_local().isoformat(),
         "service": "altstadtfest-api",
     })
 
@@ -266,6 +365,7 @@ if __name__ == "__main__":
     print("🎪 Altstadtfest API gestartet auf http://0.0.0.0:5000")
     print("Endpoints:")
     print("  /api/card.json    - Kachel (Highlights / aktuelles Programm / Danke & Feedback)")
+    print("  /api/index.json   - Feed (laufendes/nächstes Programm + Link zur Übersicht)")
     print("  /api/programm.html - Vollständige Programmübersicht")
     print("  /health            - Health Check")
 
