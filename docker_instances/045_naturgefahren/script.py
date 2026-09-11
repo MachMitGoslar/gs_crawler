@@ -134,22 +134,24 @@ def fallback_bevoelkerungsschutz_artikel():
 
 
 # Convert to choosen Timezone before displaying
-zeitstempel = datetime.now(pytz.timezone(TIMEZONE)).strftime("%d.%m.%Y - %H:%M")
+zeitstempel = datetime.now(pytz.timezone(TIMEZONE))
+zeitstempel_str = zeitstempel.strftime("%d.%m.%Y - %H:%M")
+published_at = zeitstempel.strftime("%Y-%m-%dT%H:%M:%S")
 warnung = pick_strongest_warning(ADRESSE_LON, ADRESSE_LAT)
 
 if warnung:
     warnstufe = SEVERITY_LABELS.get(warnung.get("severity"), "Warnstufe")
     headline = (warnung.get("headline") or {}).get("de", "").strip()
     erlaeuterung = (warnung.get("description") or {}).get("de", "").strip()
-    description = f"{zeitstempel}:\n{warnstufe}: {headline}\n{erlaeuterung}".strip()
+    description = f"{zeitstempel_str}:\n{warnstufe}: {headline}\n{erlaeuterung}".strip()
     target_url = warnung.get("web") or NATURGEFAHRENPORTAL_URL
 else:
     fallback = fallback_bevoelkerungsschutz_artikel()
     if fallback:
         beschreibung, target_url = fallback
-        description = "aktuell keine Warnung: \n" + beschreibung
+        description = f"{zeitstempel_str}: aktuell keine Warnung: \n" + beschreibung
     else:
-        description = f"{zeitstempel}: Es liegen keine Warnungen für {ADRESSE} vor."
+        description = f"{zeitstempel_str}: Es liegen keine Warnungen für Goslar vor."
         target_url = FALLBACK_URL
 
 data = {
@@ -157,7 +159,7 @@ data = {
     "description": description,
     "call_to_action_url": target_url,
     "image_url": "https://crawler.goslar.app/crawler/045_naturgefahren/mowas.svg",
-    "published_at": zeitstempel
+    "published_at": published_at
 }
 
 output_dir = (

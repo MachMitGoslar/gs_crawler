@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Altstadtfest Goslar - Programm</title>
+
+<style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --accent-color: rgb(135, 110, 2);
+            --accent-light: rgba(135, 110, 2, 0.1);
+            --text-primary: #1a1a1a;
+            --text-secondary: #666;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --border-color: #e5e5e5;
+            --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.06);
+            --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.08);
+            --border-radius: 12px;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container { max-width: 1100px; margin: 0 auto; padding: 0 24px 64px; }
+
+        .hero {
+            position: relative;
+            margin-bottom: 32px;
+        }
+        .hero img {
+            width: 100%;
+            max-height: 320px;
+            object-fit: cover;
+            display: block;
+        }
+        .hero-caption {
+            text-align: center;
+            padding: 24px 0 8px;
+        }
+        .hero-caption h1 { font-size: 2.2rem; font-weight: 700; }
+        .hero-caption p { color: var(--text-secondary); margin-top: 8px; }
+        .hero-caption a {
+            display: inline-block;
+            margin-top: 16px;
+            color: var(--accent-color);
+            font-weight: 600;
+            text-decoration: none;
+            border: 1px solid var(--accent-color);
+            border-radius: 20px;
+            padding: 8px 18px;
+        }
+
+        section.block { margin-bottom: 40px; }
+        section.block h2 {
+            font-size: 1.5rem;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--accent-color);
+        }
+
+        .highlights-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 16px;
+        }
+        .highlight-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 18px;
+            box-shadow: var(--shadow-light);
+        }
+        .highlight-card h3 { font-size: 1.05rem; margin-bottom: 8px; color: var(--accent-color); }
+        .highlight-card p { font-size: 0.9rem; color: var(--text-secondary); }
+
+        .stage-block {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-light);
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        .stage-block > h3 {
+            background: var(--accent-light);
+            color: var(--accent-color);
+            padding: 14px 20px;
+            font-size: 1.1rem;
+        }
+        .day-group { padding: 12px 20px; border-top: 1px solid var(--border-color); }
+        .day-group h4 { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .program-row { display: flex; gap: 16px; padding: 8px 0; border-top: 1px dashed var(--border-color); }
+        .program-row:first-child { border-top: none; }
+        .program-time { flex: 0 0 140px; font-weight: 600; color: var(--accent-color); }
+        .program-title { font-weight: 600; }
+        .program-desc { color: var(--text-secondary); font-size: 0.9rem; margin-top: 2px; }
+
+        .footer { text-align: center; color: var(--text-secondary); font-size: 0.85rem; padding: 24px 0; }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        {% if image_url %}<img src="{{ image_url }}" alt="Altstadtfest Goslar">{% endif %}
+    </div>
+    <div class="container">
+        <div class="hero-caption">
+            <h1>🏰 Altstadtfest Goslar</h1>
+            <p>Das komplette Bühnenprogramm auf einen Blick</p>
+            <a href="{{ source_url }}" target="_blank" rel="noopener">Zur offiziellen Seite</a>
+        </div>
+
+        {% if highlights %}
+        <section class="block">
+            <h2>✨ Highlights</h2>
+            <div class="highlights-grid">
+                {% for h in highlights %}
+                <div class="highlight-card">
+                    <h3>{{ h.title }}</h3>
+                    <p>{{ h.description }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        <section class="block">
+            <h2>🎤 Bühnenprogramm</h2>
+            {% for stage, days in stages.items() %}
+            <div class="stage-block">
+                <h3>{{ stage }}</h3>
+                {% for day, events in days.items() %}
+                <div class="day-group">
+                    <h4>{{ day }}</h4>
+                    {% for event in events|sort(attribute="start") %}
+                    <div class="program-row">
+                        <div class="program-time">{{ event.Uhrzeit }}</div>
+                        <div>
+                            <div class="program-title">{{ event.Programm }}</div>
+                            <div class="program-desc">{{ event.Beschreibung }}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </section>
+
+        <div class="footer">
+            <p>Quelle: <a href="{{ source_url }}" target="_blank" rel="noopener">meingoslar.de</a></p>
+        </div>
+    </div>
+</body>
+</html>
