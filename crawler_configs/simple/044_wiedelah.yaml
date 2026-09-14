@@ -11,7 +11,7 @@ run_on_start: true
 selectors:
   container: "div#main-content div.post-listing article"
 
-  title:
+  published_at:
     selector: "span.tie-date"
     attribute: "text"
     # Date becomes the title in this case
@@ -29,9 +29,22 @@ selectors:
     attribute: "href"
     fallback: "https://dg-wiedelah.de/"
 
+  title:
+    selector: "h2.post-box-title a"
+    attribute: "text"
+    #fallback: "Wiedelah"
+
+post_process:
+
+  # Date parsing (optional)
+  date_format: "%d.%m.%Y"       # German date format
+  date_selector: "span.tie-date"
+  date_output_format: "%Y-%m-%dT%H:%M:%S"
+
 output:
   single:
     enabled: true
+    title_override: "Wiedelah"
     filename: "044-wiedelah.json"
 
   all:
