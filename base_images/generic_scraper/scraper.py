@@ -176,9 +176,6 @@ def apply_post_processing(entry: Dict[str, Any], all_entries: List[Dict], config
     post_process = config.get('post_process', {})
     output_config = config.get('output', {}).get('single', {})
 
-    # Apply title override
-    if 'title_override' in output_config:
-        entry['title'] = output_config['title_override']
 
     # Apply description template
     template = post_process.get('single_description_template')
@@ -188,6 +185,11 @@ def apply_post_processing(entry: Dict[str, Any], all_entries: List[Dict], config
             description=entry.get('description', ''),
             count=len(all_entries)
         )
+        
+    # Apply title override
+    if 'title_override' in output_config:
+        entry['title'] = output_config['title_override']
+
 
     # Apply CTA override
     if 'cta_override' in output_config:
