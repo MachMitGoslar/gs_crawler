@@ -24,7 +24,7 @@ image_div = soup.find("div", class_="c-hero")
 image_url = image_div.find("img")["src"] if image_div and image_div.find("img") else "" 
 jetzt = datetime.now()
 timeline_date_entry = timeline_container.find("div", class_="project-step-timeline-date") if timeline_container else None
-published_at = jetzt.strftime("%Y-%m-%dT%H:00")
+published_at = datetime.strptime(timeline_date_entry.get_text(strip=True), "%d.%m.%Y").strftime("%Y-%m-%d") + "T00:00:00" if timeline_date_entry else jetzt.strftime("%Y-%m-%dT%H:00")
 
 description_text = " ".join([
     headline.get_text(strip=True) if headline else "",
@@ -35,7 +35,7 @@ description_text = " ".join([
 if description_text:
             
     datensatz = {
-        "published_at": timeline_date_entry.get_text(strip=True) if timeline_date_entry else published_at,
+        "published_at": published_at,
         "title": "WasApp?",
         "description": description_text,
         "image_url": image_url,

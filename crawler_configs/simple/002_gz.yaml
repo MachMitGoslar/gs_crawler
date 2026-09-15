@@ -29,11 +29,15 @@ selectors:
     attribute: "href"
     prefix: "https://www.goslarsche.de"
 
+post_process:
+  single_description_template: "{title} - {description})"
+
 output:
   single:
     enabled: true
     filename: "002_goslarsche.json"
     cta_override: "https://crawler.goslar.app/crawler/002_goslarsche-alle.json"
+    title_override: "Goslarsche Zeitung"
 
   all:
     enabled: true
