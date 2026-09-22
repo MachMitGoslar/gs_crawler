@@ -43,10 +43,8 @@ def load_containers_from_registry():
 
             # Build container key (matching old format)
             cid = crawler['id']
-            if cid == '002_ferienpass':
-                key = 'gs_compiler_002_fepa'
-            else:
-                key = f"gs_compiler_{cid}"
+            # Fallback removed, after Ferienpass Cleanup
+            key = f"gs_compiler_{cid}"
 
             containers[key] = {
                 'name': crawler['name'],
@@ -77,13 +75,6 @@ if CONTAINERS is None:
             'source': 'https://www.goslar.de/leben-in-goslar/senioren/seniorenzeitung',
             'schedule': 'Täglich 02:00',
             'type': 'XML Feed'
-        },
-        'gs_compiler_002_fepa': {
-            'name': 'Ferienpass Events',
-            'expected_files': ['002_fepa_events.json'],
-            'source': 'https://goslar.feripro.de/api/',
-            'schedule': '2x täglich (02:00, 14:00)',
-            'type': 'JSON API'
         },
         'gs_compiler_004_zufaellig-nix-vor': {
             'name': 'Zufällig nix vor?',
