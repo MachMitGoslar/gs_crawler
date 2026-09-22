@@ -113,7 +113,7 @@ jobs:
 
         # Collect changed containers (only if they still exist - skip deleted)
         for file in $changed_files; do
-          if [[ $file == docker_instances/*/Dockerfile ]] || [[ $file == docker_instances/*/*.py ]] || [[ $file == docker_instances/*/*.php ]] || [[ $file == docker_instances/*/crontab ]]; then
+          if [[ $file == docker_instances/*/Dockerfile ]] || [[ $file == docker_instances/*/*.py ]] || [[ $file == docker_instances/*/*.php ]] || [[ $file == docker_instances/*/crontab ]] || [[ $file == docker_instances/*/*.html ]] || [[ $file == docker_instances/*/*.css ]] || [[ $file == docker_instances/*/*.json ]]; then
             container=$(echo $file | cut -d'/' -f2)
             # Only add if container directory still exists (not deleted)
             if [[ -d "docker_instances/$container" ]] && [[ ! " ${changed_containers[@]} " =~ " ${container} " ]]; then
