@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Alle Vorschläge · Zufällig nix vor?</title>
+  <link rel="icon" href="data:," />
   <link href="ui-kit/goslar-ui.css" rel="stylesheet" />
   <style>
     .suggestion-page {
@@ -27,59 +28,35 @@
       margin-top: 18px;
     }
 
-    .suggestion-card {
-      overflow: hidden;
-      min-height: 100%;
-      display: flex;
-      flex-direction: column;
-      border-radius: var(--gs-radius-card);
-      background: var(--gs-color-card);
+    .suggestion-list .gs-list-widget {
+      min-height: 132px;
+      align-items: center;
+      padding: 14px;
       color: inherit;
-      text-align: left;
-      text-decoration: none;
-      box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02);
-      transition: transform 0.18s ease, box-shadow 0.18s ease;
     }
 
-    .suggestion-card:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 14px 28px rgba(28, 25, 18, 0.08);
-    }
-
-    .suggestion-card__image {
-      width: 100%;
-      aspect-ratio: 16 / 9;
+    .suggestion-list__image {
+      width: 86px;
+      height: 83px;
+      flex: 0 0 86px;
       display: block;
-      object-fit: cover;
+      border-radius: var(--gs-radius-media);
       background: var(--gs-color-background);
+      object-fit: cover;
+      order: -1;
     }
 
-    .suggestion-card__body {
-      min-width: 0;
-      flex: 1;
-      padding: 14px 16px 16px;
-    }
-
-    .suggestion-card__title {
-      margin: 0;
-      color: var(--gs-color-text);
-      font: 760 16px/22px var(--gs-font-ui);
-      letter-spacing: -0.008em;
-    }
-
-    .suggestion-card__copy {
-      margin: 8px 0 0;
-      color: var(--gs-color-copy);
-      font: 590 13px/20px var(--gs-font-ui);
-      letter-spacing: -0.004em;
-      overflow-wrap: anywhere;
-    }
-
-    .suggestion-card__cta {
-      margin-top: 12px;
+    .suggestion-list__placeholder {
+      width: 86px;
+      height: 83px;
+      flex: 0 0 86px;
+      display: grid;
+      place-items: center;
+      border-radius: var(--gs-radius-media);
+      background: var(--gs-color-background);
       color: var(--gs-color-gold);
-      font: 760 13px/18px var(--gs-font-ui);
-      letter-spacing: -0.004em;
+      font: 700 28px/1 var(--gs-font-ui);
+      order: -1;
     }
 
     .suggestion-empty {
@@ -90,6 +67,114 @@
       background: var(--gs-color-card);
       color: var(--gs-color-copy);
       font: 590 13px/20px var(--gs-font-ui);
+    }
+
+    .suggestion-detail {
+      display: none;
+    }
+
+    .suggestion-detail.is-open {
+      display: block;
+    }
+
+    .suggestion-detail__bar {
+      display: flex;
+      align-items: center;
+      margin-bottom: 7px;
+    }
+
+    .suggestion-detail__back {
+      width: 28px;
+      height: 28px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: var(--gs-color-gold);
+      cursor: pointer;
+      appearance: none;
+    }
+
+    .suggestion-detail__back svg {
+      width: 24px;
+      height: 24px;
+      display: block;
+      fill: currentColor;
+    }
+
+    .suggestion-detail__back:focus,
+    .suggestion-detail__back:focus-visible {
+      outline: 0;
+    }
+
+    .suggestion-detail .gs-page-description {
+      white-space: normal;
+    }
+
+    .suggestion-detail__frame-card {
+      display: none;
+      overflow: hidden;
+      margin-top: 18px;
+      padding: 0;
+    }
+
+    .suggestion-detail__frame-card.is-visible {
+      display: block;
+    }
+
+    .suggestion-detail__frame {
+      width: 100%;
+      height: min(70vh, 720px);
+      min-height: 460px;
+      display: block;
+      border: 0;
+      background: var(--gs-color-card);
+    }
+
+    .suggestion-detail__fallback {
+      display: none;
+      margin-top: 18px;
+      padding: 14px;
+    }
+
+    .suggestion-detail__fallback.is-visible {
+      display: grid;
+      gap: 14px;
+    }
+
+    .suggestion-detail__fallback-image {
+      width: 100%;
+      max-height: 320px;
+      display: block;
+      border-radius: var(--gs-radius-media);
+      object-fit: cover;
+      background: var(--gs-color-background);
+    }
+
+    .suggestion-detail__fallback-placeholder {
+      min-height: 180px;
+      display: grid;
+      place-items: center;
+      border-radius: var(--gs-radius-media);
+      background: var(--gs-color-background);
+      color: var(--gs-color-gold);
+      font: 700 40px/1 var(--gs-font-ui);
+    }
+
+    .suggestion-detail__fallback .gs-action {
+      width: 100%;
+    }
+
+    body.suggestion-detail-open {
+      overflow: auto;
+    }
+
+    body.suggestion-detail-open .suggestion-list-view,
+    body.suggestion-detail-open main > .gs-back-link,
+    body.suggestion-detail-open .gs-scroll-top {
+      display: none;
     }
 
     @media (min-width: 760px) {
@@ -111,23 +196,46 @@
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.7 5.3 9 12l6.7 6.7-1.4 1.4L6.2 12l8.1-8.1 1.4 1.4Z"/></svg>
     </a>
 
-    <header class="gs-page-header">
-      <h1 class="gs-page-title">Alle Vorschläge</h1>
-      <p class="gs-page-description">Durchsuche alle Empfehlungen für Goslar und Umgebung.</p>
-    </header>
+    <div class="suggestion-list-view" id="suggestion-list-view">
+      <header class="gs-page-header">
+        <h1 class="gs-page-title">Alle Vorschläge</h1>
+        <p class="gs-page-description">Durchsuche alle Empfehlungen für Goslar und Umgebung.</p>
+      </header>
 
-    <div class="gs-toolbar suggestion-toolbar">
-      <label class="gs-search" for="suggestion-search">
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M9.8 17.1a7.3 7.3 0 1 1 5.2-2.1l4.1 4.1-1.5 1.5-4.1-4.1a7.2 7.2 0 0 1-3.7.6Zm0-2.1a5.2 5.2 0 1 0 0-10.4 5.2 5.2 0 0 0 0 10.4Z" />
-        </svg>
-        <input class="gs-search-input" id="suggestion-search" type="search" placeholder="Vorschläge suchen ..." autocomplete="off" />
-      </label>
+      <div class="gs-toolbar suggestion-toolbar">
+        <label class="gs-search" for="suggestion-search">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M9.8 17.1a7.3 7.3 0 1 1 5.2-2.1l4.1 4.1-1.5 1.5-4.1-4.1a7.2 7.2 0 0 1-3.7.6Zm0-2.1a5.2 5.2 0 1 0 0-10.4 5.2 5.2 0 0 0 0 10.4Z" />
+          </svg>
+          <input class="gs-search-input" id="suggestion-search" type="search" placeholder="Vorschläge suchen ..." autocomplete="off" />
+        </label>
+      </div>
+      <div class="suggestion-count" id="suggestion-count"></div>
+
+      <section class="suggestion-list" id="suggestion-list" aria-live="polite"></section>
+      <div class="suggestion-empty" id="suggestion-empty">Keine Vorschläge gefunden.</div>
     </div>
-    <div class="suggestion-count" id="suggestion-count"></div>
 
-    <section class="suggestion-list" id="suggestion-list" aria-live="polite"></section>
-    <div class="suggestion-empty" id="suggestion-empty">Keine Vorschläge gefunden.</div>
+    <section class="suggestion-detail" id="suggestion-detail" aria-label="Geöffneter Vorschlag">
+      <div class="suggestion-detail__bar">
+        <button class="suggestion-detail__back" id="suggestion-detail-back" type="button" aria-label="Zurück zu allen Vorschlägen">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.7 5.3 9 12l6.7 6.7-1.4 1.4L6.2 12l8.1-8.1 1.4 1.4Z"/></svg>
+        </button>
+      </div>
+      <header class="gs-page-header">
+        <h1 class="gs-page-title" id="suggestion-detail-title">Vorschlag</h1>
+        <p class="gs-page-description" id="suggestion-detail-description"></p>
+      </header>
+
+      <div class="gs-info-card suggestion-detail__frame-card" id="suggestion-detail-frame-card">
+        <iframe class="suggestion-detail__frame" id="suggestion-detail-frame" title="Vorschlag" allow="fullscreen" allowfullscreen></iframe>
+      </div>
+
+      <article class="gs-info-card suggestion-detail__fallback" id="suggestion-detail-fallback">
+        <div id="suggestion-detail-fallback-media"></div>
+        <a class="gs-action" id="suggestion-detail-fallback-external" href="#" target="_blank" rel="noopener noreferrer"></a>
+      </article>
+    </section>
   </main>
 
   <button class="gs-scroll-top" type="button" data-gs-scroll-top aria-label="Nach oben scrollen">↑</button>
@@ -141,13 +249,50 @@
     const list = document.getElementById('suggestion-list');
     const count = document.getElementById('suggestion-count');
     const empty = document.getElementById('suggestion-empty');
+    const detail = document.getElementById('suggestion-detail');
+    const detailBack = document.getElementById('suggestion-detail-back');
+    const detailTitle = document.getElementById('suggestion-detail-title');
+    const detailDescription = document.getElementById('suggestion-detail-description');
+    const detailFrameCard = document.getElementById('suggestion-detail-frame-card');
+    const detailFrame = document.getElementById('suggestion-detail-frame');
+    const detailFallback = document.getElementById('suggestion-detail-fallback');
+    const detailFallbackMedia = document.getElementById('suggestion-detail-fallback-media');
+    const detailFallbackExternal = document.getElementById('suggestion-detail-fallback-external');
+    let activeSuggestion = null;
+    let frameLoadTimer = null;
+    let frameLoaded = false;
+    let frameTargetUrl = '';
 
     searchInput.addEventListener('input', () => {
       state.query = searchInput.value.trim();
       renderSuggestions();
     });
 
+    detailBack.addEventListener('click', closeSuggestionFrame);
+    detailFrame.addEventListener('load', () => {
+      if (detailFrame.getAttribute('src') === 'about:blank') return;
+      if (detailFrame.getAttribute('src') !== frameTargetUrl) return;
+      if (!activeSuggestion || frameLoaded) return;
+      frameLoaded = true;
+      clearFrameLoadTimer();
+      showFrame();
+    });
+    detailFrame.addEventListener('error', showFallback);
+
+    window.addEventListener('popstate', () => {
+      const suggestion = getSuggestionFromHash();
+      if (suggestion) {
+        showSuggestionFrame(suggestion, false);
+      } else {
+        closeSuggestionFrame(false);
+      }
+    });
+
     renderSuggestions();
+    const initialSuggestion = getSuggestionFromHash();
+    if (initialSuggestion) {
+      showSuggestionFrame(initialSuggestion, false);
+    }
 
     function renderSuggestions() {
       const suggestions = filterSuggestions(SUGGESTIONS || [], state.query);
@@ -157,22 +302,123 @@
 
       for (const suggestion of suggestions) {
         const element = document.createElement(suggestion.call_to_action_url ? 'a' : 'article');
-        element.className = 'suggestion-card';
+        element.className = 'gs-list-widget';
         if (suggestion.call_to_action_url) {
           element.href = suggestion.call_to_action_url;
-          element.target = '_blank';
-          element.rel = 'noopener noreferrer';
+          element.addEventListener('click', event => {
+            event.preventDefault();
+            showSuggestionFrame(suggestion);
+          });
         }
 
         element.innerHTML = ''
-          + (suggestion.image_url ? '<img class="suggestion-card__image" src="' + escapeAttr(suggestion.image_url) + '" alt="" loading="lazy" />' : '')
-          + '<div class="suggestion-card__body">'
-          + '<h2 class="suggestion-card__title">' + escapeHtml(suggestion.title || 'Zufällig nix vor?') + '</h2>'
-          + '<p class="suggestion-card__copy">' + escapeHtml(suggestion.description || '') + '</p>'
-          + (suggestion.call_to_action_url ? '<div class="suggestion-card__cta">Vorschlag öffnen →</div>' : '')
+          + (suggestion.image_url ? '<img class="suggestion-list__image" src="' + escapeAttr(suggestion.image_url) + '" alt="" loading="lazy" />' : '<div class="suggestion-list__placeholder" aria-hidden="true">?</div>')
+          + '<div class="gs-list-widget__content">'
+          + '<h2 class="gs-list-widget__title">' + escapeHtml(suggestion.title || 'Zufällig nix vor?') + '</h2>'
+          + '<p class="gs-list-widget__copy">' + escapeHtml(suggestion.description || '') + '</p>'
+          + (suggestion.call_to_action_url ? '<div class="gs-list-widget__cta">Vorschlag öffnen →</div>' : '')
           + '</div>';
         list.appendChild(element);
       }
+    }
+
+    function showSuggestionFrame(suggestion, updateHistory = true) {
+      if (!suggestion || !suggestion.call_to_action_url) return;
+
+      activeSuggestion = suggestion;
+      detailTitle.textContent = suggestion.title || 'Vorschlag';
+      detailDescription.textContent = suggestion.description || '';
+      detailFallbackExternal.href = suggestion.call_to_action_url;
+      detailFallbackExternal.textContent = 'In ' + getUrlDomain(suggestion.call_to_action_url) + ' öffnen';
+      detailFallbackMedia.innerHTML = suggestion.image_url
+        ? '<img class="suggestion-detail__fallback-image" src="' + escapeAttr(suggestion.image_url) + '" alt="" />'
+        : '<div class="suggestion-detail__fallback-placeholder" aria-hidden="true">?</div>';
+      loadSuggestionFrame(suggestion);
+      detail.classList.add('is-open');
+      document.body.classList.add('suggestion-detail-open');
+      window.scrollTo({ top: 0, left: 0 });
+      detailBack.focus();
+
+      if (updateHistory) {
+        history.pushState({ suggestionId: suggestion.id }, '', '#vorschlag-' + encodeURIComponent(suggestion.id));
+      }
+    }
+
+    function loadSuggestionFrame(suggestion) {
+      frameLoaded = false;
+      frameTargetUrl = '';
+      clearFrameLoadTimer();
+      hideFrameAndFallback();
+
+      if (suggestion.can_embed_iframe === false) {
+        showFallback();
+        return;
+      }
+
+      frameTargetUrl = suggestion.call_to_action_url;
+      detailFrame.src = 'about:blank';
+      window.setTimeout(() => {
+        detailFrame.src = suggestion.call_to_action_url;
+      }, 0);
+      frameLoadTimer = window.setTimeout(() => {
+        if (!frameLoaded) {
+          showFallback();
+        }
+      }, 4500);
+    }
+
+    function showFrame() {
+      detailFallback.classList.remove('is-visible');
+      detailFrameCard.classList.add('is-visible');
+    }
+
+    function showFallback() {
+      frameTargetUrl = '';
+      detailFrame.removeAttribute('src');
+      detailFrameCard.classList.remove('is-visible');
+      detailFallback.classList.add('is-visible');
+    }
+
+    function hideFrameAndFallback() {
+      detailFrameCard.classList.remove('is-visible');
+      detailFallback.classList.remove('is-visible');
+    }
+
+    function closeSuggestionFrame(updateHistory = true) {
+      detail.classList.remove('is-open');
+      document.body.classList.remove('suggestion-detail-open');
+      frameTargetUrl = '';
+      detailFrame.removeAttribute('src');
+      clearFrameLoadTimer();
+      hideFrameAndFallback();
+      activeSuggestion = null;
+      searchInput.focus();
+
+      if (updateHistory && location.hash) {
+        history.replaceState(null, '', location.pathname + location.search);
+      }
+    }
+
+    function clearFrameLoadTimer() {
+      if (frameLoadTimer) {
+        window.clearTimeout(frameLoadTimer);
+        frameLoadTimer = null;
+      }
+    }
+
+    function getUrlDomain(url) {
+      try {
+        return new URL(url, window.location.href).hostname.replace(/^www\./, '');
+      } catch (error) {
+        return 'externer Seite';
+      }
+    }
+
+    function getSuggestionFromHash() {
+      const match = location.hash.match(/^#vorschlag-(.+)$/);
+      if (!match) return null;
+      const id = decodeURIComponent(match[1]);
+      return (SUGGESTIONS || []).find(suggestion => String(suggestion.id) === id && suggestion.call_to_action_url);
     }
 
     function filterSuggestions(suggestions, query) {
