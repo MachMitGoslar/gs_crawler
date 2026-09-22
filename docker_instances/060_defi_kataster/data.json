@@ -1564,5 +1564,41 @@
       "sa": [],
       "so": []
     }
+  },
+  {
+    "title": "Defibrillator: Psychotherapeutische Praxis Derer",
+    "city": "Goslar",
+    "Defi": "Genauer Standort im Gebäude: Im Flur der Praxis, durch ein Schild gekennzeichnet. Der Defibrillator befindet sich innerhalb der Praxis und ist nur zugänglich, wenn die Praxis besetzt ist. Die regulären Zugangszeiten sind Montag, Dienstag, Donnerstag und Freitag jeweils von 8:30 bis 11:30 Uhr. Aufgrund von Urlaub, Krankheit, Fortbildungen oder anderen betrieblichen Gründen kann es an einzelnen Tagen zu Abweichungen kommen. Die Praxis ist häufig auch über diese Zeiten hinaus – teilweise bis etwa 16 Uhr – besetzt. Eine verlässliche Zugänglichkeit des Defibrillators kann außerhalb der genannten regulären Zeiten jedoch nicht zugesichert werden. Außerhalb der tatsächlichen Anwesenheitszeiten besteht kein öffentlicher Zugang.",
+    "phone": "05321 3958705",
+    "lat": 51.905865,
+    "lng": 10.430443,
+    "opening_hours": {
+      "mo":  [
+                [
+          "08:30",
+          "11:30"
+        ]
+      ],
+      "di": [
+                [
+          "08:30",
+          "11:30"
+        ]
+      ],
+      "do": [
+                [
+          "08:30",
+          "11:30"
+        ]
+      ],
+      "fr": [
+                [
+          "08:30",
+          "11:30"
+        ]
+      ],
+      "sa": [],
+      "so": []
+    }
   }
 ]
