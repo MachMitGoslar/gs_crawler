@@ -106,17 +106,6 @@ crawlers:
     implementation: custom
 
   # === EVENTS ===
-  - id: "002_ferienpass"
-    name: "Ferienpass Events"
-    category: events
-    type: "JSON API"
-    source: "https://goslar.feripro.de/api/"
-    schedule: "0 2,14 * * *"
-    schedule_human: "2x täglich (02:00, 14:00)"
-    expected_files:
-      - "002_fepa_events.json"
-    implementation: custom
-    service_name: "gs_compiler_002_fepa"  # Override default service name
 
   - id: "004_zufaellig-nix-vor"
     name: "Zufällig nix vor?"

@@ -35,13 +35,6 @@ services:
     restart: unless-stopped
 
   # === EVENTS ===
-  gs_compiler_002_fepa:
-    build: ./docker_instances/002_ferienpass
-    volumes:
-      - ./httpdocs/crawler:/app/output
-    container_name: gs_compiler_002_fepa
-    restart: unless-stopped
-
   gs_compiler_004_zufaellig-nix-vor:
     build: ./docker_instances/004_zufaellig-nix-vor
     volumes:

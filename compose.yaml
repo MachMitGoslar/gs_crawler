@@ -36,13 +36,6 @@ services:
     restart: unless-stopped
 
   # === EVENTS ===
-  gs_compiler_002_fepa:
-    image: ghcr.io/machmitgoslar/gs_crawler_002_ferienpass:latest
-    volumes:
-      - ./httpdocs/crawler:/app/output
-    container_name: gs_compiler_002_fepa
-    restart: unless-stopped
-
   gs_compiler_004_zufaellig-nix-vor:
     image: ghcr.io/machmitgoslar/gs_crawler_004_zufaellig-nix-vor:latest
     volumes:
