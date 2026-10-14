@@ -141,7 +141,7 @@ if CONTAINERS is None:
         },
         'gs_compiler_035_talsperren': {
             'name': 'Talsperren Daten',
-            'expected_files': ['035-talsperren_alle.json'],
+            'expected_files': ['035-talsperren_alle.json', '035-talsperren_index.json'],
             'source': 'https://www.harzwasserwerke.de/infoservice/aktuelle-talsperrendaten/',
             'schedule': 'Stündlich',
             'type': 'Umwelt Monitor'
