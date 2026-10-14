@@ -234,6 +234,7 @@ crawlers:
     schedule_human: "Stündlich"
     expected_files:
       - "035-talsperren_alle.json"
+      - "035-talsperren_index.json"
     implementation: custom
 
   - id: "045_naturgefahren"
