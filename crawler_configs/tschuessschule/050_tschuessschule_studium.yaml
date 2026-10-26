@@ -40,7 +40,7 @@ output:
   single:
     enabled: true
     filename: "050-tschuessschule-studium.json"
-    cta_override: "https://crawler.goslar.app/crawler/050-tschuessschule-studium-alle.json"
+    cta_override: "https://crawler.goslar.app/crawler/050_tschuessschule_studium/050-tschuessschule-studium-alle.json"
     title_override: "Studienangebote"
 
   all:

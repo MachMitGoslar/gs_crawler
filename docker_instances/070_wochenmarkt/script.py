@@ -13,8 +13,8 @@ SCOPE          = "markets.read"
 EVENTS_URL      = "https://external-gateway.hsp.ceconsoft.de/api/external/market-events/upcoming"
 ATTENDANCES_URL = "https://external-gateway.hsp.ceconsoft.de/api/external/market-events/{id}/attendances"
 
-BASE_URL   = "https://crawler.goslar.app/crawler/wochenmaerkte"
-OUTPUT_DIR = "/app/output/wochenmaerkte"
+BASE_URL   = "https://crawler.goslar.app/crawler/070_wochenmarkt"
+OUTPUT_DIR = "/app/output"
 
 DAYS   = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"]
 MONTHS = ["Januar", "Februar", "März", "April", "Mai", "Juni",

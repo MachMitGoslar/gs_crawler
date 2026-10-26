@@ -183,13 +183,15 @@ def test_custom_crawler(crawler):
     env = os.environ.copy()
     env['OUTPUT_DIR'] = str(TEST_OUTPUT_DIR)
 
-    # Many custom scripts use hardcoded ./output/ path
-    # Create symlink from docker_dir/output to test_output
+    # Many custom scripts use hardcoded ./output/ path. Im Container ist das der eigene
+    # Ordner des Crawlers (httpdocs/crawler/<id>), daher Symlink auf test_output/<id>.
     local_output = docker_dir / "output"
     symlink_created = False
     if not local_output.exists():
         try:
-            local_output.symlink_to(TEST_OUTPUT_DIR)
+            crawler_output = TEST_OUTPUT_DIR / docker_dir.name
+            crawler_output.mkdir(parents=True, exist_ok=True)
+            local_output.symlink_to(crawler_output)
             symlink_created = True
         except Exception:
             pass

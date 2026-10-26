@@ -36,7 +36,7 @@ output:
   single:
     enabled: true
     filename: "002_goslarsche.json"
-    cta_override: "https://crawler.goslar.app/crawler/002_goslarsche-alle.json"
+    cta_override: "https://crawler.goslar.app/crawler/002_gz/002_goslarsche-alle.json"
     title_override: "Goslarsche Zeitung"
 
   all:

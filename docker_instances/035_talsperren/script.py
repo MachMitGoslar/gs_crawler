@@ -15,7 +15,8 @@ url = f"{base_url}/infoservice/aktuelle-talsperrendaten/"
 # Die Messwerte lädt die Seite per JavaScript aus diesem Theme-Endpoint nach
 barrage_api = f"{base_url}/wp-content/themes/Avada-Child-Theme/barrageData/barrageDataCall.php"
 talis_prefix = f"{base_url}/talis/"
-output_path = "output/035_talsperren"
+# /app/output ist das eigene Ausgabeverzeichnis dieses Crawlers (öffentlich unter /crawler/035_talsperren/)
+output_path = "output"
 export_jsonfile = "035-talsperren_alle.json"
 export_indexfile = "035-talsperren_index.json"
 image_base = "https://crawler.goslar.app/crawler/035_talsperren"

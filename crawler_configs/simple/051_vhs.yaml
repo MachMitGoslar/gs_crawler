@@ -34,7 +34,7 @@ output:
   single:
     enabled: true
     filename: "051_vhs.json"
-    cta_override: "https://crawler.goslar.app/crawler/051_vhs-alle.json"
+    cta_override: "https://crawler.goslar.app/crawler/051_vhs/051_vhs-alle.json"
     # Custom title for single output
     title_override: "VHS Empfehlungen"
 

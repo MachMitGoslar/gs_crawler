@@ -19,7 +19,7 @@ def slugify_url(url):
 
 def create_gif_from_db_images():
     output_dir = "output"
-    img_url_path = "https://crawler.goslar.app/crawler/"
+    img_url_path = "https://crawler.goslar.app/crawler/033_goslar24-7/"
     os.makedirs(output_dir, exist_ok=True)
 
     conn = sqlite3.connect(DB_PATH)

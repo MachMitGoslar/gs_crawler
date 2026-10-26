@@ -78,7 +78,7 @@ crawlers:
     schedule: "0 2 * * *"
     schedule_human: "Täglich 02:00"
     expected_files:
-      - "001_senioren_feed.xml"
+      - "001_senioren/001_senioren_feed.xml"
     implementation: custom
 
   - id: "002_gz"
@@ -89,8 +89,8 @@ crawlers:
     schedule: "0 * * * *"
     schedule_human: "Stündlich"
     expected_files:
-      - "002_goslarsche.json"
-      - "002_goslarsche-alle.json"
+      - "002_gz/002_goslarsche.json"
+      - "002_gz/002_goslarsche-alle.json"
     implementation: config
     config_dir: simple
 
@@ -102,7 +102,7 @@ crawlers:
     schedule: "0 2,14 * * *"
     schedule_human: "2x täglich (02:00, 14:00)"
     expected_files:
-      - "040_hp.json"
+      - "040_hp/040_hp.json"
     implementation: custom
 
   # === EVENTS ===
@@ -115,12 +115,12 @@ crawlers:
     schedule: "0 7 * * *"
     schedule_human: "Täglich 07:00"
     expected_files:
-      - "ui-kit/goslar-ui.css"
-      - "ui-kit/goslar-ui.js"
-      - "004_zufaellig-nix-vor.json"
-      - "004_zufaellig-nix-vor-alle.json"
-      - "004_zufaellig-nix-vor.html"
-      - "004_zufaellig-nix-vor-alle.html"
+      - "004_zufaellig-nix-vor/ui-kit/goslar-ui.css"
+      - "004_zufaellig-nix-vor/ui-kit/goslar-ui.js"
+      - "004_zufaellig-nix-vor/004_zufaellig-nix-vor.json"
+      - "004_zufaellig-nix-vor/004_zufaellig-nix-vor-alle.json"
+      - "004_zufaellig-nix-vor/004_zufaellig-nix-vor.html"
+      - "004_zufaellig-nix-vor/004_zufaellig-nix-vor-alle.html"
     implementation: custom
 
   - id: "014_kunst_in_ar"
@@ -131,7 +131,7 @@ crawlers:
     schedule: "0 8 * * *"
     schedule_human: "Täglich 08:00"
     expected_files:
-      - "017-kunst-in-ar-single.json"
+      - "014_kunst_in_ar/017-kunst-in-ar-single.json"
     implementation: custom
 
   - id: "019_was_app"
@@ -142,7 +142,7 @@ crawlers:
     schedule: "*/3 * * * *"
     schedule_human: "Alle 3 Minuten"
     expected_files:
-      - "019_was_app.json"
+      - "019_was_app/019_was_app.json"
     implementation: custom
 
   - id: "027_erster_freitag"
@@ -153,7 +153,7 @@ crawlers:
     schedule: "0 9 * * *"
     schedule_human: "Täglich 09:00"
     expected_files:
-      - "027-erster-freitag.json"
+      - "027_erster_freitag/027-erster-freitag.json"
     implementation: custom
 
   # === LOCAL COMMUNITIES ===
@@ -165,7 +165,7 @@ crawlers:
     schedule: "0 2,14 * * *"
     schedule_human: "2x täglich (02:00, 14:00)"
     expected_files:
-      - "041_immenrode.json"
+      - "041_immenrode/041_immenrode.json"
     implementation: config
     config_dir: simple
 
@@ -177,8 +177,8 @@ crawlers:
     schedule: "0 2,14 * * *"
     schedule_human: "2x täglich (02:00, 14:00)"
     expected_files:
-      - "044-wiedelah.json"
-      - "044-wiedelah_alle.json"
+      - "044_wiedelah/044-wiedelah.json"
+      - "044_wiedelah/044-wiedelah_alle.json"
     implementation: config
     config_dir: simple
 
@@ -190,7 +190,7 @@ crawlers:
     schedule: "0 2,14 * * *"
     schedule_human: "2x täglich (02:00, 14:00)"
     expected_files:
-      - "048_jerstedt.json"
+      - "048_jerstedt/048_jerstedt.json"
     implementation: config
     config_dir: simple
 
@@ -203,7 +203,7 @@ crawlers:
     schedule: "0 9 * * *"
     schedule_human: "Täglich 09:00"
     expected_files:
-      - "031-goslarer_geschichten.json"
+      - "031_goslarer_geschichten/031-goslarer_geschichten.json"
     implementation: custom
 
   - id: "042_freiwilligen"
@@ -214,12 +214,12 @@ crawlers:
     schedule: "0 2,14 * * *"
     schedule_human: "2x täglich (02:00, 14:00)"
     expected_files:
-      - "ui-kit/goslar-ui.css"
-      - "ui-kit/goslar-ui.js"
-      - "042-freiwilligenagentur.json"
-      - "042-freiwilligenagentur-alle.json"
-      - "042_freiwilligenagentur_index.html"
-      - "042_freiwilligenagentur_detail.html"
+      - "042_freiwilligen/ui-kit/goslar-ui.css"
+      - "042_freiwilligen/ui-kit/goslar-ui.js"
+      - "042_freiwilligen/042-freiwilligenagentur.json"
+      - "042_freiwilligen/042-freiwilligenagentur-alle.json"
+      - "042_freiwilligen/042_freiwilligenagentur_index.html"
+      - "042_freiwilligen/042_freiwilligenagentur_detail.html"
     env_file:
       - .env
     implementation: custom
@@ -233,8 +233,8 @@ crawlers:
     schedule: "0 * * * *"
     schedule_human: "Stündlich"
     expected_files:
-      - "035-talsperren_alle.json"
-      - "035-talsperren_index.json"
+      - "035_talsperren/035-talsperren_alle.json"
+      - "035_talsperren/035-talsperren_index.json"
     implementation: custom
 
   - id: "045_naturgefahren"
@@ -274,8 +274,8 @@ crawlers:
     schedule: "0 2,14 * * *"
     schedule_human: "2x täglich (02:00, 14:00)"
     expected_files:
-      - "047_bodenwasser.json"
-      - "047_bodenwasser.gif"
+      - "047_bodenwasser/047_bodenwasser.json"
+      - "047_bodenwasser/047_bodenwasser.gif"
     implementation: custom
 
   # === EDUCATION ===
@@ -287,8 +287,8 @@ crawlers:
     schedule: "0 6 * * *"
     schedule_human: "Täglich 06:00"
     expected_files:
-      - "050-tschuessschule-studium.json"
-      - "050-tschuessschule-studium-alle.json"
+      - "050_tschuessschule_studium/050-tschuessschule-studium.json"
+      - "050_tschuessschule_studium/050-tschuessschule-studium-alle.json"
     implementation: config
     config_dir: tschuessschule
 
@@ -300,8 +300,8 @@ crawlers:
     schedule: "0 9 * * *"
     schedule_human: "Täglich 09:00"
     expected_files:
-      - "051_vhs.json"
-      - "051_vhs-alle.json"
+      - "051_vhs/051_vhs.json"
+      - "051_vhs/051_vhs-alle.json"
     implementation: config
     config_dir: simple
 
@@ -313,8 +313,8 @@ crawlers:
     schedule: "0 9 * * *"
     schedule_human: "Täglich 09:00"
     expected_files:
-      - "052_vhs_kinderuni.json"
-      - "052_vhs_kinderuni_alle.json"
+      - "052_vhs_kinderuni/052_vhs_kinderuni.json"
+      - "052_vhs_kinderuni/052_vhs_kinderuni_alle.json"
     implementation: config
     config_dir: simple
 
@@ -326,8 +326,8 @@ crawlers:
     schedule: "0 6 * * *"
     schedule_human: "Täglich 06:00"
     expected_files:
-      - "053-tschuessschule-praktikum.json"
-      - "053-tschuessschule-praktikum-alle.json"
+      - "053_tschuessschule_praktikum/053-tschuessschule-praktikum.json"
+      - "053_tschuessschule_praktikum/053-tschuessschule-praktikum-alle.json"
     implementation: config
     config_dir: tschuessschule
 
@@ -339,8 +339,8 @@ crawlers:
     schedule: "0 6 * * *"
     schedule_human: "Täglich 06:00"
     expected_files:
-      - "054-tschuessschule-ausbildung.json"
-      - "054-tschuessschule-ausbildung-alle.json"
+      - "054_tschuessschule_ausbildung/054-tschuessschule-ausbildung.json"
+      - "054_tschuessschule_ausbildung/054-tschuessschule-ausbildung-alle.json"
     implementation: config
     config_dir: tschuessschule
 
@@ -353,8 +353,8 @@ crawlers:
     schedule: "0 9 * * *"
     schedule_human: "Täglich 09:00"
     expected_files:
-      - "032_webcams_goslar.json"
-      - "032_webcams.gif"
+      - "032_webcams_goslar/032_webcams_goslar.json"
+      - "032_webcams_goslar/032_webcams.gif"
     implementation: custom
 
   - id: "033_goslar24-7"
@@ -365,10 +365,10 @@ crawlers:
     schedule: "0 * * * *"
     schedule_human: "Stündlich"
     expected_files:
-      - "033_gif_schuhhof.json"
-      - "033_gif_schuhhof.gif"
-      - "033_gif_marktplatz_gmg.gif"
-      - "033_gif_marktplatz_gmg.json"
+      - "033_goslar24-7/033_gif_schuhhof.json"
+      - "033_goslar24-7/033_gif_schuhhof.gif"
+      - "033_goslar24-7/033_gif_marktplatz_gmg.gif"
+      - "033_goslar24-7/033_gif_marktplatz_gmg.json"
     implementation: custom
 
   - id: "056_serviceportal"
@@ -379,12 +379,12 @@ crawlers:
     schedule: "0 9 * * *"
     schedule_human: "Täglich 09:00"
     expected_files:
-      - "ui-kit/goslar-ui.css"
-      - "ui-kit/goslar-ui.js"
-      - "056-serviceportal.json"
-      - "056_serviceportal_index.html"
-      - "056_serviceportal_termin.html"
-      - "056_serviceportal_image.png"
+      - "056_serviceportal/ui-kit/goslar-ui.css"
+      - "056_serviceportal/ui-kit/goslar-ui.js"
+      - "056_serviceportal/056-serviceportal.json"
+      - "056_serviceportal/056_serviceportal_index.html"
+      - "056_serviceportal/056_serviceportal_termin.html"
+      - "056_serviceportal/056_serviceportal_image.png"
     implementation: custom
 
   - id: "060_defi_kataster"
@@ -394,12 +394,12 @@ crawlers:
     schedule: "0 6 * * *"
     schedule_human: "Täglich 06:00"
     expected_files:
-        - "defi-kataster/ui-kit/goslar-ui.css"
-        - "defi-kataster/ui-kit/goslar-ui.js"
-        - "defi-kataster/060-defi-kataster.json"
-        - "defi-kataster/index.html"
-        - "defi-kataster/script.js"
-        - "defi-kataster/style.css"
+        - "060_defi_kataster/ui-kit/goslar-ui.css"
+        - "060_defi_kataster/ui-kit/goslar-ui.js"
+        - "060_defi_kataster/060-defi-kataster.json"
+        - "060_defi_kataster/index.html"
+        - "060_defi_kataster/script.js"
+        - "060_defi_kataster/style.css"
     implementation: custom
 
   - id: "080_bereitschaftsdienste"
@@ -410,14 +410,14 @@ crawlers:
     schedule: "*/15 * * * *"
     schedule_human: "Alle 15 Minuten (API nur nach Endzeit)"
     expected_files:
-      - "ui-kit/goslar-ui.css"
-      - "ui-kit/goslar-ui.js"
-      - "080_bereitschaftsdienste_card.json"
-      - "080_bereitschaftsdienste_card.png"
-      - "080_bereitschaftsdienste_index.html"
-      - "080_bereitschaftsdienste_medizinisch.html"
-      - "080_bereitschaftsdienste_staedtisch.html"
-      - "080_bereitschaftsdienste_sicherheit.html"
+      - "080_bereitschaftsdienste/ui-kit/goslar-ui.css"
+      - "080_bereitschaftsdienste/ui-kit/goslar-ui.js"
+      - "080_bereitschaftsdienste/080_bereitschaftsdienste_card.json"
+      - "080_bereitschaftsdienste/080_bereitschaftsdienste_card.png"
+      - "080_bereitschaftsdienste/080_bereitschaftsdienste_index.html"
+      - "080_bereitschaftsdienste/080_bereitschaftsdienste_medizinisch.html"
+      - "080_bereitschaftsdienste/080_bereitschaftsdienste_staedtisch.html"
+      - "080_bereitschaftsdienste/080_bereitschaftsdienste_sicherheit.html"
     implementation: custom
 
 
@@ -430,8 +430,8 @@ crawlers:
     schedule: "0 */2 * * *"
     schedule_human: "Alle 2 Stunden"
     expected_files:
-      - "wochenmaerkte/070_wochenmarkt_card.json"
-      - "wochenmaerkte/070_wochenmarkt_alle.json"
+      - "070_wochenmarkt/070_wochenmarkt_card.json"
+      - "070_wochenmarkt/070_wochenmarkt_alle.json"
     env_file:
       - .env
     implementation: custom
@@ -460,13 +460,13 @@ crawlers:
     schedule: "0 * * * *"
     schedule_human: "Stündlich"
     expected_files:
-      - "ui-kit/goslar-ui.css"
-      - "ui-kit/goslar-ui.js"
-      - "072_karriere_card.json"
-      - "072_jobs.json"
-      - "072_karriere_index.html"
-      - "jobs.css"
-      - "jobs.js"
+      - "072_karriere/ui-kit/goslar-ui.css"
+      - "072_karriere/ui-kit/goslar-ui.js"
+      - "072_karriere/072_karriere_card.json"
+      - "072_karriere/072_jobs.json"
+      - "072_karriere/072_karriere_index.html"
+      - "072_karriere/jobs.css"
+      - "072_karriere/jobs.js"
     ports: []
     implementation: custom
     notes: "Statischer Karriereportal-Export fuer Landkreis Goslar. Laedt stündlich Jobdaten und schreibt HTML plus JSON nach /app/output."
@@ -480,7 +480,7 @@ crawlers:
     schedule: "0 4 * * 1"
     schedule_human: "Wöchentlich Montag 04:00"
     expected_files:
-      - "busflotte/073_busflotte_card.json"
-      - "busflotte/073_busflotte_alle.json"
+      - "073_busflotte/073_busflotte_card.json"
+      - "073_busflotte/073_busflotte_alle.json"
     implementation: custom
     notes: "Aktive Flotte (cat=fleet) der Stadtbus Goslar GmbH (cid=27) via offener GöBUS-JSON-API. Reines JSON: Card -> Index -> Detail je Fahrzeug. Bilder werden von goebus.de verlinkt, nicht gespiegelt."
