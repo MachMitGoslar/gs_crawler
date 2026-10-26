@@ -70,8 +70,8 @@ See [crawler_configs/schema.md](crawler_configs/schema.md) for config format.
 #### Option 2: Custom Container (For complex scrapers)
 
 1. Create directory: `docker_instances/XXX_name/`
-2. Add `Dockerfile`, `script.py`, `crontab`
-3. Add service to `compose.dev.yaml`
+2. Add `Dockerfile` (with `ENV SCHEDULE="..."`) and `script.py`; write output to `/app/output` (the crawler's own folder, public at `/crawler/<id>/`)
+3. Add the crawler to `crawlers.yaml` (with `expected_files` as `<id>/<file>`) and run `./scripts/generate-all.sh`
 4. Run `./scripts/dev.sh build`
 
 ### Project Structure

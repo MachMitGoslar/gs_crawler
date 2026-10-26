@@ -28,7 +28,7 @@ Dieses Verzeichnis enthält wiederverwendbare Base-Images, die die Redundanz in 
 **Enthält:**
 - Python 3.13 + venv
 - requests, beautifulsoup4, pillow, lxml
-- Cron-Daemon
+- Scheduler (`scheduler.py`, Takt über die Umgebungsvariable `SCHEDULE`, ersetzt cron)
 - Gemeinsame Helper-Funktionen
 - Gemeinsames UI-Kit unter `/app/ui-kit`
 
@@ -67,10 +67,9 @@ cd docker_instances/001_senioren
 FROM gs_crawler/python_basic_crawler:latest
 
 COPY script.py .
-COPY crontab /etc/cron.d/mycron
 
-RUN chmod 0600 /etc/cron.d/mycron && \
-    crontab /etc/cron.d/mycron
+# Takt als Cron-Ausdruck (UTC); mehrere mit ';' trennen
+ENV SCHEDULE="0 2 * * *"
 ```
 
 ### 3. Neuen Container erstellen
@@ -83,10 +82,8 @@ cat > docker_instances/999_new_crawler/Dockerfile << EOF
 FROM gs_crawler/python_basic_crawler:latest
 
 COPY script.py .
-COPY crontab /etc/cron.d/mycron
 
-RUN chmod 0600 /etc/cron.d/mycron && \
-    crontab /etc/cron.d/mycron
+ENV SCHEDULE="0 */6 * * *"
 EOF
 
 # Erstelle dein Crawler-Script
@@ -95,15 +92,12 @@ import requests
 from helpers import ensure_directory_exists
 import os
 
-# Output-Pfad (helpers.py ist im Base-Image verfügbar)
+# Output-Pfad: /app/output ist der eigene Ordner des Crawlers (httpdocs/crawler/999_new_crawler)
 output_path = os.path.join("/app/output", "999_new_crawler.json")
 ensure_directory_exists(output_path)
 
 # Dein Crawler-Code hier...
 EOF
-
-# Erstelle Crontab
-echo "0 */6 * * * cd /app && .venv/bin/python3 script.py" > docker_instances/999_new_crawler/crontab
 ```
 
 ## 📊 Statistiken & Einsparungen
