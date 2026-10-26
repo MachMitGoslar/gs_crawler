@@ -162,6 +162,9 @@ jobs:
         pip install pyyaml
         pip install -r base_images/generic_scraper/requirements.txt
 
+    - name: Check files shared between base images
+      run: ./scripts/check-shared-files.sh
+
     - name: Test config-driven crawlers
       run: |
         echo "Testing config-driven crawlers from registry..."
@@ -254,17 +257,34 @@ jobs:
         # Build single platform (uses locally built base images from previous step)
         docker build --tag test/${{ matrix.container }}:test .
 
-        # Basic start test - pass env vars so credential-dependent containers
-        # reach cron without crashing on missing secrets
+        # Basic start test with the same hardening as production (see compose.yaml):
+        # non-root, read-only root filesystem, no capabilities, only /tmp and the
+        # output folder are writable. Pass env vars so credential-dependent
+        # containers reach the scheduler without crashing on missing secrets.
+        out_dir="$RUNNER_TEMP/out_${{ matrix.container }}"
+        mkdir -p "$out_dir" && chmod 777 "$out_dir"
         docker run -d --name test_${{ matrix.container }} \
+          --read-only --cap-drop ALL --security-opt no-new-privileges \
+          --user 1234:1234 \
+          --tmpfs /tmp:rw,noexec,nosuid,size=64m \
+          --tmpfs /data:rw,mode=1777 \
+          -v "$out_dir:/app/output" \
           -e FREIWILLIGEN_AGENTUR_API_KEY=${{ secrets.FREIWILLIGEN_AGENTUR_API_KEY }} \
           -e WOCHENMARKT_CLIENT_ID=${{ secrets.WOCHENMARKT_CLIENT_ID }} \
           -e WOCHENMARKT_CLIENT_SECRET=${{ secrets.WOCHENMARKT_CLIENT_SECRET }} \
           test/${{ matrix.container }}:test
-        sleep 3
+        sleep 20
 
         # Capture logs before any cleanup
-        docker logs test_${{ matrix.container }} 2>&1 || true
+        docker logs test_${{ matrix.container }} > "$RUNNER_TEMP/logs_${{ matrix.container }}.txt" 2>&1 || true
+        cat "$RUNNER_TEMP/logs_${{ matrix.container }}.txt"
+
+        # Hardening must not break the crawler: it may only write to /tmp, /data and /app/output
+        if grep -qiE "Read-only file system|PermissionError|Permission denied|readonly database" "$RUNNER_TEMP/logs_${{ matrix.container }}.txt"; then
+          echo "Container writes outside its writable paths (hardening violation)"
+          docker rm -f test_${{ matrix.container }} || true
+          exit 1
+        fi
 
         if docker ps | grep -q test_${{ matrix.container }}; then
           echo "Container started successfully (still running)"
