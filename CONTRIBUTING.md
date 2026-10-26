@@ -102,8 +102,8 @@ gs_crawler/
 
 ### Output Files
 
-Crawler output is written to `httpdocs/crawler/`. This directory is:
-- Mounted as a volume in all containers
+Crawler output is written to `httpdocs/crawler/<id>/` (create the folders with `./scripts/init-output-dirs.sh`, `dev.sh` does it for you). This directory is:
+- Mounted as a volume, one folder per container
 - Gitignored (not committed)
 - Accessible via the Health Monitor at http://localhost:5015
 

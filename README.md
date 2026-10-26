@@ -164,7 +164,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed setup instructions.
 
 ## Output
 
-All crawlers write to `httpdocs/crawler/` (mounted as `/app/output` in containers).
+Every crawler writes to its own folder `httpdocs/crawler/<id>/` (mounted as `/app/output` in its container, public at `/crawler/<id>/`). Create the folders with `./scripts/init-output-dirs.sh` before `docker compose up`; `scripts/dev.sh` does this automatically. See [docs/HARDENING.md](docs/HARDENING.md).
 
 ## CI/CD
 
