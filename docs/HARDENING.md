@@ -32,8 +32,12 @@ docker compose pull && docker compose up -d
 ```
 
 Hinweise:
-- `httpdocs/crawler` muss dem Hosting-User gehören. Alte Dateien im Wurzelverzeichnis (flache Pfade) werden nicht mehr
-  geschrieben und können nach der Umstellung entfernt werden.
+- Vor der einmaligen Initialisierung oben müssen bestehende Crawler-Container gestoppt werden.
+  `httpdocs/crawler` einschließlich aller vorhandenen Unterordner und Dateien muss dem Hosting-User gehören.
+  Bisher root-eigene Ausgaben muss ein Administrator umstellen, z. B. mit
+  `sudo chown -R "$(id -u):$(id -g)" httpdocs/crawler`, ausgeführt aus der Shell des Hosting-Users.
+  Erst danach `init-output-dirs.sh` ausführen und die gehärteten Container starten.
+- Alte Dateien im Wurzelverzeichnis (flache Pfade) werden nicht mehr geschrieben und können nach der Umstellung entfernt werden.
 - Die SQLite-Datenbank von `033_goslar24-7` liegt im Volume `gs_033_data`. Der bisherige Verlauf im alten Container
   wird nicht übernommen, die GIFs füllen sich innerhalb weniger Stunden wieder.
 - Zeiten im Scheduler gelten in UTC (wie vorher bei cron). Der Takt steht pro Crawler als `ENV SCHEDULE` im Dockerfile.
