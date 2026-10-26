@@ -4,206 +4,359 @@
 # Edit crawlers.yaml and run: python scripts/generate-compose.py
 # =============================================================================
 
+# Gemeinsame Härtung: kein Root, schreibgeschütztes Dateisystem, keine Capabilities.
+# Beschreibbar sind nur /tmp (tmpfs) und die gemounteten Ordner.
+x-crawler-defaults: &crawler-defaults
+  user: "${CRAWLER_UID:-1000}:${CRAWLER_GID:-1000}"
+  read_only: true
+  cap_drop:
+    - ALL
+  security_opt:
+    - no-new-privileges:true
+  tmpfs:
+    - /tmp:rw,noexec,nosuid,size=64m
+  init: true
+  restart: unless-stopped
+
 services:
   # === INFRASTRUCTURE ===
   gs_health_monitor:
+    <<: *crawler-defaults
     build: ./docker_instances/000_health_monitor
     volumes:
-      - ./httpdocs/crawler:/app/output
-      - ./crawlers.yaml:/app/configs/crawlers.yaml:ro
+      - type: bind
+        source: ./httpdocs/crawler
+        target: /app/output
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./httpdocs/crawler/000_health_monitor
+        target: /app/output/000_health_monitor
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./crawlers.yaml
+        target: /app/configs/crawlers.yaml
+        read_only: true
+        bind:
+          create_host_path: false
     ports:
       - "5015:5000"
     container_name: gs_health_monitor
-    restart: unless-stopped
     depends_on:
       - gs_generic_scraper_simple
       - gs_generic_scraper_tschuessschule
 
   # === NEWS & MEDIA ===
   gs_compiler_001_senioren:
+    <<: *crawler-defaults
     build: ./docker_instances/001_senioren
     volumes:
-      - ./httpdocs/crawler:/app/output
+      - type: bind
+        source: ./httpdocs/crawler/001_senioren
+        target: /app/output
+        bind:
+          create_host_path: false
     container_name: gs_compiler_001_senioren
-    restart: unless-stopped
 
   gs_compiler_040_hp:
+    <<: *crawler-defaults
     build: ./docker_instances/040_hp
     volumes:
-      - ./httpdocs/crawler:/app/output
+      - type: bind
+        source: ./httpdocs/crawler/040_hp
+        target: /app/output
+        bind:
+          create_host_path: false
     container_name: gs_compiler_040_hp
-    restart: unless-stopped
 
   # === EVENTS ===
   gs_compiler_004_zufaellig-nix-vor:
+    <<: *crawler-defaults
     build: ./docker_instances/004_zufaellig-nix-vor
     volumes:
-      - ./httpdocs/crawler:/app/output
+      - type: bind
+        source: ./httpdocs/crawler/004_zufaellig-nix-vor
+        target: /app/output
+        bind:
+          create_host_path: false
     container_name: gs_compiler_004_zufaellig-nix-vor
-    restart: unless-stopped
 
   gs_compiler_014_kunst_in_ar:
+    <<: *crawler-defaults
     build: ./docker_instances/014_kunst_in_ar
     volumes:
-      - ./httpdocs/crawler:/app/output
+      - type: bind
+        source: ./httpdocs/crawler/014_kunst_in_ar
+        target: /app/output
+        bind:
+          create_host_path: false
     container_name: gs_compiler_014_kunst_in_ar
-    restart: unless-stopped
 
   gs_compiler_019_was_app:
+    <<: *crawler-defaults
     build: ./docker_instances/019_was_app
     volumes:
-      - ./httpdocs/crawler:/app/output
+      - type: bind
+        source: ./httpdocs/crawler/019_was_app
+        target: /app/output
+        bind:
+          create_host_path: false
     container_name: gs_compiler_019_was_app
-    restart: unless-stopped
 
   gs_compiler_027_erster_freitag:
+    <<: *crawler-defaults
     build: ./docker_instances/027_erster_freitag
     volumes:
-      - ./httpdocs/crawler:/app/output
+      - type: bind
+        source: ./httpdocs/crawler/027_erster_freitag
+        target: /app/output
+        bind:
+          create_host_path: false
     container_name: gs_compiler_027_erster_freitag
-    restart: unless-stopped
 
   gs_compiler_070_wochenmarkt:
+    <<: *crawler-defaults
     build: ./docker_instances/070_wochenmarkt
     volumes:
-      - ./httpdocs/crawler:/app/output
+      - type: bind
+        source: ./httpdocs/crawler/070_wochenmarkt
+        target: /app/output
+        bind:
+          create_host_path: false
     env_file:
       - .env
     container_name: gs_compiler_070_wochenmarkt
-    restart: unless-stopped
 
-  # === LOCAL COMMUNITIES ===
   # === COMMUNITY & VOLUNTEERING ===
   gs_compiler_031_goslarer_geschichten:
+    <<: *crawler-defaults
     build: ./docker_instances/031_goslarer_geschichten
     volumes:
-      - ./httpdocs/crawler:/app/output
+      - type: bind
+        source: ./httpdocs/crawler/031_goslarer_geschichten
+        target: /app/output
+        bind:
+          create_host_path: false
     container_name: gs_compiler_031_goslarer_geschichten
-    restart: unless-stopped
 
   gs_compiler_042_freiwilligen:
+    <<: *crawler-defaults
     build: ./docker_instances/042_freiwilligen
     volumes:
-      - ./httpdocs/crawler:/app/output
+      - type: bind
+        source: ./httpdocs/crawler/042_freiwilligen
+        target: /app/output
+        bind:
+          create_host_path: false
     env_file:
       - .env
     container_name: gs_compiler_042_freiwilligen
-    restart: unless-stopped
 
   # === ENVIRONMENTAL MONITORING ===
   gs_compiler_035_talsperren:
+    <<: *crawler-defaults
     build: ./docker_instances/035_talsperren
     volumes:
-      - ./httpdocs/crawler:/app/output
+      - type: bind
+        source: ./httpdocs/crawler/035_talsperren
+        target: /app/output
+        bind:
+          create_host_path: false
     container_name: gs_compiler_035_talsperren
-    restart: unless-stopped
 
   gs_compiler_045_naturgefahren:
+    <<: *crawler-defaults
     build: ./docker_instances/045_naturgefahren
     volumes:
-      - ./httpdocs/crawler:/app/output
+      - type: bind
+        source: ./httpdocs/crawler/045_naturgefahren
+        target: /app/output
+        bind:
+          create_host_path: false
     container_name: gs_compiler_045_naturgefahren
-    restart: unless-stopped
 
   gs_compiler_046_bio_stadt_goslar:
+    <<: *crawler-defaults
     build: ./docker_instances/046_bio_stadt_goslar
     volumes:
-      - ./httpdocs/crawler:/app/output
+      - type: bind
+        source: ./httpdocs/crawler/046_bio_stadt_goslar
+        target: /app/output
+        bind:
+          create_host_path: false
     container_name: gs_compiler_046_bio_stadt_goslar
-    restart: unless-stopped
 
   gs_compiler_047_bodenwasser:
+    <<: *crawler-defaults
     build: ./docker_instances/047_bodenwasser
     volumes:
-      - ./httpdocs/crawler:/app/output
+      - type: bind
+        source: ./httpdocs/crawler/047_bodenwasser
+        target: /app/output
+        bind:
+          create_host_path: false
     container_name: gs_compiler_047_bodenwasser
-    restart: unless-stopped
 
-  # === EDUCATION ===
   # === MOBILITÄT & VERKEHR ===
   gs_compiler_073_busflotte:
+    <<: *crawler-defaults
     build: ./docker_instances/073_busflotte
     volumes:
-      - ./httpdocs/crawler:/app/output
+      - type: bind
+        source: ./httpdocs/crawler/073_busflotte
+        target: /app/output
+        bind:
+          create_host_path: false
     container_name: gs_compiler_073_busflotte
-    restart: unless-stopped
 
   # === SPECIALIZED ===
   gs_compiler_032_webcams_goslar:
+    <<: *crawler-defaults
     build: ./docker_instances/032_webcams_goslar
     volumes:
-      - ./httpdocs/crawler:/app/output
+      - type: bind
+        source: ./httpdocs/crawler/032_webcams_goslar
+        target: /app/output
+        bind:
+          create_host_path: false
     container_name: gs_compiler_032_webcams_goslar
-    restart: unless-stopped
 
   gs_compiler_033_goslar24-7:
+    <<: *crawler-defaults
     build: ./docker_instances/033_goslar24-7
     volumes:
-      - ./httpdocs/crawler:/app/output
+      - type: bind
+        source: ./httpdocs/crawler/033_goslar24-7
+        target: /app/output
+        bind:
+          create_host_path: false
+      - gs_033_data:/data
     container_name: gs_compiler_033_goslar_24-7
-    restart: unless-stopped
 
   gs_compiler_056_serviceportal:
+    <<: *crawler-defaults
     build: ./docker_instances/056_serviceportal
     volumes:
-      - ./httpdocs/crawler:/app/output
+      - type: bind
+        source: ./httpdocs/crawler/056_serviceportal
+        target: /app/output
+        bind:
+          create_host_path: false
     container_name: gs_compiler_056_serviceportal
-    restart: unless-stopped
 
   gs_compiler_060_defi_kataster:
+    <<: *crawler-defaults
     build: ./docker_instances/060_defi_kataster
     volumes:
-      - ./httpdocs/crawler:/app/output
+      - type: bind
+        source: ./httpdocs/crawler/060_defi_kataster
+        target: /app/output
+        bind:
+          create_host_path: false
     container_name: gs_compiler_060_defi_kataster
-    restart: unless-stopped
 
   gs_compiler_080_bereitschaftsdienste:
+    <<: *crawler-defaults
     build: ./docker_instances/080_bereitschaftsdienste
     volumes:
-      - ./httpdocs/crawler:/app/output
+      - type: bind
+        source: ./httpdocs/crawler/080_bereitschaftsdienste
+        target: /app/output
+        bind:
+          create_host_path: false
     container_name: gs_compiler_080_bereitschaftsdienste
-    restart: unless-stopped
 
   # === API SERVICES ===
   gs_compiler_068_altstadtfest:
+    <<: *crawler-defaults
     build: ./docker_instances/068_altstadtfest
-    volumes:
-      - ./httpdocs/crawler:/app/output
     ports:
       - "5016:5000"
     container_name: gs_compiler_068_altstadtfest
-    restart: unless-stopped
 
   gs_compiler_072_karriere:
+    <<: *crawler-defaults
     build: ./docker_instances/072_karriere
     volumes:
-      - ./httpdocs/crawler:/app/output
+      - type: bind
+        source: ./httpdocs/crawler/072_karriere
+        target: /app/output
+        bind:
+          create_host_path: false
     container_name: gs_compiler_072_karriere
-    restart: unless-stopped
 
   # === GENERIC SCRAPER (Config-Driven) ===
   # These run the YAML-based crawlers from crawler_configs/
   gs_generic_scraper_simple:
+    <<: *crawler-defaults
     build: ./base_images/generic_scraper
     volumes:
-      - ./httpdocs/crawler:/app/output
-      - ./crawler_configs/simple:/app/configs
+      - type: bind
+        source: ./httpdocs/crawler/002_gz
+        target: /app/output/002_gz
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./httpdocs/crawler/041_immenrode
+        target: /app/output/041_immenrode
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./httpdocs/crawler/044_wiedelah
+        target: /app/output/044_wiedelah
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./httpdocs/crawler/048_jerstedt
+        target: /app/output/048_jerstedt
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./httpdocs/crawler/051_vhs
+        target: /app/output/051_vhs
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./httpdocs/crawler/052_vhs_kinderuni
+        target: /app/output/052_vhs_kinderuni
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./crawler_configs/simple
+        target: /app/configs
+        read_only: true
+        bind:
+          create_host_path: false
     container_name: gs_generic_scraper_simple
-    restart: unless-stopped
 
   gs_generic_scraper_tschuessschule:
+    <<: *crawler-defaults
     build: ./base_images/generic_scraper
     volumes:
-      - ./httpdocs/crawler:/app/output
-      - ./crawler_configs/tschuessschule:/app/configs
+      - type: bind
+        source: ./httpdocs/crawler/050_tschuessschule_studium
+        target: /app/output/050_tschuessschule_studium
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./httpdocs/crawler/053_tschuessschule_praktikum
+        target: /app/output/053_tschuessschule_praktikum
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./httpdocs/crawler/054_tschuessschule_ausbildung
+        target: /app/output/054_tschuessschule_ausbildung
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./crawler_configs/tschuessschule
+        target: /app/configs
+        read_only: true
+        bind:
+          create_host_path: false
     container_name: gs_generic_scraper_tschuessschule
-    restart: unless-stopped
 
-# Shared volume for all output files
 volumes:
-  crawler_output:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ./httpdocs/crawler
+  gs_033_data:

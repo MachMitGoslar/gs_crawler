@@ -5,205 +5,358 @@
 # Uses pre-built images from GitHub Container Registry
 # =============================================================================
 
+# Gemeinsame Härtung: kein Root, schreibgeschütztes Dateisystem, keine Capabilities.
+# Beschreibbar sind nur /tmp (tmpfs) und die gemounteten Ordner.
+x-crawler-defaults: &crawler-defaults
+  user: "${CRAWLER_UID:?CRAWLER_UID fehlt (UID des Hosting-Users, siehe .env.example)}:${CRAWLER_GID:?CRAWLER_GID fehlt (GID des Hosting-Users, siehe .env.example)}"
+  read_only: true
+  cap_drop:
+    - ALL
+  security_opt:
+    - no-new-privileges:true
+  tmpfs:
+    - /tmp:rw,noexec,nosuid,size=64m
+  init: true
+  restart: unless-stopped
+
 services:
   # === INFRASTRUCTURE ===
   gs_health_monitor:
+    <<: *crawler-defaults
     image: ghcr.io/machmitgoslar/gs_crawler_000_health_monitor:latest
     volumes:
-      - ./httpdocs/crawler:/app/output
-      - ./crawlers.yaml:/app/configs/crawlers.yaml:ro
+      - type: bind
+        source: ./httpdocs/crawler
+        target: /app/output
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./httpdocs/crawler/000_health_monitor
+        target: /app/output/000_health_monitor
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./crawlers.yaml
+        target: /app/configs/crawlers.yaml
+        read_only: true
+        bind:
+          create_host_path: false
     ports:
       - "5015:5000"
     container_name: gs_health_monitor
-    restart: unless-stopped
     depends_on:
       - gs_generic_scraper_simple
       - gs_generic_scraper_tschuessschule
 
   # === NEWS & MEDIA ===
   gs_compiler_001_senioren:
+    <<: *crawler-defaults
     image: ghcr.io/machmitgoslar/gs_crawler_001_senioren:latest
     volumes:
-      - ./httpdocs/crawler:/app/output
+      - type: bind
+        source: ./httpdocs/crawler/001_senioren
+        target: /app/output
+        bind:
+          create_host_path: false
     container_name: gs_compiler_001_senioren
-    restart: unless-stopped
 
   gs_compiler_040_hp:
+    <<: *crawler-defaults
     image: ghcr.io/machmitgoslar/gs_crawler_040_hp:latest
     volumes:
-      - ./httpdocs/crawler:/app/output
+      - type: bind
+        source: ./httpdocs/crawler/040_hp
+        target: /app/output
+        bind:
+          create_host_path: false
     container_name: gs_compiler_040_hp
-    restart: unless-stopped
 
   # === EVENTS ===
   gs_compiler_004_zufaellig-nix-vor:
+    <<: *crawler-defaults
     image: ghcr.io/machmitgoslar/gs_crawler_004_zufaellig-nix-vor:latest
     volumes:
-      - ./httpdocs/crawler:/app/output
+      - type: bind
+        source: ./httpdocs/crawler/004_zufaellig-nix-vor
+        target: /app/output
+        bind:
+          create_host_path: false
     container_name: gs_compiler_004_zufaellig-nix-vor
-    restart: unless-stopped
 
   gs_compiler_014_kunst_in_ar:
+    <<: *crawler-defaults
     image: ghcr.io/machmitgoslar/gs_crawler_014_kunst_in_ar:latest
     volumes:
-      - ./httpdocs/crawler:/app/output
+      - type: bind
+        source: ./httpdocs/crawler/014_kunst_in_ar
+        target: /app/output
+        bind:
+          create_host_path: false
     container_name: gs_compiler_014_kunst_in_ar
-    restart: unless-stopped
 
   gs_compiler_019_was_app:
+    <<: *crawler-defaults
     image: ghcr.io/machmitgoslar/gs_crawler_019_was_app:latest
     volumes:
-      - ./httpdocs/crawler:/app/output
+      - type: bind
+        source: ./httpdocs/crawler/019_was_app
+        target: /app/output
+        bind:
+          create_host_path: false
     container_name: gs_compiler_019_was_app
-    restart: unless-stopped
 
   gs_compiler_027_erster_freitag:
+    <<: *crawler-defaults
     image: ghcr.io/machmitgoslar/gs_crawler_027_erster_freitag:latest
     volumes:
-      - ./httpdocs/crawler:/app/output
+      - type: bind
+        source: ./httpdocs/crawler/027_erster_freitag
+        target: /app/output
+        bind:
+          create_host_path: false
     container_name: gs_compiler_027_erster_freitag
-    restart: unless-stopped
 
   gs_compiler_070_wochenmarkt:
+    <<: *crawler-defaults
     image: ghcr.io/machmitgoslar/gs_crawler_070_wochenmarkt:latest
     volumes:
-      - ./httpdocs/crawler:/app/output
+      - type: bind
+        source: ./httpdocs/crawler/070_wochenmarkt
+        target: /app/output
+        bind:
+          create_host_path: false
     env_file:
       - .env
     container_name: gs_compiler_070_wochenmarkt
-    restart: unless-stopped
 
-  # === LOCAL COMMUNITIES ===
   # === COMMUNITY & VOLUNTEERING ===
   gs_compiler_031_goslarer_geschichten:
+    <<: *crawler-defaults
     image: ghcr.io/machmitgoslar/gs_crawler_031_goslarer_geschichten:latest
     volumes:
-      - ./httpdocs/crawler:/app/output
+      - type: bind
+        source: ./httpdocs/crawler/031_goslarer_geschichten
+        target: /app/output
+        bind:
+          create_host_path: false
     container_name: gs_compiler_031_goslarer_geschichten
-    restart: unless-stopped
 
   gs_compiler_042_freiwilligen:
+    <<: *crawler-defaults
     image: ghcr.io/machmitgoslar/gs_crawler_042_freiwilligen:latest
     volumes:
-      - ./httpdocs/crawler:/app/output
+      - type: bind
+        source: ./httpdocs/crawler/042_freiwilligen
+        target: /app/output
+        bind:
+          create_host_path: false
     env_file:
       - .env
     container_name: gs_compiler_042_freiwilligen
-    restart: unless-stopped
 
   # === ENVIRONMENTAL MONITORING ===
   gs_compiler_035_talsperren:
+    <<: *crawler-defaults
     image: ghcr.io/machmitgoslar/gs_crawler_035_talsperren:latest
     volumes:
-      - ./httpdocs/crawler:/app/output
+      - type: bind
+        source: ./httpdocs/crawler/035_talsperren
+        target: /app/output
+        bind:
+          create_host_path: false
     container_name: gs_compiler_035_talsperren
-    restart: unless-stopped
 
   gs_compiler_045_naturgefahren:
+    <<: *crawler-defaults
     image: ghcr.io/machmitgoslar/gs_crawler_045_naturgefahren:latest
     volumes:
-      - ./httpdocs/crawler:/app/output
+      - type: bind
+        source: ./httpdocs/crawler/045_naturgefahren
+        target: /app/output
+        bind:
+          create_host_path: false
     container_name: gs_compiler_045_naturgefahren
-    restart: unless-stopped
 
   gs_compiler_046_bio_stadt_goslar:
+    <<: *crawler-defaults
     image: ghcr.io/machmitgoslar/gs_crawler_046_bio_stadt_goslar:latest
     volumes:
-      - ./httpdocs/crawler:/app/output
+      - type: bind
+        source: ./httpdocs/crawler/046_bio_stadt_goslar
+        target: /app/output
+        bind:
+          create_host_path: false
     container_name: gs_compiler_046_bio_stadt_goslar
-    restart: unless-stopped
 
   gs_compiler_047_bodenwasser:
+    <<: *crawler-defaults
     image: ghcr.io/machmitgoslar/gs_crawler_047_bodenwasser:latest
     volumes:
-      - ./httpdocs/crawler:/app/output
+      - type: bind
+        source: ./httpdocs/crawler/047_bodenwasser
+        target: /app/output
+        bind:
+          create_host_path: false
     container_name: gs_compiler_047_bodenwasser
-    restart: unless-stopped
 
-  # === EDUCATION ===
   # === MOBILITÄT & VERKEHR ===
   gs_compiler_073_busflotte:
+    <<: *crawler-defaults
     image: ghcr.io/machmitgoslar/gs_crawler_073_busflotte:latest
     volumes:
-      - ./httpdocs/crawler:/app/output
+      - type: bind
+        source: ./httpdocs/crawler/073_busflotte
+        target: /app/output
+        bind:
+          create_host_path: false
     container_name: gs_compiler_073_busflotte
-    restart: unless-stopped
 
   # === SPECIALIZED ===
   gs_compiler_032_webcams_goslar:
+    <<: *crawler-defaults
     image: ghcr.io/machmitgoslar/gs_crawler_032_webcams_goslar:latest
     volumes:
-      - ./httpdocs/crawler:/app/output
+      - type: bind
+        source: ./httpdocs/crawler/032_webcams_goslar
+        target: /app/output
+        bind:
+          create_host_path: false
     container_name: gs_compiler_032_webcams_goslar
-    restart: unless-stopped
 
   gs_compiler_033_goslar24-7:
+    <<: *crawler-defaults
     image: ghcr.io/machmitgoslar/gs_crawler_033_goslar24-7:latest
     volumes:
-      - ./httpdocs/crawler:/app/output
+      - type: bind
+        source: ./httpdocs/crawler/033_goslar24-7
+        target: /app/output
+        bind:
+          create_host_path: false
+      - gs_033_data:/data
     container_name: gs_compiler_033_goslar_24-7
-    restart: unless-stopped
 
   gs_compiler_056_serviceportal:
+    <<: *crawler-defaults
     image: ghcr.io/machmitgoslar/gs_crawler_056_serviceportal:latest
     volumes:
-      - ./httpdocs/crawler:/app/output
+      - type: bind
+        source: ./httpdocs/crawler/056_serviceportal
+        target: /app/output
+        bind:
+          create_host_path: false
     container_name: gs_compiler_056_serviceportal
-    restart: unless-stopped
 
   gs_compiler_060_defi_kataster:
+    <<: *crawler-defaults
     image: ghcr.io/machmitgoslar/gs_crawler_060_defi_kataster:latest
     volumes:
-      - ./httpdocs/crawler:/app/output
+      - type: bind
+        source: ./httpdocs/crawler/060_defi_kataster
+        target: /app/output
+        bind:
+          create_host_path: false
     container_name: gs_compiler_060_defi_kataster
-    restart: unless-stopped
 
   gs_compiler_080_bereitschaftsdienste:
+    <<: *crawler-defaults
     image: ghcr.io/machmitgoslar/gs_crawler_080_bereitschaftsdienste:latest
     volumes:
-      - ./httpdocs/crawler:/app/output
+      - type: bind
+        source: ./httpdocs/crawler/080_bereitschaftsdienste
+        target: /app/output
+        bind:
+          create_host_path: false
     container_name: gs_compiler_080_bereitschaftsdienste
-    restart: unless-stopped
 
   # === API SERVICES ===
   gs_compiler_068_altstadtfest:
+    <<: *crawler-defaults
     image: ghcr.io/machmitgoslar/gs_crawler_068_altstadtfest:latest
-    volumes:
-      - ./httpdocs/crawler:/app/output
     ports:
       - "5016:5000"
     container_name: gs_compiler_068_altstadtfest
-    restart: unless-stopped
 
   gs_compiler_072_karriere:
+    <<: *crawler-defaults
     image: ghcr.io/machmitgoslar/gs_crawler_072_karriere:latest
     volumes:
-      - ./httpdocs/crawler:/app/output
+      - type: bind
+        source: ./httpdocs/crawler/072_karriere
+        target: /app/output
+        bind:
+          create_host_path: false
     container_name: gs_compiler_072_karriere
-    restart: unless-stopped
 
   # === GENERIC SCRAPER (Config-Driven) ===
   gs_generic_scraper_simple:
+    <<: *crawler-defaults
     image: ghcr.io/machmitgoslar/gs_crawler_generic_scraper:latest
     volumes:
-      - ./httpdocs/crawler:/app/output
-      - ./crawler_configs/simple:/app/configs
+      - type: bind
+        source: ./httpdocs/crawler/002_gz
+        target: /app/output/002_gz
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./httpdocs/crawler/041_immenrode
+        target: /app/output/041_immenrode
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./httpdocs/crawler/044_wiedelah
+        target: /app/output/044_wiedelah
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./httpdocs/crawler/048_jerstedt
+        target: /app/output/048_jerstedt
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./httpdocs/crawler/051_vhs
+        target: /app/output/051_vhs
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./httpdocs/crawler/052_vhs_kinderuni
+        target: /app/output/052_vhs_kinderuni
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./crawler_configs/simple
+        target: /app/configs
+        read_only: true
+        bind:
+          create_host_path: false
     container_name: gs_generic_scraper_simple
-    restart: unless-stopped
 
   gs_generic_scraper_tschuessschule:
+    <<: *crawler-defaults
     image: ghcr.io/machmitgoslar/gs_crawler_generic_scraper:latest
     volumes:
-      - ./httpdocs/crawler:/app/output
-      - ./crawler_configs/tschuessschule:/app/configs
+      - type: bind
+        source: ./httpdocs/crawler/050_tschuessschule_studium
+        target: /app/output/050_tschuessschule_studium
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./httpdocs/crawler/053_tschuessschule_praktikum
+        target: /app/output/053_tschuessschule_praktikum
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./httpdocs/crawler/054_tschuessschule_ausbildung
+        target: /app/output/054_tschuessschule_ausbildung
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./crawler_configs/tschuessschule
+        target: /app/configs
+        read_only: true
+        bind:
+          create_host_path: false
     container_name: gs_generic_scraper_tschuessschule
-    restart: unless-stopped
 
-# Shared volume for all output files
 volumes:
-  crawler_output:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ./httpdocs/crawler
+  gs_033_data:
