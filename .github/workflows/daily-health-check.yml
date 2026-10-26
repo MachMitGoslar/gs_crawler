@@ -28,10 +28,24 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Create output directory
+    - name: Prepare output directories and environment
+      env:
+        FREIWILLIGEN_AGENTUR_API_KEY: ${{ secrets.FREIWILLIGEN_AGENTUR_API_KEY }}
+        WOCHENMARKT_CLIENT_ID: ${{ secrets.WOCHENMARKT_CLIENT_ID }}
+        WOCHENMARKT_CLIENT_SECRET: ${{ secrets.WOCHENMARKT_CLIENT_SECRET }}
       run: |
-        mkdir -p httpdocs/crawler
-        echo "Created output directory for crawler data"
+        # One folder per crawler: compose bind mounts fail if they are missing
+        ./scripts/init-output-dirs.sh
+
+        # compose.yaml needs the container user (CRAWLER_UID/GID) and the env_file entries
+        # need .env; compose reads it automatically for variable substitution as well
+        {
+          echo "CRAWLER_UID=$(id -u)"
+          echo "CRAWLER_GID=$(id -g)"
+          echo "FREIWILLIGEN_AGENTUR_API_KEY=$FREIWILLIGEN_AGENTUR_API_KEY"
+          echo "WOCHENMARKT_CLIENT_ID=$WOCHENMARKT_CLIENT_ID"
+          echo "WOCHENMARKT_CLIENT_SECRET=$WOCHENMARKT_CLIENT_SECRET"
+        } > .env
 
     - name: Pull and start containers
       run: |
@@ -91,7 +105,7 @@ jobs:
             echo ""
             echo "=== JSON VALIDATION (first 10 files) ==="
             count=0
-            for json_file in httpdocs/crawler/*.json; do
+            for json_file in httpdocs/crawler/*/*.json; do
               if [ -f "$json_file" ] && [ "$count" -lt 10 ]; then
                 if jq empty "$json_file" 2>/dev/null; then
                   echo "✅ Valid: $(basename "$json_file")"
