@@ -25,6 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       containers: ${{ steps.registry.outputs.containers }}
+      disabled-containers: ${{ steps.registry.outputs.disabled-containers }}
       config-dirs: ${{ steps.registry.outputs.config-dirs }}
       base-images: ${{ steps.registry.outputs.base-images }}
 
@@ -44,15 +45,18 @@ jobs:
       id: registry
       run: |
         containers=$(python scripts/generate-workflow-matrix.py --containers)
+        disabled_containers=$(python scripts/generate-workflow-matrix.py --disabled)
         config_dirs=$(python scripts/generate-workflow-matrix.py --config-dirs)
         base_images=$(python scripts/generate-workflow-matrix.py --base-images)
 
         echo "containers=$containers" >> $GITHUB_OUTPUT
+        echo "disabled-containers=$disabled_containers" >> $GITHUB_OUTPUT
         echo "config-dirs=$config_dirs" >> $GITHUB_OUTPUT
         echo "base-images=$base_images" >> $GITHUB_OUTPUT
 
         echo "Loaded from crawlers.yaml registry:"
         echo "  Containers: $containers"
+        echo "  Disabled (enabled: false): $disabled_containers"
         echo "  Config dirs: $config_dirs"
         echo "  Base images: $base_images"
 
@@ -256,6 +260,13 @@ jobs:
 
         # Build single platform (uses locally built base images from previous step)
         docker build --tag test/${{ matrix.container }}:test .
+
+        # Crawlers paused with enabled: false in crawlers.yaml are only built, never run:
+        # starting them would contact the (possibly not yet permitted) source again.
+        if echo '${{ needs.load-registry.outputs.disabled-containers }}' | jq -e --arg c "${{ matrix.container }}" 'index($c)' > /dev/null; then
+          echo "${{ matrix.container }} is disabled (enabled: false) - image built, start test skipped"
+          exit 0
+        fi
 
         # Basic start test with the same hardening as production (see compose.yaml):
         # non-root, read-only root filesystem, no capabilities, only /tmp and the
