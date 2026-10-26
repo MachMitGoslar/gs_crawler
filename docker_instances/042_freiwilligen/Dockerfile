@@ -5,10 +5,6 @@ FROM ghcr.io/machmitgoslar/gs_crawler_python_basic_crawler:latest
 COPY script.py .
 COPY 042_freiwilligenagentur_index.html .
 COPY 042_freiwilligenagentur_detail.html .
-COPY crontab /etc/cron.d/mycron
 
-
-
-# Konfiguriere Cron
-RUN chmod 0600 /etc/cron.d/mycron && \
-    crontab /etc/cron.d/mycron
+# Takt (Cron-Ausdruck, UTC) für den Scheduler im Base-Image
+ENV SCHEDULE="0 2,14 * * *"

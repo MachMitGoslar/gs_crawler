@@ -12,11 +12,11 @@ COPY refresh_jobs.py .
 COPY jobs.html .
 COPY jobs.css .
 COPY jobs.js .
-COPY crontab /etc/cron.d/mycron
 
-RUN chmod 0600 /etc/cron.d/mycron \
-    && crontab /etc/cron.d/mycron \
-    && mkdir -p /app/output
+RUN mkdir -p /app/output
 
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
+
+# Takt (Cron-Ausdruck, UTC) für den Scheduler im Base-Image
+ENV SCHEDULE="0 * * * *"

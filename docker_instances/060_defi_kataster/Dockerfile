@@ -7,8 +7,6 @@ COPY index.html .
 COPY script.js .
 COPY style.css .
 COPY data.json .
-COPY crontab /etc/cron.d/mycron
 
-# Konfiguriere Cron
-RUN chmod 0600 /etc/cron.d/mycron && \
-    crontab /etc/cron.d/mycron
+# Takt (Cron-Ausdruck, UTC) für den Scheduler im Base-Image
+ENV SCHEDULE="0 6 * * *"

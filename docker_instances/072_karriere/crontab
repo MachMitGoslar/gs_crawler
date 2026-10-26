@@ -1,2 +1,0 @@
-# Refresh cached Karriere static export every hour
-0 * * * * cd /app ; .venv/bin/python3 /app/script.py >> /proc/1/fd/1 2>&1
