@@ -18,3 +18,5 @@ typing_extensions==4.14.0
 urllib3==2.5.0
 schedule==1.2.1
 pytz==2024.1
+croniter==6.2.4
+python-dateutil==2.9.0.post0

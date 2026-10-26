@@ -72,6 +72,10 @@ def generate_crawler_tables(registry):
             if len(files) > 50:
                 files = files[:47] + "..."
 
+            if not crawler.get('enabled', True):
+                name = f"{name} _(pausiert)_"
+                schedule = "-"
+
             lines.append(f"| {cid} | {name} | {ctype} | {schedule} | `{files}` |")
 
         lines.append("")

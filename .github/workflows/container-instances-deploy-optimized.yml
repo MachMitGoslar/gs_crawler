@@ -103,7 +103,7 @@ jobs:
         echo "$changed_files"
 
         # Check for base image changes (excluding generic_scraper)
-        if echo "$changed_files" | grep -q "^base_images/python\|^base_images/php\|^base_images/flask"; then
+        if echo "$changed_files" | grep -q "^base_images/python\|^base_images/flask"; then
           base_images_changed="true"
           deploy_all="true"
           echo "Base images changed - will deploy all dependent containers"
@@ -122,7 +122,7 @@ jobs:
 
         # Collect changed containers (only if they still exist - skip deleted)
         for file in $changed_files; do
-          if [[ $file == docker_instances/*/Dockerfile ]] || [[ $file == docker_instances/*/*.py ]] || [[ $file == docker_instances/*/*.php ]] || [[ $file == docker_instances/*/crontab ]] || [[ $file == docker_instances/*/templates/* ]] || [[ $file == docker_instances/*/*.html ]] || [[ $file == docker_instances/*/*.css ]] || [[ $file == docker_instances/*/*.json ]] || [[ $file == docker_instances/*/*.js ]] || [[ $file == docker_instances/*/*.svg ]]; then
+          if [[ $file == docker_instances/*/Dockerfile ]] || [[ $file == docker_instances/*/*.py ]] || [[ $file == docker_instances/*/crontab ]] || [[ $file == docker_instances/*/templates/* ]] || [[ $file == docker_instances/*/*.html ]] || [[ $file == docker_instances/*/*.css ]] || [[ $file == docker_instances/*/*.json ]] || [[ $file == docker_instances/*/*.js ]] || [[ $file == docker_instances/*/*.svg ]]; then
             container=$(echo $file | cut -d'/' -f2)
             # Only add if container directory still exists (not deleted)
             if [[ -d "docker_instances/$container" ]] && [[ ! " ${changed_containers[@]} " =~ " ${container} " ]]; then

@@ -8,7 +8,7 @@ Dieses Verzeichnis enthält wiederverwendbare Base-Images, die die Redundanz in 
 - **Redundanz:** Jeder Container hatte identische Dockerfile-Strukturen
 - **Wartbarkeit:** Änderungen mussten in 20+ Dockerfiles repliziert werden
 - **Größe:** Jeder Container installierte dieselben Dependencies
-- **Konsistenz:** Unterschiedliche Python-/PHP-Versionen zwischen Containern
+- **Konsistenz:** Unterschiedliche Python-Versionen zwischen Containern
 - **Build-Zeit:** Lange Build-Zeiten durch redundante Installationen
 
 ### Nachher (Vorteile):
@@ -28,30 +28,11 @@ Dieses Verzeichnis enthält wiederverwendbare Base-Images, die die Redundanz in 
 **Enthält:**
 - Python 3.13 + venv
 - requests, beautifulsoup4, pillow, lxml
-- Cron-Daemon
+- Scheduler (`scheduler.py`, Takt über die Umgebungsvariable `SCHEDULE`, ersetzt cron)
 - Gemeinsame Helper-Funktionen
 - Gemeinsames UI-Kit unter `/app/ui-kit`
 
-### 2. `gs_crawler/python_selenium_crawler`
-**Für:** Erweiterte Crawler mit Browser-Automatisierung  
-**Verwendet von:** 2 Container (naturgefahren, talsperren)  
-**Reduziert:** ~100 Zeilen redundanten Code  
-
-**Enthält:**
-- Alles von python_basic_crawler
-- Firefox ESR + Selenium WebDriver
-- matplotlib, numpy für Datenverarbeitung
-
-### 3. `gs_crawler/php_basic_crawler`
-**Für:** PHP-basierte Crawler  
-**Verwendet von:** 1 Container (ferienpass)  
-**Reduziert:** ~50 Zeilen redundanten Code  
-
-**Enthält:**
-- PHP 8.2 CLI
-- Cron-Daemon
-
-### 4. `gs_crawler/flask_monitor`
+### 2. `gs_crawler/flask_monitor`
 **Für:** Flask-basierte Monitoring-Anwendungen  
 **Verwendet von:** 1 Container (health_monitor)  
 **Reduziert:** ~30 Zeilen redundanten Code  
@@ -86,10 +67,9 @@ cd docker_instances/001_senioren
 FROM gs_crawler/python_basic_crawler:latest
 
 COPY script.py .
-COPY crontab /etc/cron.d/mycron
 
-RUN chmod 0600 /etc/cron.d/mycron && \
-    crontab /etc/cron.d/mycron
+# Takt als Cron-Ausdruck (UTC); mehrere mit ';' trennen
+ENV SCHEDULE="0 2 * * *"
 ```
 
 ### 3. Neuen Container erstellen
@@ -102,10 +82,8 @@ cat > docker_instances/999_new_crawler/Dockerfile << EOF
 FROM gs_crawler/python_basic_crawler:latest
 
 COPY script.py .
-COPY crontab /etc/cron.d/mycron
 
-RUN chmod 0600 /etc/cron.d/mycron && \
-    crontab /etc/cron.d/mycron
+ENV SCHEDULE="0 */6 * * *"
 EOF
 
 # Erstelle dein Crawler-Script
@@ -114,15 +92,12 @@ import requests
 from helpers import ensure_directory_exists
 import os
 
-# Output-Pfad (helpers.py ist im Base-Image verfügbar)
+# Output-Pfad: /app/output ist der eigene Ordner des Crawlers (httpdocs/crawler/999_new_crawler)
 output_path = os.path.join("/app/output", "999_new_crawler.json")
 ensure_directory_exists(output_path)
 
 # Dein Crawler-Code hier...
 EOF
-
-# Erstelle Crontab
-echo "0 */6 * * * cd /app && .venv/bin/python3 script.py" > docker_instances/999_new_crawler/crontab
 ```
 
 ## 📊 Statistiken & Einsparungen
@@ -177,7 +152,7 @@ Alle Base-Images setzen:
 - `PYTHONDONTWRITEBYTECODE=1` (für Python-Images)
 
 ### Ports:
-- Python/PHP Crawler: Kein Port (reine Cron-Jobs)
+- Python Crawler: Kein Port (reine Cron-Jobs)
 - Flask Monitor: Port 5000 exponiert
 
 ### Volumes:

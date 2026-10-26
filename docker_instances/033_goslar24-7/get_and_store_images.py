@@ -2,11 +2,12 @@ import logging
 import requests
 from PIL import Image
 from io import BytesIO
+import os
 import sqlite3
 from datetime import datetime, timedelta
 import init_db
 
-DB_PATH = "webcam_images.db"
+DB_PATH = os.environ.get("DB_PATH", "webcam_images.db")
 
 # Webcam-URLs
 URLS = [

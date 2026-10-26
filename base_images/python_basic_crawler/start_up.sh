@@ -1,15 +1,12 @@
 #!/bin/sh
-echo "Starting Python Basic Crawler..."
 cd /app
 
-# Prüfe ob ein script.py existiert
-if [ -f "script.py" ]; then
-    echo "Running script.py once..."
-    .venv/bin/python3 script.py >> /proc/1/fd/1
-else
-    echo "No script.py found, skipping initial run."
+# Mit SCHEDULE: Scheduler führt script.py nach Cron-Ausdruck aus (ersetzt cron).
+# Ohne SCHEDULE: script.py läuft einmal im Vordergrund (z. B. eigene Endlosschleife).
+if [ -n "$SCHEDULE" ]; then
+    echo "Starting scheduler (SCHEDULE=$SCHEDULE)..."
+    exec .venv/bin/python3 scheduler.py
 fi
 
-# Starte Cron für geplante Tasks
-echo "Starting cron daemon..."
-cron -f
+echo "Running script.py..."
+exec .venv/bin/python3 script.py

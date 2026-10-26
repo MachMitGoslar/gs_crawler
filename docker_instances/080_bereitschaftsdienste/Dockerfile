@@ -9,9 +9,8 @@ COPY 080_bereitschaftsdienste_medizinisch.html .
 COPY 080_bereitschaftsdienste_sicherheit.html .
 COPY 080_bereitschaftsdienste_staedtisch.html .
 COPY csm__bkf5951-bearbeitet_65e837eae0.jpg .
-COPY crontab /etc/cron.d/mycron
 
-# Konfiguriere Cron
-RUN chmod 0600 /etc/cron.d/mycron && \
-    crontab /etc/cron.d/mycron && \
-    mkdir -p /app/output
+RUN mkdir -p /app/output
+
+# Takt (Cron-Ausdruck, UTC) für den Scheduler im Base-Image
+ENV SCHEDULE="*/15 * * * *"

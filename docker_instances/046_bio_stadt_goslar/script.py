@@ -11,7 +11,7 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parent.parent
 
 if Path("/app/output").exists():
-    OUTPUT_DIR = Path("/app/output/046_bio_stadt_goslar")
+    OUTPUT_DIR = Path("/app/output")
 else:
     OUTPUT_DIR = REPO_ROOT / "httpdocs" / "crawler" / "046_bio_stadt_goslar"
 

@@ -70,8 +70,8 @@ See [crawler_configs/schema.md](crawler_configs/schema.md) for config format.
 #### Option 2: Custom Container (For complex scrapers)
 
 1. Create directory: `docker_instances/XXX_name/`
-2. Add `Dockerfile`, `script.py`, `crontab`
-3. Add service to `compose.dev.yaml`
+2. Add `Dockerfile` (with `ENV SCHEDULE="..."`) and `script.py`; write output to `/app/output` (the crawler's own folder, public at `/crawler/<id>/`)
+3. Add the crawler to `crawlers.yaml` (with `expected_files` as `<id>/<file>`) and run `./scripts/generate-all.sh`
 4. Run `./scripts/dev.sh build`
 
 ### Project Structure
@@ -80,7 +80,6 @@ See [crawler_configs/schema.md](crawler_configs/schema.md) for config format.
 gs_crawler/
 ├── base_images/              # Docker base images
 │   ├── python_basic_crawler/ # Standard Python crawler
-│   ├── python_selenium_crawler/ # Browser automation
 │   ├── generic_scraper/      # Config-driven scraper engine
 │   └── ...
 ├── crawler_configs/          # YAML configs for generic scraper
@@ -103,8 +102,8 @@ gs_crawler/
 
 ### Output Files
 
-Crawler output is written to `httpdocs/crawler/`. This directory is:
-- Mounted as a volume in all containers
+Crawler output is written to `httpdocs/crawler/<id>/` (create the folders with `./scripts/init-output-dirs.sh`, `dev.sh` does it for you). This directory is:
+- Mounted as a volume, one folder per container
 - Gitignored (not committed)
 - Accessible via the Health Monitor at http://localhost:5015
 

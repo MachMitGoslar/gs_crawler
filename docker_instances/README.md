@@ -169,7 +169,7 @@ Das GS Crawler System besteht aus 24 Docker Containern, die verschiedene Website
 - **Aufgabe:** Talsperren-Füllstände der Harzwasserwerke
 - **Quelle:** https://www.harzwasserwerke.de/infoservice/aktuelle-talsperrendaten/
 - **Output:** `035_talsperren.json`
-- **Technologie:** Selenium + Matplotlib
+- **Technologie:** requests + Matplotlib
 
 ### 🏛️ Verwaltung & Service
 
@@ -229,7 +229,6 @@ Die folgenden Container führen ihre Scripts auch beim Container-Start aus:
 
 ### Python-basierte Container (21)
 - **Standard:** requests, BeautifulSoup, json, datetime
-- **Selenium:** 045_naturgefahren (Firefox), 050/053/054_tschuessschule (Chrome)
 - **Bildverarbeitung:** 032_webcams_goslar (PIL), 047_bodenwasser (matplotlib)
 - **XML:** 001_senioren (lxml)
 

@@ -47,7 +47,7 @@ output:
     enabled: true
     filename: "002_goslarsche.json"
     # For single output, redirect CTA to the "all" file
-    cta_override: "https://crawler.goslar.app/crawler/{all_filename}"
+    cta_override: "https://crawler.goslar.app/crawler/<id>/{all_filename}"
 
   all:
     enabled: true

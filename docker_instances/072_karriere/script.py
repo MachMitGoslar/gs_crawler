@@ -21,7 +21,7 @@ JOBS_JSON_FILE = "072_jobs.json"
 INDEX_HTML_FILE = "072_karriere_index.html"
 EXPORT_UI_KIT_FILES = ["goslar-ui.css", "goslar-ui.js"]
 EXPORT_STATIC_FILES = ["jobs.css", "jobs.js"]
-BASE_URL = "https://crawler.goslar.app/crawler"
+BASE_URL = "https://crawler.goslar.app/crawler/072_karriere"
 INDEX_URL = f"{BASE_URL}/{INDEX_HTML_FILE}?location=Goslar&wo=Goslar"
 EMPTY_DESCRIPTION = "Aktuell sind keine passenden Jobangebote fuer den Landkreis Goslar verfuegbar."
 MAX_LOGO_WORKERS = 8

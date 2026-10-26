@@ -32,7 +32,7 @@ output:
   single:
     enabled: true
     filename: "052_vhs_kinderuni.json"
-    cta_override: "https://crawler.goslar.app/crawler/052_vhs_kinderuni_alle.json"
+    cta_override: "https://crawler.goslar.app/crawler/052_vhs_kinderuni/052_vhs_kinderuni_alle.json"
     title_override: "VHS Kinderuni"
 
   all:

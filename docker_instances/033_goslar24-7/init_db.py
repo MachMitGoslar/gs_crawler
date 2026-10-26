@@ -1,6 +1,7 @@
+import os
 import sqlite3
 
-conn = sqlite3.connect("webcam_images.db")
+conn = sqlite3.connect(os.environ.get("DB_PATH", "webcam_images.db"))
 cur = conn.cursor()
 cur.execute("""
     CREATE TABLE IF NOT EXISTS webcam_images (

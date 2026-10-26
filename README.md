@@ -39,76 +39,76 @@ _Local news sources and media outlets_
 
 | ID | Name | Type | Schedule | Output Files |
 |:---|:-----|:-----|:---------|:-------------|
-| 001_senioren | Seniorenzeitung Goslar | XML Feed | Täglich 02:00 | `001_senioren_feed.xml` |
-| 002_gz | Goslarsche Zeitung | News Crawler | Stündlich | `002_goslarsche.json, 002_goslarsche-alle.json` |
-| 040_hp | Harzer Panorama | News Crawler | 2x täglich (02:00, 14:00) | `040_hp.json` |
+| 001_senioren | Seniorenzeitung Goslar | XML Feed | Täglich 02:00 | `001_senioren/001_senioren_feed.xml` |
+| 002_gz | Goslarsche Zeitung | News Crawler | Stündlich | `002_gz/002_goslarsche.json, 002_gz/002_goslarsc...` |
+| 040_hp | Harzer Panorama | News Crawler | 2x täglich (02:00, 14:00) | `040_hp/040_hp.json` |
 
 ### Events
 _Event calendars and activities_
 
 | ID | Name | Type | Schedule | Output Files |
 |:---|:-----|:-----|:---------|:-------------|
-| 004_zufaellig-nix-vor | Zufällig nix vor? | Suggestion Feed | Täglich 07:00 | `ui-kit/goslar-ui.css, ui-kit/goslar-ui.js, 004_...` |
-| 014_kunst_in_ar | Kunst in AR | Event Crawler | Täglich 08:00 | `017-kunst-in-ar-single.json` |
-| 019_was_app | WasApp Community | Community Feed | Alle 3 Minuten | `019_was_app.json` |
-| 027_erster_freitag | Erster Freitag Events | Event Crawler | Täglich 09:00 | `027-erster-freitag.json` |
-| 070_wochenmarkt | Wochenmarkt Goslar | Market Crawler | Alle 2 Stunden | `wochenmaerkte/070_wochenmarkt_card.json, wochen...` |
+| 004_zufaellig-nix-vor | Zufällig nix vor? | Suggestion Feed | Täglich 07:00 | `004_zufaellig-nix-vor/ui-kit/goslar-ui.css, 004...` |
+| 014_kunst_in_ar | Kunst in AR | Event Crawler | Täglich 08:00 | `014_kunst_in_ar/017-kunst-in-ar-single.json` |
+| 019_was_app | WasApp Community | Community Feed | Alle 3 Minuten | `019_was_app/019_was_app.json` |
+| 027_erster_freitag | Erster Freitag Events | Event Crawler | Täglich 09:00 | `027_erster_freitag/027-erster-freitag.json` |
+| 070_wochenmarkt | Wochenmarkt Goslar | Market Crawler | Alle 2 Stunden | `070_wochenmarkt/070_wochenmarkt_card.json, 070_...` |
 
 ### Local Communities
 _Village and neighborhood news_
 
 | ID | Name | Type | Schedule | Output Files |
 |:---|:-----|:-----|:---------|:-------------|
-| 041_immenrode | Immenrode News | Local News | 2x täglich (02:00, 14:00) | `041_immenrode.json` |
-| 044_wiedelah | Wiedelah Events | Community Events | 2x täglich (02:00, 14:00) | `044-wiedelah.json, 044-wiedelah_alle.json` |
-| 048_jerstedt | Jerstedt News | Local News | 2x täglich (02:00, 14:00) | `048_jerstedt.json` |
+| 041_immenrode | Immenrode News | Local News | 2x täglich (02:00, 14:00) | `041_immenrode/041_immenrode.json` |
+| 044_wiedelah | Wiedelah Events | Community Events | 2x täglich (02:00, 14:00) | `044_wiedelah/044-wiedelah.json, 044_wiedelah/04...` |
+| 048_jerstedt | Jerstedt News _(pausiert)_ | Local News | - | `048_jerstedt/048_jerstedt.json` |
 
 ### Community & Volunteering
 _Community organizations and volunteer opportunities_
 
 | ID | Name | Type | Schedule | Output Files |
 |:---|:-----|:-----|:---------|:-------------|
-| 031_goslarer_geschichten | Goslarer Geschichten | Forum Crawler | Täglich 09:00 | `031-goslarer_geschichten.json` |
-| 042_freiwilligen | Freiwilligenagentur | Volunteer Portal | 2x täglich (02:00, 14:00) | `ui-kit/goslar-ui.css, ui-kit/goslar-ui.js, 042-...` |
+| 031_goslarer_geschichten | Goslarer Geschichten | Forum Crawler | Täglich 09:00 | `031_goslarer_geschichten/031-goslarer_geschicht...` |
+| 042_freiwilligen | Freiwilligenagentur | Volunteer Portal | 2x täglich (02:00, 14:00) | `042_freiwilligen/ui-kit/goslar-ui.css, 042_frei...` |
 
 ### Environmental Monitoring
 _Weather, water, and environmental data_
 
 | ID | Name | Type | Schedule | Output Files |
 |:---|:-----|:-----|:---------|:-------------|
-| 035_talsperren | Talsperren Daten | Umwelt Monitor | Stündlich | `035-talsperren_alle.json` |
+| 035_talsperren | Talsperren Daten _(pausiert)_ | Umwelt Monitor | - | `035_talsperren/035-talsperren_alle.json, 035_ta...` |
 | 045_naturgefahren | Naturgefahren Monitor | Weather Alert | Alle 15 Minuten | `045_naturgefahren/045_naturgefahren_de.json` |
 | 046_bio_stadt_goslar | Biostadt Goslar | Info & Einkaufsführer | 2x täglich (02:00, 14:00) | `046_bio_stadt_goslar/ui-kit/goslar-ui.css, 046_...` |
-| 047_bodenwasser | Bodenwasser Monitor | Umwelt Monitor | 2x täglich (02:00, 14:00) | `047_bodenwasser.json, 047_bodenwasser.gif` |
+| 047_bodenwasser | Bodenwasser Monitor | Umwelt Monitor | 2x täglich (02:00, 14:00) | `047_bodenwasser/047_bodenwasser.json, 047_boden...` |
 
 ### Education
 _Schools, courses, and educational opportunities_
 
 | ID | Name | Type | Schedule | Output Files |
 |:---|:-----|:-----|:---------|:-------------|
-| 050_tschuessschule_studium | TschüssSchule Studium | Education Portal | Täglich 06:00 | `050-tschuessschule-studium.json, 050-tschuesssc...` |
-| 051_vhs | VHS Kurse | Education Portal | Täglich 09:00 | `051_vhs.json, 051_vhs-alle.json` |
-| 052_vhs_kinderuni | VHS Kinderuni | Education Portal | Täglich 09:00 | `052_vhs_kinderuni.json, 052_vhs_kinderuni_alle....` |
-| 053_tschuessschule_praktikum | TschüssSchule Praktikum | Education Portal | Täglich 06:00 | `053-tschuessschule-praktikum.json, 053-tschuess...` |
-| 054_tschuessschule_ausbildung | TschüssSchule Ausbildung | Education Portal | Täglich 06:00 | `054-tschuessschule-ausbildung.json, 054-tschues...` |
+| 050_tschuessschule_studium | TschüssSchule Studium | Education Portal | Täglich 06:00 | `050_tschuessschule_studium/050-tschuessschule-s...` |
+| 051_vhs | VHS Kurse | Education Portal | Täglich 09:00 | `051_vhs/051_vhs.json, 051_vhs/051_vhs-alle.json` |
+| 052_vhs_kinderuni | VHS Kinderuni | Education Portal | Täglich 09:00 | `052_vhs_kinderuni/052_vhs_kinderuni.json, 052_v...` |
+| 053_tschuessschule_praktikum | TschüssSchule Praktikum | Education Portal | Täglich 06:00 | `053_tschuessschule_praktikum/053-tschuessschule...` |
+| 054_tschuessschule_ausbildung | TschüssSchule Ausbildung | Education Portal | Täglich 06:00 | `054_tschuessschule_ausbildung/054-tschuessschul...` |
 
 ### Mobilität & Verkehr
 _ÖPNV, Fuhrparks und Verkehrsdaten_
 
 | ID | Name | Type | Schedule | Output Files |
 |:---|:-----|:-----|:---------|:-------------|
-| 073_busflotte | Busflotte Stadtbus Goslar | Fleet Data | Wöchentlich Montag 04:00 | `busflotte/073_busflotte_card.json, busflotte/07...` |
+| 073_busflotte | Busflotte Stadtbus Goslar | Fleet Data | Wöchentlich Montag 04:00 | `073_busflotte/073_busflotte_card.json, 073_busf...` |
 
 ### Specialized
 _Unique data sources requiring custom processing_
 
 | ID | Name | Type | Schedule | Output Files |
 |:---|:-----|:-----|:---------|:-------------|
-| 032_webcams_goslar | Webcams Goslar | Webcam Processor | Täglich 09:00 | `032_webcams_goslar.json, 032_webcams.gif` |
-| 033_goslar24-7 | Goslar24-7 Webcams | Webcam Processor | Stündlich | `033_gif_schuhhof.json, 033_gif_schuhhof.gif, 03...` |
-| 056_serviceportal | Serviceportal Goslar | Service Portal | Täglich 09:00 | `ui-kit/goslar-ui.css, ui-kit/goslar-ui.js, 056-...` |
-| 060_defi_kataster | Defibrillatoren Kataster | Defi Locations | Täglich 06:00 | `defi-kataster/ui-kit/goslar-ui.css, defi-katast...` |
-| 080_bereitschaftsdienste | Bereitschaftsdienste Goslar | Emergency Services | Alle 15 Minuten (API nur nach Endzeit) | `ui-kit/goslar-ui.css, ui-kit/goslar-ui.js, 080_...` |
+| 032_webcams_goslar | Webcams Goslar | Webcam Processor | Täglich 09:00 | `032_webcams_goslar/032_webcams_goslar.json, 032...` |
+| 033_goslar24-7 | Goslar24-7 Webcams | Webcam Processor | Stündlich | `033_goslar24-7/033_gif_schuhhof.json, 033_gosla...` |
+| 056_serviceportal | Serviceportal Goslar | Service Portal | Täglich 09:00 | `056_serviceportal/ui-kit/goslar-ui.css, 056_ser...` |
+| 060_defi_kataster | Defibrillatoren Kataster | Defi Locations | Täglich 06:00 | `060_defi_kataster/ui-kit/goslar-ui.css, 060_def...` |
+| 080_bereitschaftsdienste | Bereitschaftsdienste Goslar | Emergency Services | Alle 15 Minuten (API nur nach Endzeit) | `080_bereitschaftsdienste/ui-kit/goslar-ui.css, ...` |
 
 ### API Services
 _API endpoints and services_
@@ -116,7 +116,7 @@ _API endpoints and services_
 | ID | Name | Type | Schedule | Output Files |
 |:---|:-----|:-----|:---------|:-------------|
 | 068_altstadtfest | Altstadtfest Goslar | API Endpoint | API Endpoint | `-` |
-| 072_karriere | Karriere Goslar | Job Portal | Stündlich | `ui-kit/goslar-ui.css, ui-kit/goslar-ui.js, 072_...` |
+| 072_karriere | Karriere Goslar | Job Portal | Stündlich | `072_karriere/ui-kit/goslar-ui.css, 072_karriere...` |
 
 <!-- CRAWLER_TABLE_END -->
 
@@ -164,7 +164,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed setup instructions.
 
 ## Output
 
-All crawlers write to `httpdocs/crawler/` (mounted as `/app/output` in containers).
+Every crawler writes to its own folder `httpdocs/crawler/<id>/` (mounted as `/app/output` in its container, public at `/crawler/<id>/`). Create the folders with `./scripts/init-output-dirs.sh` before `docker compose up`; `scripts/dev.sh` does this automatically. See [docs/HARDENING.md](docs/HARDENING.md).
 
 ## CI/CD
 

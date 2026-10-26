@@ -13,3 +13,6 @@ COPY templates/ templates/
 COPY data.json .
 
 # Port ist bereits im Base-Image exponiert
+
+# Cache liegt im tmpfs (Root-Dateisystem ist schreibgeschützt)
+ENV DATA_FILE=/tmp/data.json
