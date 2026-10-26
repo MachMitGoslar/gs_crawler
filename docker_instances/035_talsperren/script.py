@@ -1,31 +1,20 @@
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.firefox.options import Options
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException
-from selenium.webdriver.firefox.service import Service as FirefoxService
-from webdriver_manager.firefox import GeckoDriverManager
-
-from bs4 import BeautifulSoup
-import time
 import json
-from datetime import datetime
-import matplotlib.pyplot as plt
-from matplotlib.patches import Wedge, FancyBboxPatch
 import os
 import re
+import time
+from datetime import datetime
 
-# Setup (optional: Headless-Modus aktivieren)
-options = Options()
-options.add_argument("--headless")
-service = FirefoxService(GeckoDriverManager().install())
-driver = webdriver.Firefox(options=options, service=service, )
+import matplotlib.pyplot as plt
+import requests
+from bs4 import BeautifulSoup
+from matplotlib.patches import Wedge, FancyBboxPatch
 
 # Ziel-URL
 base_url = "https://www.harzwasserwerke.de"
 url = f"{base_url}/infoservice/aktuelle-talsperrendaten/"
+# Die Messwerte lädt die Seite per JavaScript aus diesem Theme-Endpoint nach
+barrage_api = f"{base_url}/wp-content/themes/Avada-Child-Theme/barrageData/barrageDataCall.php"
+talis_prefix = f"{base_url}/talis/"
 output_path = "output/035_talsperren"
 export_jsonfile = "035-talsperren_alle.json"
 export_indexfile = "035-talsperren_index.json"
@@ -95,44 +84,67 @@ def draw_gauge(prozent, titel, untertitel, dateiname):
     plt.close(fig)
 
 
-try:
-    driver.get(url)
-    time.sleep(5)  # Warten auf JS-Inhalte
-    soup = BeautifulSoup(driver.page_source, "html.parser")
+def parse_messwert(text):
+    """API liefert Zahlen mit Punkt als Dezimaltrenner ('12.91'), fehlend/ungültig -> None"""
+    try:
+        return float(text)
+    except (TypeError, ValueError):
+        return None
 
-    result_div = soup.find("div", class_="slick-track")
-    if not result_div:
-        print("❌ slick-track nicht gefunden.")
-        driver.quit()
-        exit()
 
-    # Gesamt-Messzeitpunkt (Fallback für Talsperren ohne eigenes Datum)
-    datum_tags = [t.get_text(strip=True) for t in soup.find_all("span", class_="datum")]
-    datum_tags = [d for d in datum_tags if d and d != "-"]
-    messzeitpunkt = datum_tags[0] if datum_tags else "Messzeitpunkt unbekannt"
+def hole_messwerte(session, quell_url):
+    """Aktuelle Messwerte einer Talsperre aus dem TALIS-Textfile (Theme-Endpoint der Seite)."""
+    if not quell_url.startswith(talis_prefix):
+        raise ValueError(f"unerwartete Quell-URL: {quell_url}")
+    resp = session.get(barrage_api, timeout=30, params={
+        "m": "getReducedAndSplittedTextData",
+        "url": quell_url,
+        "dateNow": int(time.time() * 1000),
+    })
+    resp.raise_for_status()
+    return resp.json()
+
+
+def main():
+    session = requests.Session()
+    session.headers["User-Agent"] = "Mozilla/5.0 (compatible; gs-crawler/035_talsperren)"
+
+    resp = session.get(url, timeout=30)
+    resp.raise_for_status()
+    soup = BeautifulSoup(resp.text, "html.parser")
+
+    slides = [li for li in soup.find_all("li", class_="slide") if li.find("span", class_="talsperrenname")]
+    if not slides:
+        print("❌ Keine Talsperren auf der Seite gefunden.")
+        raise SystemExit(1)
+
+    resp = session.get(barrage_api, params={"m": "getTsMap"}, timeout=30)
+    resp.raise_for_status()
+    quellen = resp.json()
 
     jetzt = datetime.now().strftime("%Y-%m-%dT%H:%M")
     talsperren = []
 
-    for li in result_div.find_all("li", class_="slide"):
-        name_tag = li.find("span", class_="talsperrenname")
+    for li in slides:
+        name = li.find("span", class_="talsperrenname").get_text(strip=True)
         max_tag = li.find("strong", class_="data_stauhoehe")
-        inhalt_tag = li.find("strong", class_="data_stauinhalt")
-        if not (name_tag and max_tag and inhalt_tag):
-            continue
+        maximum = parse_zahl(max_tag.get_text()) if max_tag else None
 
-        name = name_tag.get_text(strip=True)
-        maximum = parse_zahl(max_tag.get_text())
-        inhalt = parse_zahl(inhalt_tag.get_text())
+        try:
+            messwerte = hole_messwerte(session, quellen[name])
+        except (KeyError, ValueError, requests.RequestException) as e:
+            print(f"❌ {name}: Messwerte nicht abrufbar ({e}). Abbruch ohne Überschreiben.")
+            raise SystemExit(1)
+
+        inhalt = parse_messwert(messwerte.get("stauinhalt"))
         if not maximum or inhalt is None:
-            print(f"⚠️ {name}: keine gültigen Daten, übersprungen.")
-            continue
+            print(f"❌ {name}: keine gültigen Daten. Abbruch ohne Überschreiben.")
+            raise SystemExit(1)
 
-        datum_tag = li.find("span", class_="datum")
-        datum = datum_tag.get_text(strip=True) if datum_tag else ""
-        datum = datum if datum and datum != "-" else messzeitpunkt
-        zufluss = parse_zahl(li.find("strong", class_="data_zufluss").get_text()) if li.find("strong", class_="data_zufluss") else None
-        uwabgabe = parse_zahl(li.find("strong", class_="data_uwabgabe").get_text()) if li.find("strong", class_="data_uwabgabe") else None
+        # Darstellung wie auf der Seite: "26.10.2026 – 21:00:00 Uhr"
+        datum = messwerte["datum"].replace(" ", " – ", 1) + " Uhr" if messwerte.get("datum") else ""
+        zufluss = parse_messwert(messwerte.get("zufluss"))
+        uwabgabe = parse_messwert(messwerte.get("abgabe"))
 
         # Direkter Link auf die TALIS-Detailseite der einzelnen Talsperre
         link_tag = li.find("a", id="zurTalsperre")
@@ -145,9 +157,8 @@ try:
             "url": talis_url, "info_url": talsperre_url,
         })
 
-    if not talsperren:
-        print("❌ Keine gültigen Füllstandsdaten gefunden. Abbruch ohne Überschreiben.")
-        raise SystemExit(1)
+    # Gesamt-Messzeitpunkt (erste Talsperre)
+    messzeitpunkt = talsperren[0]["datum"] or "Messzeitpunkt unbekannt"
 
     # Gesamtfüllstand aller Talsperren (Frontansicht / Karte)
     summe_max = sum(t["maximum"] for t in talsperren)
@@ -205,5 +216,5 @@ try:
     print(json.dumps(daten, ensure_ascii=False, indent=2))
     print(json.dumps(index, ensure_ascii=False, indent=2))
 
-finally:
-    driver.quit()
+
+main()
