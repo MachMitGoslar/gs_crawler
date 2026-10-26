@@ -1,8 +1,9 @@
 # Migriert zu Base-Image für bessere Wartbarkeit
 FROM ghcr.io/machmitgoslar/gs_crawler_python_basic_crawler:latest
 
-# matplotlib für die Füllstand-Gauges (im Base-Image nicht enthalten)
-RUN .venv/bin/pip install --no-cache-dir matplotlib==3.10.3
+# Zusätzliche Abhängigkeit: matplotlib für die Füllstand-Gauges (im Base-Image nicht enthalten)
+COPY requirements.txt .
+RUN .venv/bin/pip install --no-cache-dir -r requirements.txt
 
 # Kopiere container-spezifische Dateien
 COPY script.py .
