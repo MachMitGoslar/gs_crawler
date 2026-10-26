@@ -187,6 +187,8 @@ def test_custom_crawler(crawler):
     # Ordner des Crawlers (httpdocs/crawler/<id>), daher Symlink auf test_output/<id>.
     local_output = docker_dir / "output"
     symlink_created = False
+    if local_output.is_symlink() and local_output.resolve() == TEST_OUTPUT_DIR.resolve():
+        local_output.unlink()
     if not local_output.exists():
         try:
             crawler_output = TEST_OUTPUT_DIR / docker_dir.name
