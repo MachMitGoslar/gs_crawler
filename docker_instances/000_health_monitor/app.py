@@ -314,4 +314,4 @@ if __name__ == '__main__':
     container_status_cache = get_container_status()
 
     print("Health Monitor gestartet auf http://0.0.0.0:5000")
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=False)
