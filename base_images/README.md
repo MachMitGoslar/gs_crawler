@@ -8,7 +8,7 @@ Dieses Verzeichnis enthält wiederverwendbare Base-Images, die die Redundanz in 
 - **Redundanz:** Jeder Container hatte identische Dockerfile-Strukturen
 - **Wartbarkeit:** Änderungen mussten in 20+ Dockerfiles repliziert werden
 - **Größe:** Jeder Container installierte dieselben Dependencies
-- **Konsistenz:** Unterschiedliche Python-/PHP-Versionen zwischen Containern
+- **Konsistenz:** Unterschiedliche Python-Versionen zwischen Containern
 - **Build-Zeit:** Lange Build-Zeiten durch redundante Installationen
 
 ### Nachher (Vorteile):
@@ -42,16 +42,7 @@ Dieses Verzeichnis enthält wiederverwendbare Base-Images, die die Redundanz in 
 - Firefox ESR + Selenium WebDriver
 - matplotlib, numpy für Datenverarbeitung
 
-### 3. `gs_crawler/php_basic_crawler`
-**Für:** PHP-basierte Crawler  
-**Verwendet von:** 1 Container (ferienpass)  
-**Reduziert:** ~50 Zeilen redundanten Code  
-
-**Enthält:**
-- PHP 8.2 CLI
-- Cron-Daemon
-
-### 4. `gs_crawler/flask_monitor`
+### 3. `gs_crawler/flask_monitor`
 **Für:** Flask-basierte Monitoring-Anwendungen  
 **Verwendet von:** 1 Container (health_monitor)  
 **Reduziert:** ~30 Zeilen redundanten Code  
@@ -177,7 +168,7 @@ Alle Base-Images setzen:
 - `PYTHONDONTWRITEBYTECODE=1` (für Python-Images)
 
 ### Ports:
-- Python/PHP Crawler: Kein Port (reine Cron-Jobs)
+- Python Crawler: Kein Port (reine Cron-Jobs)
 - Flask Monitor: Port 5000 exponiert
 
 ### Volumes:
