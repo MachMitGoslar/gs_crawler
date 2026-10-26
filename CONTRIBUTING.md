@@ -80,7 +80,6 @@ See [crawler_configs/schema.md](crawler_configs/schema.md) for config format.
 gs_crawler/
 ├── base_images/              # Docker base images
 │   ├── python_basic_crawler/ # Standard Python crawler
-│   ├── python_selenium_crawler/ # Browser automation
 │   ├── generic_scraper/      # Config-driven scraper engine
 │   └── ...
 ├── crawler_configs/          # YAML configs for generic scraper

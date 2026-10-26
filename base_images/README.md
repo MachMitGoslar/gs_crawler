@@ -32,17 +32,7 @@ Dieses Verzeichnis enthält wiederverwendbare Base-Images, die die Redundanz in 
 - Gemeinsame Helper-Funktionen
 - Gemeinsames UI-Kit unter `/app/ui-kit`
 
-### 2. `gs_crawler/python_selenium_crawler`
-**Für:** Erweiterte Crawler mit Browser-Automatisierung  
-**Verwendet von:** 2 Container (naturgefahren, talsperren)  
-**Reduziert:** ~100 Zeilen redundanten Code  
-
-**Enthält:**
-- Alles von python_basic_crawler
-- Firefox ESR + Selenium WebDriver
-- matplotlib, numpy für Datenverarbeitung
-
-### 3. `gs_crawler/flask_monitor`
+### 2. `gs_crawler/flask_monitor`
 **Für:** Flask-basierte Monitoring-Anwendungen  
 **Verwendet von:** 1 Container (health_monitor)  
 **Reduziert:** ~30 Zeilen redundanten Code  
