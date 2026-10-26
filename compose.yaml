@@ -156,17 +156,6 @@ services:
     container_name: gs_compiler_042_freiwilligen
 
   # === ENVIRONMENTAL MONITORING ===
-  gs_compiler_035_talsperren:
-    <<: *crawler-defaults
-    image: ghcr.io/machmitgoslar/gs_crawler_035_talsperren:latest
-    volumes:
-      - type: bind
-        source: ./httpdocs/crawler/035_talsperren
-        target: /app/output
-        bind:
-          create_host_path: false
-    container_name: gs_compiler_035_talsperren
-
   gs_compiler_045_naturgefahren:
     <<: *crawler-defaults
     image: ghcr.io/machmitgoslar/gs_crawler_045_naturgefahren:latest
@@ -309,11 +298,6 @@ services:
         bind:
           create_host_path: false
       - type: bind
-        source: ./httpdocs/crawler/048_jerstedt
-        target: /app/output/048_jerstedt
-        bind:
-          create_host_path: false
-      - type: bind
         source: ./httpdocs/crawler/051_vhs
         target: /app/output/051_vhs
         bind:
@@ -329,6 +313,8 @@ services:
         read_only: true
         bind:
           create_host_path: false
+    environment:
+      DISABLED_CONFIGS: "048_jerstedt"
     container_name: gs_generic_scraper_simple
 
   gs_generic_scraper_tschuessschule:

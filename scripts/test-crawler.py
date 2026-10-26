@@ -283,6 +283,12 @@ def run_tests(crawlers, registry, test_config=True, test_custom=True):
 
         print(f"{Colors.BOLD}Testing: {crawler_id}{Colors.RESET} ({crawler['name']})")
 
+        if not crawler.get('enabled', True):
+            reason = crawler.get('disabled_reason', 'enabled: false')
+            results['skipped'].append((crawler_id, f"Disabled: {reason}"))
+            print(f"  {Colors.YELLOW}SKIPPED{Colors.RESET}: disabled ({reason})\n")
+            continue
+
         if impl == 'config' and test_config:
             success, message = test_config_crawler(crawler, venv_python)
         elif impl == 'custom' and test_custom:

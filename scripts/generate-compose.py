@@ -32,6 +32,11 @@ def load_registry():
         return yaml.safe_load(f)
 
 
+def is_enabled(crawler):
+    """Crawler können in crawlers.yaml mit `enabled: false` pausiert werden."""
+    return crawler.get('enabled', True)
+
+
 def get_service_name(crawler):
     """Get the Docker service name for a crawler."""
     if 'service_name' in crawler:
@@ -151,9 +156,14 @@ def generic_scraper_lines(config_dir, config_crawlers, mode, ghcr_prefix):
         lines.append("    build: ./base_images/generic_scraper")
     lines.append("    volumes:")
     for crawler in sorted(config_crawlers, key=lambda c: c['id']):
-        cid = crawler['id']
-        lines += bind_mount(f"{CRAWLER_ROOT}/{cid}", f"/app/output/{cid}")
+        if is_enabled(crawler):
+            cid = crawler['id']
+            lines += bind_mount(f"{CRAWLER_ROOT}/{cid}", f"/app/output/{cid}")
     lines += bind_mount(f"./crawler_configs/{config_dir}", "/app/configs", read_only=True)
+    disabled = sorted(c['id'] for c in config_crawlers if not is_enabled(c))
+    if disabled:
+        lines.append("    environment:")
+        lines.append(f'      DISABLED_CONFIGS: "{",".join(disabled)}"')
     lines.append(f"    container_name: gs_generic_scraper_{config_dir}")
     lines.append("")
     return lines
@@ -168,9 +178,10 @@ def generate_compose(registry, mode):
     by_category = defaultdict(list)
     config_crawlers_by_dir = defaultdict(list)
     for crawler in crawlers:
-        by_category[crawler['category']].append(crawler)
         if crawler.get('implementation') == 'config':
             config_crawlers_by_dir[crawler.get('config_dir', 'simple')].append(crawler)
+        elif is_enabled(crawler):
+            by_category[crawler['category']].append(crawler)
 
     lines = [
         "# =============================================================================",

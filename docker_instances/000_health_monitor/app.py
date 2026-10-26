@@ -41,6 +41,10 @@ def load_containers_from_registry():
             if crawler['id'] == '000_health_monitor':
                 continue
 
+            # Pausierte Crawler (enabled: false) nicht überwachen, sonst gäbe es dauerhaft Alarm
+            if not crawler.get('enabled', True):
+                continue
+
             # Build container key (matching old format)
             cid = crawler['id']
             # Fallback removed, after Ferienpass Cleanup

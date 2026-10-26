@@ -61,7 +61,7 @@ _Village and neighborhood news_
 |:---|:-----|:-----|:---------|:-------------|
 | 041_immenrode | Immenrode News | Local News | 2x täglich (02:00, 14:00) | `041_immenrode/041_immenrode.json` |
 | 044_wiedelah | Wiedelah Events | Community Events | 2x täglich (02:00, 14:00) | `044_wiedelah/044-wiedelah.json, 044_wiedelah/04...` |
-| 048_jerstedt | Jerstedt News | Local News | 2x täglich (02:00, 14:00) | `048_jerstedt/048_jerstedt.json` |
+| 048_jerstedt | Jerstedt News _(pausiert)_ | Local News | - | `048_jerstedt/048_jerstedt.json` |
 
 ### Community & Volunteering
 _Community organizations and volunteer opportunities_
@@ -76,7 +76,7 @@ _Weather, water, and environmental data_
 
 | ID | Name | Type | Schedule | Output Files |
 |:---|:-----|:-----|:---------|:-------------|
-| 035_talsperren | Talsperren Daten | Umwelt Monitor | Stündlich | `035_talsperren/035-talsperren_alle.json, 035_ta...` |
+| 035_talsperren | Talsperren Daten _(pausiert)_ | Umwelt Monitor | - | `035_talsperren/035-talsperren_alle.json, 035_ta...` |
 | 045_naturgefahren | Naturgefahren Monitor | Weather Alert | Alle 15 Minuten | `045_naturgefahren/045_naturgefahren_de.json` |
 | 046_bio_stadt_goslar | Biostadt Goslar | Info & Einkaufsführer | 2x täglich (02:00, 14:00) | `046_bio_stadt_goslar/ui-kit/goslar-ui.css, 046_...` |
 | 047_bodenwasser | Bodenwasser Monitor | Umwelt Monitor | 2x täglich (02:00, 14:00) | `047_bodenwasser/047_bodenwasser.json, 047_boden...` |

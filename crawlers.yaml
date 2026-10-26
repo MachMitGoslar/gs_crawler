@@ -7,6 +7,11 @@
 #   - README.md tables generated via scripts/generate-readme.py
 #
 # To add a new crawler: Add an entry here, then run ./scripts/generate-all.sh
+#
+# To pause a crawler without deleting it: set `enabled: false` and give a
+# `disabled_reason`. Disabled crawlers get no service in the generated compose
+# files, are skipped by the generic scraper, the crawler tests and the health
+# monitor, and are marked in the README. Re-enable by removing the two lines.
 # =============================================================================
 
 # -----------------------------------------------------------------------------
@@ -191,6 +196,8 @@ crawlers:
     schedule_human: "2x täglich (02:00, 14:00)"
     expected_files:
       - "048_jerstedt/048_jerstedt.json"
+    enabled: false
+    disabled_reason: "jerstedt.de liefert nur das selbstsignierte Standardzertifikat des Hosters (CN=webslave.ispgateway.de); TLS-Pruefung schlaegt fehl. Reaktivieren, sobald die Seite ein gueltiges Zertifikat hat."
     implementation: config
     config_dir: simple
 
@@ -235,6 +242,8 @@ crawlers:
     expected_files:
       - "035_talsperren/035-talsperren_alle.json"
       - "035_talsperren/035-talsperren_index.json"
+    enabled: false
+    disabled_reason: "Wartet auf Antwort der Harzwasserwerke zur Nutzung des internen Theme-Endpoints (barrageDataCall.php)."
     implementation: custom
 
   - id: "045_naturgefahren"
