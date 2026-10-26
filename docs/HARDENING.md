@@ -28,7 +28,7 @@ id -u && id -g                          # UID/GID des Hosting-Users
 Danach wie gewohnt:
 
 ```bash
-docker compose pull && docker compose up -d
+docker compose pull && docker compose up -d --remove-orphans
 ```
 
 Hinweise:
