@@ -34,7 +34,7 @@ services:
       - ./httpdocs:/usr/share/nginx/html:ro
     labels:
       - traefik.enable=true
-      - traefik.http.routers.gs-webserver.rule=Host(`${WEBSERVER_HOST:-gs-crawler.site}`)
+      - traefik.http.routers.gs-webserver.rule=Host(`${WEBSERVER_HOST:-gs-crawler.localhost}`)
       - traefik.http.routers.gs-webserver.entrypoints=web
       - traefik.http.services.gs-webserver.loadbalancer.server.port=80
     depends_on:
