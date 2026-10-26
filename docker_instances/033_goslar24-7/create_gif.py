@@ -11,7 +11,7 @@ import pytz
 
 
 
-DB_PATH = "webcam_images.db"
+DB_PATH = os.environ.get("DB_PATH", "webcam_images.db")
 
 def slugify_url(url):
     """Hilfsfunktion: Dateinamen aus URL generieren"""

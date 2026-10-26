@@ -12,5 +12,7 @@ RUN apt-get update && apt-get install -y fonts-dejavu-core
 # copy Code
 ADD .. .
 
-# SQLite-Datenbank bei Build erstellen
-RUN python init_db.py
+# SQLite-Datenbank liegt auf einem Volume (/data), weil das Dateisystem sonst schreibgeschützt
+# ist. Die Tabelle legt init_db.py beim ersten Import zur Laufzeit an.
+ENV DB_PATH=/data/webcam_images.db
+RUN mkdir -p /data && chmod 1777 /data

@@ -369,6 +369,8 @@ crawlers:
       - "033_goslar24-7/033_gif_schuhhof.gif"
       - "033_goslar24-7/033_gif_marktplatz_gmg.gif"
       - "033_goslar24-7/033_gif_marktplatz_gmg.json"
+    volumes:
+      - gs_033_data:/data
     implementation: custom
 
   - id: "056_serviceportal"
