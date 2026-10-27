@@ -42,7 +42,7 @@ output:
   single:
     enabled: true
     filename: "089_seesen.json"
-    cta_override: "https://crawler.goslar.app/crawler/089_seesen_alle.json"
+    cta_override: "https://crawler.goslar.app/crawler/089_seesen/089_seesen_alle.json"
     title_override: "Seesen aktuelle Mitteilungen"
 
   all:

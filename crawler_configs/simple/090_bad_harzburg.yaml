@@ -41,7 +41,7 @@ output:
     enabled: true
     filename: "090_bad_harzburg.json"
     image_override: "https://www.stadt-bad-harzburg.de/layout/badharzburg/media/logo_stadt_bad_harzburg.png"
-    cta_override: "https://crawler.goslar.app/crawler/090_bad_harzburg_alle.json"
+    cta_override: "https://crawler.goslar.app/crawler/090_bad_harzburg/090_bad_harzburg_alle.json"
     title_override: "Bad Harzburg aktuelle Mitteilungen"
 
   all:

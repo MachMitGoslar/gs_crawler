@@ -37,7 +37,7 @@ output:
   single:
     enabled: true
     filename: "086_liebenburg.json"
-    cta_override: "https://crawler.goslar.app/crawler/086_liebenburg_alle.json"
+    cta_override: "https://crawler.goslar.app/crawler/086_liebenburg/086_liebenburg_alle.json"
     title_override: "Liebenburg - aktuelle Mitteilungen"
 
   all:

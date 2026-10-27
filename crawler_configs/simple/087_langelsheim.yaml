@@ -40,7 +40,7 @@ output:
     enabled: true
     filename: "087_langelsheim.json"
     image_override: "https://www.langelsheim.de/media/custom/3960_1_1_k.PNG?1698137914"
-    cta_override: "https://crawler.goslar.app/crawler/087_langelsheim_alle.json"
+    cta_override: "https://crawler.goslar.app/crawler/087_langelsheim/087_langelsheim_alle.json"
     title_override: "Langelsheim - aktuelle Mitteilungen"
 
   all:
