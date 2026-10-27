@@ -15,6 +15,7 @@ import requests
 from bs4 import BeautifulSoup
 
 from config_loader import load_config, get_selector_config
+from date_helpers import PUBLISHED_AT_FORMAT, parse_published_at
 
 
 OUTPUT_DIR = os.environ.get('OUTPUT_DIR', '/app/output')
@@ -66,29 +67,6 @@ def extract_value(element, selector_config: Dict[str, Any], base_url: str = '') 
             value = prefix + value
 
     return value if value else (fallback if fallback is not None else default)
-
-
-PUBLISHED_AT_FORMAT = '%Y-%m-%dT%H:%M'
-
-
-def parse_published_at(value: Optional[str], date_format: Optional[str] = None) -> Optional[str]:
-    """Normalize a date from the page to PUBLISHED_AT_FORMAT, or None if it cannot be parsed.
-
-    date_format is a strptime pattern (e.g. '%d.%m.%Y'); without it ISO 8601 is expected
-    ('2026-10-25', '2026-10-25T10:00:00+01:00', '...Z'). Time zones are dropped, the
-    wall-clock time of the page is kept.
-    """
-    if not value:
-        return None
-    value = value.strip()
-    try:
-        if date_format:
-            parsed = datetime.strptime(value, date_format)
-        else:
-            parsed = datetime.fromisoformat(value.replace('Z', '+00:00'))
-    except ValueError:
-        return None
-    return parsed.strftime(PUBLISHED_AT_FORMAT)
 
 
 def scrape_simple(soup: BeautifulSoup, config: Dict[str, Any]) -> List[Dict[str, Any]]:

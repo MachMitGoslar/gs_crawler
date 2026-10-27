@@ -98,6 +98,9 @@ published_at:
   attribute: "datetime"        # e.g. 2026-10-25T10:00:00+01:00
   date_format: "%d.%m.%Y"      # Optional: strptime pattern for non-ISO dates (text "25.10.2026")
 ```
+German month names work with `%B`/`%b` independent of the locale (`"23. Oktober"` with
+`"%d. %B"`). A format without a year uses the current year (the previous one if the date would
+lie in the future). Use `regex` to cut the date out of surrounding text such as hidden labels.
 Without `published_at` (or if the value cannot be parsed) the current time is used. The value is
 normalized to `YYYY-MM-DDTHH:MM`; time zones are dropped. With `selection.strategy: "latest"`
 the entry with the newest date is chosen.

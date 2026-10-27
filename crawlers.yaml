@@ -174,6 +174,19 @@ crawlers:
     implementation: config
     config_dir: simple
 
+  - id: "088_braunlage"
+    name: "Braunlage Mitteilungen"
+    category: local
+    type: "Local News"
+    source: "https://www.braunlage.city"
+    schedule: "0 9 * * *"
+    schedule_human: "Täglich 09:00"
+    expected_files:
+      - "088_braunlage/088_braunlage.json"
+      - "088_braunlage/088_braunlage_alle.json"
+    implementation: config
+    config_dir: simple
+
   - id: "089_seesen"
     name: "Seesen Mitteilungen"
     category: local
@@ -182,8 +195,8 @@ crawlers:
     schedule: "0 9 * * *"
     schedule_human: "Täglich 09:00"
     expected_files:
-      - "089_seesen.json"
-      - "089_seesen_alle.json"
+      - "089_seesen/089_seesen.json"
+      - "089_seesen/089_seesen_alle.json"
     implementation: config
     config_dir: simple
 

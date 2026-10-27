@@ -308,6 +308,11 @@ services:
         bind:
           create_host_path: false
       - type: bind
+        source: ./httpdocs/crawler/088_braunlage
+        target: /app/output/088_braunlage
+        bind:
+          create_host_path: false
+      - type: bind
         source: ./httpdocs/crawler/089_seesen
         target: /app/output/089_seesen
         bind:

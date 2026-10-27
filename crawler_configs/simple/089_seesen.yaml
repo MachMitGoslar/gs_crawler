@@ -2,14 +2,14 @@
 id: "089_seesen"
 name: "Seesen aktuelle Mitteilungen"
 
-url: "https://www.stadtverwaltung-seesen.de"
+url: "https://www.stadtverwaltung-seesen.de/Bürger/Aktuelles/Pressemitteilungen/"
 base_url: "https://www.stadtverwaltung-seesen.de"
 
 schedule: "0 9 * * *"
 run_on_start: true
 
 selectors:
-  container: "#liste_2 li"
+  container: "#liste_1 li"
 
   title:
     selector: "a div.flex-row div.order-1 div.list-text h3"
@@ -30,6 +30,13 @@ selectors:
     # style="background-image:url('/media/custom/x.jpg?123');" -> /media/custom/x.jpg?123
     regex: "url\\(['\"]?([^'\")]+)['\"]?\\)"
     prefix: "https://www.stadtverwaltung-seesen.de"
+
+  published_at:
+    selector: "a div.flex-row div.order-1 div.list-text small"
+    attribute: "text"
+    # text is "Datum:23. Oktober" (hidden sr-only label + date without year)
+    regex: "(\\d{1,2}\\.\\s*[A-Za-zäöüÄÖÜ]+)"
+    date_format: "%d. %B"
 
 output:
   single:
