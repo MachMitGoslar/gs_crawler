@@ -1,0 +1,48 @@
+# Bad Harzburg aktuelle Mitteilungen
+id: "090_bad_harzburg"
+name: "Bad Harzburg aktuelle Mitteilungen"
+
+url: "https://www.stadt-bad-harzburg.de/Bürgerservice/Pressemitteilungen/"
+base_url: "https://www.stadt-bad-harzburg.de/"
+
+schedule: "0 9 * * *"
+run_on_start: true
+
+selectors:
+  container: "#readthis div.mitteilungen"
+
+  title:
+    selector: "div.liste_titel"
+    attribute: "text"
+
+  description:
+    selector: "div.liste_text"
+    default: ""
+
+  call_to_action_url:
+    selector: "div.liste_titel a"
+    attribute: "href"
+    prefix: "https://www.stadt-bad-harzburg.de"
+
+
+  published_at:
+    selector: "div.date"
+    attribute: "text"
+
+output:
+  single:
+    enabled: true
+    filename: "090_bad_harzburg.json"
+    image_override: "https://www.stadt-bad-harzburg.de/layout/badharzburg/media/logo_stadt_bad_harzburg.png"
+    cta_override: "https://crawler.goslar.app/crawler/090_bad_harzburg_alle.json"
+    title_override: "Bad Harzburg aktuelle Mitteilungen"
+
+  all:
+    enabled: true
+    filename: "090_bad_harzburg_alle.json"
+
+selection:
+  strategy: "first"
+
+post_process:
+  single_description_template: "{title} {description}"

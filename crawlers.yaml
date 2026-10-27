@@ -200,6 +200,19 @@ crawlers:
     implementation: config
     config_dir: simple
 
+  - id: "090_bad_harzburg"
+    name: "Bad Harzburg aktuelle Mitteilungen"
+    category: local
+    type: "Local News"
+    source: "https://www.stadt-bad-harzburg.de/Bürgerservice/Pressemitteilungen/"
+    schedule: "0 9 * * *"
+    schedule_human: "Täglich 09:00"
+    expected_files:
+      - "090_bad_harzburg/090_bad_harzburg.json"
+      - "090_bad_harzburg/090_bad_harzburg_alle.json"
+    implementation: config
+    config_dir: simple
+
   - id: "044_wiedelah"
     name: "Wiedelah Events"
     category: local

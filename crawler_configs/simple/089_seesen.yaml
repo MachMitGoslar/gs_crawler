@@ -50,7 +50,7 @@ output:
     filename: "089_seesen_alle.json"
 
 selection:
-  strategy: "random"
+  strategy: "first"
 
 post_process:
   single_description_template: "{title} {description}"

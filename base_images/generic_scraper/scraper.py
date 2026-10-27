@@ -184,6 +184,7 @@ def select_single(entries: List[Dict], config: Dict[str, Any]) -> Dict[str, Any]
     else:
         selected = entries[0].copy()
 
+    selected.pop('id', None)
     return selected
 
 
@@ -206,6 +207,10 @@ def apply_post_processing(entry: Dict[str, Any], all_entries: List[Dict], config
     if 'title_override' in output_config:
         entry['title'] = output_config['title_override']
 
+
+    # Apply image override (fixed URL, only for the single card file)
+    if output_config.get('image_override'):
+        entry['image_url'] = output_config['image_override']
 
     # Apply CTA override
     if 'cta_override' in output_config:
