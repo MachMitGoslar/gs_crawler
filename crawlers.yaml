@@ -239,6 +239,19 @@ crawlers:
     implementation: config
     config_dir: simple
 
+  - id: "092_lewerdaele"
+    name: "Lewer-Daele Veranstaltungen"
+    category: local
+    type: "Community Events"
+    source: "https://www.lewer-daele.de"
+    schedule: "0 9 * * *"
+    schedule_human: "Täglich 09:00"
+    expected_files:
+      - "092_lewerdaele/092_lewerdaele.json"
+      - "092_lewerdaele/092_lewerdaele_alle.json"
+    implementation: config
+    config_dir: simple
+
   - id: "044_wiedelah"
     name: "Wiedelah Events"
     category: local

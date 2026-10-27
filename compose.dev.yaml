@@ -333,6 +333,11 @@ services:
         bind:
           create_host_path: false
       - type: bind
+        source: ./httpdocs/crawler/092_lewerdaele
+        target: /app/output/092_lewerdaele
+        bind:
+          create_host_path: false
+      - type: bind
         source: ./crawler_configs/simple
         target: /app/configs
         read_only: true
