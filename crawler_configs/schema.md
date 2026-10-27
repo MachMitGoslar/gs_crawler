@@ -91,6 +91,17 @@ image_url:
 The regex runs on the extracted value; the first capture group (or the whole match
 without groups) becomes the value. No match falls back to `fallback`/`default`.
 
+### Publication date (published_at)
+```yaml
+published_at:
+  selector: "div.teaser time"
+  attribute: "datetime"        # e.g. 2026-10-25T10:00:00+01:00
+  date_format: "%d.%m.%Y"      # Optional: strptime pattern for non-ISO dates (text "25.10.2026")
+```
+Without `published_at` (or if the value cannot be parsed) the current time is used. The value is
+normalized to `YYYY-MM-DDTHH:MM`; time zones are dropped. With `selection.strategy: "latest"`
+the entry with the newest date is chosen.
+
 ### With prefix/suffix
 ```yaml
 image_url:

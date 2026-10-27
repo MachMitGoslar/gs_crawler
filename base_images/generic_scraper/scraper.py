@@ -68,6 +68,29 @@ def extract_value(element, selector_config: Dict[str, Any], base_url: str = '') 
     return value if value else (fallback if fallback is not None else default)
 
 
+PUBLISHED_AT_FORMAT = '%Y-%m-%dT%H:%M'
+
+
+def parse_published_at(value: Optional[str], date_format: Optional[str] = None) -> Optional[str]:
+    """Normalize a date from the page to PUBLISHED_AT_FORMAT, or None if it cannot be parsed.
+
+    date_format is a strptime pattern (e.g. '%d.%m.%Y'); without it ISO 8601 is expected
+    ('2026-10-25', '2026-10-25T10:00:00+01:00', '...Z'). Time zones are dropped, the
+    wall-clock time of the page is kept.
+    """
+    if not value:
+        return None
+    value = value.strip()
+    try:
+        if date_format:
+            parsed = datetime.strptime(value, date_format)
+        else:
+            parsed = datetime.fromisoformat(value.replace('Z', '+00:00'))
+    except ValueError:
+        return None
+    return parsed.strftime(PUBLISHED_AT_FORMAT)
+
+
 def scrape_simple(soup: BeautifulSoup, config: Dict[str, Any]) -> List[Dict[str, Any]]:
     """Scrape using simple container-based approach."""
     selectors = config['selectors']
@@ -83,13 +106,21 @@ def scrape_simple(soup: BeautifulSoup, config: Dict[str, Any]) -> List[Dict[str,
 
     entries = []
     for index, container in enumerate(containers):
+        published_config = get_selector_config(selectors, 'published_at')
+        published_at = None
+        if published_config.get('selector'):
+            raw_date = extract_value(container, published_config, base_url)
+            published_at = parse_published_at(raw_date, published_config.get('date_format'))
+            if raw_date and not published_at:
+                print(f"Warning: {config['id']}: unparseable published_at '{raw_date}', using current time")
+
         entry = {
             'id': index + 1,
             'title': extract_value(container, get_selector_config(selectors, 'title'), base_url),
             'description': extract_value(container, get_selector_config(selectors, 'description'), base_url),
             'image_url': extract_value(container, get_selector_config(selectors, 'image_url'), base_url),
             'call_to_action_url': extract_value(container, get_selector_config(selectors, 'call_to_action_url'), base_url),
-            'published_at': datetime.now().strftime('%Y-%m-%dT%H:%M')
+            'published_at': published_at or datetime.now().strftime(PUBLISHED_AT_FORMAT)
         }
 
         # Only add entries that have at least a title or description
