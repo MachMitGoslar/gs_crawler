@@ -35,6 +35,7 @@ selectors:
     selector: "div.PictureContainer img"
     attribute: "src"
     prefix: ""                  # Optional: prepend to value
+    regex: ""                   # Optional: keep only the first capture group (see below)
 
   call_to_action_url:
     selector: "h2.article-heading a"
@@ -48,6 +49,8 @@ output:
     filename: "002_goslarsche.json"
     # For single output, redirect CTA to the "all" file
     cta_override: "https://crawler.goslar.app/crawler/<id>/{all_filename}"
+    # Optional: fixed image URL for the single file (the "all" file keeps the scraped images)
+    image_override: "https://crawler.goslar.app/images/teaser.jpg"
 
   all:
     enabled: true
@@ -78,6 +81,40 @@ title:
   selector: "h2 a"
   attribute: "text"
 ```
+
+### Extract part of an attribute (regex)
+```yaml
+image_url:
+  selector: "div.list-img div"
+  attribute: "style"            # e.g. background-image:url('/media/a.jpg?123');
+  regex: "url\\(['\"]?([^'\")]+)['\"]?\\)"
+  prefix: "https://example.com" # applied after the regex, only to relative values
+```
+The regex runs on the extracted value; the first capture group (or the whole match
+without groups) becomes the value. No match falls back to `fallback`/`default`.
+
+### Remove child elements from a text (exclude)
+```yaml
+description:
+  selector: "div.list-text p"
+  attribute: "text"
+  exclude: "span.more, span.sr-only"   # CSS selector; matches are removed before the text is read
+```
+Only applies to `attribute: "text"`. The page itself is not modified, other fields still see the full element.
+
+### Publication date (published_at)
+```yaml
+published_at:
+  selector: "div.teaser time"
+  attribute: "datetime"        # e.g. 2026-10-25T10:00:00+01:00
+  date_format: "%d.%m.%Y"      # Optional: strptime pattern for non-ISO dates (text "25.10.2026")
+```
+German month names work with `%B`/`%b` independent of the locale (`"23. Oktober"` with
+`"%d. %B"`). A format without a year uses the current year (the previous one if the date would
+lie in the future). Use `regex` to cut the date out of surrounding text such as hidden labels.
+Without `published_at` (or if the value cannot be parsed) the current time is used. The value is
+normalized to `YYYY-MM-DDTHH:MM`; time zones are dropped. With `selection.strategy: "latest"`
+the entry with the newest date is chosen.
 
 ### With prefix/suffix
 ```yaml

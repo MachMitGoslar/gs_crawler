@@ -8,6 +8,7 @@ import os
 import json
 import random
 import re
+import copy
 from datetime import datetime
 from typing import Dict, Any, List, Optional
 
@@ -15,6 +16,7 @@ import requests
 from bs4 import BeautifulSoup
 
 from config_loader import load_config, get_selector_config
+from date_helpers import PUBLISHED_AT_FORMAT, parse_published_at
 
 
 OUTPUT_DIR = os.environ.get('OUTPUT_DIR', '/app/output')
@@ -35,6 +37,8 @@ def extract_value(element, selector_config: Dict[str, Any], base_url: str = '') 
     selector = selector_config.get('selector', '')
     attribute = selector_config.get('attribute', 'text')
     prefix = selector_config.get('prefix', '')
+    pattern = selector_config.get('regex')
+    exclude = selector_config.get('exclude')
     fallback = selector_config.get('fallback')
     default = selector_config.get('default')
 
@@ -47,11 +51,22 @@ def extract_value(element, selector_config: Dict[str, Any], base_url: str = '') 
 
     # Extract value based on attribute type
     if attribute == 'text':
+        if exclude:
+            # Work on a copy so other fields still see the complete element
+            found = copy.copy(found)
+            for unwanted in found.select(exclude):
+                unwanted.decompose()
         value = found.get_text(strip=True)
     elif attribute in ('href', 'src', 'id'):
         value = found.get(attribute, '')
     else:
         value = found.get(attribute, '')
+
+    # Optional: reduce the value to the first capture group (or the whole match), e.g. the
+    # URL out of style="background-image:url('...')". No match counts as no value.
+    if value and pattern:
+        match = re.search(pattern, value)
+        value = (match.group(1) if match and match.groups() else match.group(0)) if match else ''
 
     if value and prefix:
         # Don't add prefix if value is already absolute URL
@@ -76,13 +91,21 @@ def scrape_simple(soup: BeautifulSoup, config: Dict[str, Any]) -> List[Dict[str,
 
     entries = []
     for index, container in enumerate(containers):
+        published_config = get_selector_config(selectors, 'published_at')
+        published_at = None
+        if published_config.get('selector'):
+            raw_date = extract_value(container, published_config, base_url)
+            published_at = parse_published_at(raw_date, published_config.get('date_format'))
+            if raw_date and not published_at:
+                print(f"Warning: {config['id']}: unparseable published_at '{raw_date}', using current time")
+
         entry = {
             'id': index + 1,
             'title': extract_value(container, get_selector_config(selectors, 'title'), base_url),
             'description': extract_value(container, get_selector_config(selectors, 'description'), base_url),
             'image_url': extract_value(container, get_selector_config(selectors, 'image_url'), base_url),
             'call_to_action_url': extract_value(container, get_selector_config(selectors, 'call_to_action_url'), base_url),
-            'published_at': datetime.now().strftime('%Y-%m-%dT%H:%M')
+            'published_at': published_at or datetime.now().strftime(PUBLISHED_AT_FORMAT)
         }
 
         # Only add entries that have at least a title or description
@@ -168,6 +191,7 @@ def select_single(entries: List[Dict], config: Dict[str, Any]) -> Dict[str, Any]
     else:
         selected = entries[0].copy()
 
+    selected.pop('id', None)
     return selected
 
 
@@ -190,6 +214,10 @@ def apply_post_processing(entry: Dict[str, Any], all_entries: List[Dict], config
     if 'title_override' in output_config:
         entry['title'] = output_config['title_override']
 
+
+    # Apply image override (fixed URL, only for the single card file)
+    if output_config.get('image_override'):
+        entry['image_url'] = output_config['image_override']
 
     # Apply CTA override
     if 'cta_override' in output_config:

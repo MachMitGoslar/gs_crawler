@@ -1,0 +1,51 @@
+# Liebenburg aktuelle Mitteilungen
+id: "086_liebenburg"
+name: "Liebenburg - aktuelle Mitteilungen"
+
+url: "https://www.liebenburg.de/rathaus-verwaltung/verwaltung/aktuelle-meldungen/"
+base_url: "https://www.liebenburg.de"
+
+schedule: "0 9 * * *"
+run_on_start: true
+
+selectors:
+  container: "div.meldungsliste div.nolis-list-item"
+
+  title:
+    selector: "div.nolis-list-inner h4 a"
+    attribute: "text"
+
+  description:
+    selector: "div.nolis-list-inner p.nolis-list-text"
+    exclude: "a"
+    default: ""
+
+  call_to_action_url:
+    selector: "div.nolis-list-inner h4 a"
+    attribute: "href"
+
+  image_url:
+    selector: "div.nolis-list-inner p.nolis-list-img span a img"
+    attribute: "src"
+  
+  published_at:
+    selector: "div.nolis-list-inner p.nolis-list-date"
+    attribute: "text"
+    date_format: "%d.%m.%Y"
+
+output:
+  single:
+    enabled: true
+    filename: "086_liebenburg.json"
+    cta_override: "https://crawler.goslar.app/crawler/086_liebenburg_alle.json"
+    title_override: "Liebenburg - aktuelle Mitteilungen"
+
+  all:
+    enabled: true
+    filename: "086_liebenburg_alle.json"
+
+selection:
+  strategy: "first"
+
+post_process:
+  single_description_template: "{title}: {description}"

@@ -1,0 +1,54 @@
+# Langelsheim aktuelle Mitteilungen
+id: "087_langelsheim"
+name: "Langelsheim - aktuelle Mitteilungen"
+
+url: "https://www.langelsheim.de/Verwaltung-Politik/Mitteilungen/"
+base_url: "https://www.langelsheim.de"
+
+schedule: "0 9 * * *"
+run_on_start: true
+
+selectors:
+  container: "#liste_1 li"
+
+  title:
+    selector: "a div.flex-row div.order-1 div.list-text h3"
+    attribute: "text"
+
+  description:
+    selector: "a div.flex-row div.order-1 div.list-text p:not(.list-icons)"
+    exclude: "span.more"
+    default: ""
+
+  call_to_action_url:
+    selector: "a"
+    attribute: "href"
+    prefix: "https://www.langelsheim.de"
+
+  image_url:
+    selector: "a div.flex-row div.order-1 div.list-image img"
+    attribute: "src"
+    prefix: "https://www.langelsheim.de"
+    default: "https://www.langelsheim.de/media/custom/3960_1_1_k.PNG?1698137914"
+  
+  published_at:
+    selector: "a div.flex-row div.order-1 div.list-text p.list-icons time"
+    attribute: "datetime"
+
+output:
+  single:
+    enabled: true
+    filename: "087_langelsheim.json"
+    image_override: "https://www.langelsheim.de/media/custom/3960_1_1_k.PNG?1698137914"
+    cta_override: "https://crawler.goslar.app/crawler/087_langelsheim_alle.json"
+    title_override: "Langelsheim - aktuelle Mitteilungen"
+
+  all:
+    enabled: true
+    filename: "087_langelsheim_alle.json"
+
+selection:
+  strategy: "first"
+
+post_process:
+  single_description_template: "{title}: {description}"

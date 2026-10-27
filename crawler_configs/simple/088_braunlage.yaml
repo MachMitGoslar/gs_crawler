@@ -1,0 +1,52 @@
+# Braunlage aktuelle Mitteilungen
+id: "088_braunlage"
+name: "Braunlage - aktuelle Mitteilungen"
+
+url: "https://www.braunlage.city"
+base_url: "https://www.braunlage.city"
+
+schedule: "0 9 * * *"
+run_on_start: true
+
+selectors:
+  container: ".article-teaser-list article"
+
+  title:
+    selector: "a div.article-teaser__content h3 span.headline"
+    attribute: "text"
+
+  description:
+    selector: "a div.article-teaser__content p"
+    default: ""
+
+  call_to_action_url:
+    selector: "a"
+    attribute: "href"
+    prefix: ""
+
+  image_url:
+    selector: "a figure img"
+    # src is only a base64 placeholder (lazy loading); the real URL is in data-src
+    attribute: "data-src"
+    prefix: ""
+  
+  published_at:
+    selector: "a div.article-teaser__content time"
+    attribute: "datetime"
+
+output:
+  single:
+    enabled: true
+    filename: "088_braunlage.json"
+    cta_override: "https://crawler.goslar.app/crawler/088_braunlage_alle.json"
+    title_override: "Braunlage - aktuelle Mitteilungen"
+
+  all:
+    enabled: true
+    filename: "088_braunlage_alle.json"
+
+selection:
+  strategy: "first"
+
+post_process:
+  single_description_template: "{title}: {description}"

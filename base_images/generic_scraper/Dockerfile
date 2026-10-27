@@ -11,6 +11,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 # Copy the generic scraper engine
 COPY scraper.py .
 COPY config_loader.py .
+COPY date_helpers.py .
 COPY scheduler.py .
 COPY run_scheduler.py .
 COPY start_up.sh .

@@ -308,6 +308,31 @@ services:
         bind:
           create_host_path: false
       - type: bind
+        source: ./httpdocs/crawler/086_liebenburg
+        target: /app/output/086_liebenburg
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./httpdocs/crawler/087_langelsheim
+        target: /app/output/087_langelsheim
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./httpdocs/crawler/088_braunlage
+        target: /app/output/088_braunlage
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./httpdocs/crawler/089_seesen
+        target: /app/output/089_seesen
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./httpdocs/crawler/090_bad_harzburg
+        target: /app/output/090_bad_harzburg
+        bind:
+          create_host_path: false
+      - type: bind
         source: ./crawler_configs/simple
         target: /app/configs
         read_only: true

@@ -173,6 +173,71 @@ crawlers:
       - "041_immenrode/041_immenrode.json"
     implementation: config
     config_dir: simple
+  
+  - id: "086_liebenburg"
+    name: "Liebenburg aktuelle Mitteilungen"
+    category: local
+    type: "Local News"
+    source: "https://www.liebenburg.de/rathaus-verwaltung/verwaltung/aktuelle-meldungen/"
+    schedule: "0 9 * * *"
+    schedule_human: "Täglich 09:00"
+    expected_files:
+      - "086_liebenburg/086_liebenburg.json"
+      - "086_liebenburg/086_liebenburg_alle.json"
+    implementation: config
+    config_dir: simple
+
+  - id: "087_langelsheim"
+    name: "Langelsheim aktuelle Mitteilungen"
+    category: local
+    type: "Local News"
+    source: "https://www.langelsheim.de/index.php?&object=tx,3960.5.1&ModID=255&kuo=1&call=0&sfkat=0&sfmonat=0&sfjahr=0&k_sub=0&La=1"
+    schedule: "0 9 * * *"
+    schedule_human: "Täglich 09:00"
+    expected_files:
+      - "087_langelsheim/087_langelsheim.json"
+      - "087_langelsheim/087_langelsheim_alle.json"
+    implementation: config
+    config_dir: simple
+
+  - id: "088_braunlage"
+    name: "Braunlage Mitteilungen"
+    category: local
+    type: "Local News"
+    source: "https://www.braunlage.city"
+    schedule: "0 9 * * *"
+    schedule_human: "Täglich 09:00"
+    expected_files:
+      - "088_braunlage/088_braunlage.json"
+      - "088_braunlage/088_braunlage_alle.json"
+    implementation: config
+    config_dir: simple
+
+  - id: "089_seesen"
+    name: "Seesen Mitteilungen"
+    category: local
+    type: "Local News"
+    source: "https://www.stadtverwaltung-seesen.de"
+    schedule: "0 9 * * *"
+    schedule_human: "Täglich 09:00"
+    expected_files:
+      - "089_seesen/089_seesen.json"
+      - "089_seesen/089_seesen_alle.json"
+    implementation: config
+    config_dir: simple
+
+  - id: "090_bad_harzburg"
+    name: "Bad Harzburg aktuelle Mitteilungen"
+    category: local
+    type: "Local News"
+    source: "https://www.stadt-bad-harzburg.de/Bürgerservice/Pressemitteilungen/"
+    schedule: "0 9 * * *"
+    schedule_human: "Täglich 09:00"
+    expected_files:
+      - "090_bad_harzburg/090_bad_harzburg.json"
+      - "090_bad_harzburg/090_bad_harzburg_alle.json"
+    implementation: config
+    config_dir: simple
 
   - id: "044_wiedelah"
     name: "Wiedelah Events"
