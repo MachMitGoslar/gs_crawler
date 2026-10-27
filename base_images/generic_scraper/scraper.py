@@ -35,6 +35,7 @@ def extract_value(element, selector_config: Dict[str, Any], base_url: str = '') 
     selector = selector_config.get('selector', '')
     attribute = selector_config.get('attribute', 'text')
     prefix = selector_config.get('prefix', '')
+    pattern = selector_config.get('regex')
     fallback = selector_config.get('fallback')
     default = selector_config.get('default')
 
@@ -52,6 +53,12 @@ def extract_value(element, selector_config: Dict[str, Any], base_url: str = '') 
         value = found.get(attribute, '')
     else:
         value = found.get(attribute, '')
+
+    # Optional: reduce the value to the first capture group (or the whole match), e.g. the
+    # URL out of style="background-image:url('...')". No match counts as no value.
+    if value and pattern:
+        match = re.search(pattern, value)
+        value = (match.group(1) if match and match.groups() else match.group(0)) if match else ''
 
     if value and prefix:
         # Don't add prefix if value is already absolute URL

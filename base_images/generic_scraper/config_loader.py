@@ -114,6 +114,7 @@ def get_selector_config(selectors: Dict, field: str) -> Dict[str, Any]:
             'selector': selector_def.get('selector', ''),
             'attribute': selector_def.get('attribute', 'text'),
             'prefix': selector_def.get('prefix', ''),
+            'regex': selector_def.get('regex'),
             'fallback': selector_def.get('fallback'),
             'default': selector_def.get('default'),
             'template': selector_def.get('template'),

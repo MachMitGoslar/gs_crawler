@@ -35,6 +35,7 @@ selectors:
     selector: "div.PictureContainer img"
     attribute: "src"
     prefix: ""                  # Optional: prepend to value
+    regex: ""                   # Optional: keep only the first capture group (see below)
 
   call_to_action_url:
     selector: "h2.article-heading a"
@@ -78,6 +79,17 @@ title:
   selector: "h2 a"
   attribute: "text"
 ```
+
+### Extract part of an attribute (regex)
+```yaml
+image_url:
+  selector: "div.list-img div"
+  attribute: "style"            # e.g. background-image:url('/media/a.jpg?123');
+  regex: "url\\(['\"]?([^'\")]+)['\"]?\\)"
+  prefix: "https://example.com" # applied after the regex, only to relative values
+```
+The regex runs on the extracted value; the first capture group (or the whole match
+without groups) becomes the value. No match falls back to `fallback`/`default`.
 
 ### With prefix/suffix
 ```yaml
