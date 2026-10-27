@@ -25,7 +25,7 @@ To add/modify a crawler:
 3. Commit the changes
 
 <!-- CRAWLER_TABLE_START -->
-**Total Crawlers:** 31 (22 custom containers, 9 config-driven)
+**Total Crawlers:** 32 (22 custom containers, 10 config-driven)
 
 ### Infrastructure
 _System monitoring and management_
@@ -60,6 +60,7 @@ _Village and neighborhood news_
 | ID | Name | Type | Schedule | Output Files |
 |:---|:-----|:-----|:---------|:-------------|
 | 041_immenrode | Immenrode News | Local News | 2x täglich (02:00, 14:00) | `041_immenrode.json` |
+| 089_seesen | Seesen Mitteilungen | Local News | Täglich 09:00 | `089_seesen.json, 089_seesen_alle.json` |
 | 044_wiedelah | Wiedelah Events | Community Events | 2x täglich (02:00, 14:00) | `044-wiedelah.json, 044-wiedelah_alle.json` |
 | 048_jerstedt | Jerstedt News | Local News | 2x täglich (02:00, 14:00) | `048_jerstedt.json` |
 

@@ -169,6 +169,19 @@ crawlers:
     implementation: config
     config_dir: simple
 
+  - id: "089_seesen"
+    name: "Seesen Mitteilungen"
+    category: local
+    type: "Local News"
+    source: "https://www.stadtverwaltung-seesen.de"
+    schedule: "0 9 * * *"
+    schedule_human: "Täglich 09:00"
+    expected_files:
+      - "089_seesen.json"
+      - "089_seesen_alle.json"
+    implementation: config
+    config_dir: simple
+
   - id: "044_wiedelah"
     name: "Wiedelah Events"
     category: local

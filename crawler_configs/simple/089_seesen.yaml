@@ -1,0 +1,49 @@
+# Seesen aktuelle Mitteilungen
+id: "089_seesen"
+name: "Seesen aktuelle Mitteilungen"
+
+url: "https://www.stadtverwaltung-seesen.de"
+base_url: "https://www.stadtverwaltung-seesen.de"
+
+schedule: "0 9 * * *"
+run_on_start: true
+
+selectors:
+  container: "#liste_2 li"
+
+  title:
+    selector: "a div.flex-row div.order-1 div.list-text h3"
+    attribute: "text"
+
+  description:
+    selector: "a div.flex-row div.order-1 div.list-text p"
+    default: ""
+
+  call_to_action_url:
+    selector: "a"
+    attribute: "href"
+    prefix: "https://www.stadtverwaltung-seesen.de"
+
+  image_url:
+    selector: "a div.flex-row div.order-0 div.list-img div"
+    attribute: "style"
+    # style="background-image:url('/media/custom/x.jpg?123');" -> /media/custom/x.jpg?123
+    regex: "url\\(['\"]?([^'\")]+)['\"]?\\)"
+    prefix: "https://www.stadtverwaltung-seesen.de"
+
+output:
+  single:
+    enabled: true
+    filename: "089_seesen.json"
+    cta_override: "https://crawler.goslar.app/crawler/089_seesen_alle.json"
+    title_override: "Seesen aktuelle Mitteilungen"
+
+  all:
+    enabled: true
+    filename: "089_seesen_alle.json"
+
+selection:
+  strategy: "random"
+
+post_process:
+  single_description_template: "{title} {description}"
