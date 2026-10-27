@@ -38,7 +38,7 @@ output:
   single:
     enabled: true
     filename: "088_braunlage.json"
-    cta_override: "https://crawler.goslar.app/crawler/088_braunlage_alle.json"
+    cta_override: "https://crawler.goslar.app/crawler/088_braunlage/088_braunlage_alle.json"
     title_override: "Braunlage - aktuelle Mitteilungen"
 
   all:
