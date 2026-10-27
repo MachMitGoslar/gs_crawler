@@ -1,6 +1,6 @@
 """
 Config loader for generic scraper.
-Handles YAML config parsing and crontab generation.
+Handles YAML config parsing.
 """
 import os
 import yaml
@@ -9,7 +9,6 @@ from typing import Dict, Any, Optional
 
 
 CONFIG_DIR = os.environ.get('CONFIG_DIR', '/app/configs')
-CRONTAB_PATH = '/etc/cron.d/scraper'
 
 
 def load_config(config_path: str) -> Dict[str, Any]:
@@ -56,46 +55,6 @@ def load_all_configs() -> Dict[str, Dict[str, Any]]:
     return configs
 
 
-def generate_crontab():
-    """Generate crontab file from all configs."""
-    configs = load_all_configs()
-
-    if not configs:
-        print("No configs found, skipping crontab generation")
-        return
-
-    cron_lines = [
-        "# Auto-generated crontab for generic scraper",
-        "# Do not edit manually - regenerated on container start",
-        "",
-        "SHELL=/bin/sh",
-        "PATH=/usr/local/bin:/usr/bin:/bin",
-        ""
-    ]
-
-    for crawler_id, config in configs.items():
-        schedule = config.get('schedule', '0 9 * * *')
-        config_path = config['_path']
-
-        # Cron line format: schedule command
-        cron_line = f"{schedule} cd /app && python3 scraper.py {config_path} >> /var/log/cron/scraper.log 2>&1"
-        cron_lines.append(f"# {config.get('name', crawler_id)}")
-        cron_lines.append(cron_line)
-        cron_lines.append("")
-
-    # Write crontab
-    crontab_content = '\n'.join(cron_lines) + '\n'
-
-    with open(CRONTAB_PATH, 'w') as f:
-        f.write(crontab_content)
-
-    # Set permissions and install crontab
-    os.chmod(CRONTAB_PATH, 0o644)
-    os.system(f'crontab {CRONTAB_PATH}')
-
-    print(f"Generated crontab with {len(configs)} crawlers")
-
-
 def get_selector_config(selectors: Dict, field: str) -> Dict[str, Any]:
     """Get selector config for a field, handling both simple and complex formats."""
     selector_def = selectors.get(field, {})
@@ -122,8 +81,3 @@ def get_selector_config(selectors: Dict, field: str) -> Dict[str, Any]:
         }
 
     return {'selector': '', 'attribute': 'text', 'prefix': '', 'fallback': None}
-
-
-if __name__ == '__main__':
-    # When run directly, generate crontab
-    generate_crontab()

@@ -209,14 +209,15 @@ def apply_post_processing(entry: Dict[str, Any], all_entries: List[Dict], config
 
 
 def save_output(entries: List[Dict], single_entry: Dict, config: Dict[str, Any]):
-    """Save output files."""
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    """Save output files into the crawler's own folder (OUTPUT_DIR/<id>/)."""
+    output_dir = os.path.join(OUTPUT_DIR, config['id'])
+    os.makedirs(output_dir, exist_ok=True)
     output_config = config.get('output', {})
 
     # Save "all" file
     if output_config.get('all', {}).get('enabled', False):
         all_filename = output_config['all'].get('filename', f"{config['id']}-alle.json")
-        all_path = os.path.join(OUTPUT_DIR, all_filename)
+        all_path = os.path.join(output_dir, all_filename)
         with open(all_path, 'w', encoding='utf-8') as f:
             json.dump(entries, f, ensure_ascii=False, indent=2)
         print(f"Saved {len(entries)} entries to {all_filename}")
@@ -224,7 +225,7 @@ def save_output(entries: List[Dict], single_entry: Dict, config: Dict[str, Any])
     # Save "single" file
     if output_config.get('single', {}).get('enabled', False) and single_entry:
         single_filename = output_config['single'].get('filename', f"{config['id']}.json")
-        single_path = os.path.join(OUTPUT_DIR, single_filename)
+        single_path = os.path.join(output_dir, single_filename)
         with open(single_path, 'w', encoding='utf-8') as f:
             json.dump(single_entry, f, ensure_ascii=False, indent=2)
         print(f"Saved single entry to {single_filename}")
