@@ -93,6 +93,15 @@ image_url:
 The regex runs on the extracted value; the first capture group (or the whole match
 without groups) becomes the value. No match falls back to `fallback`/`default`.
 
+### Remove child elements from a text (exclude)
+```yaml
+description:
+  selector: "div.list-text p"
+  attribute: "text"
+  exclude: "span.more, span.sr-only"   # CSS selector; matches are removed before the text is read
+```
+Only applies to `attribute: "text"`. The page itself is not modified, other fields still see the full element.
+
 ### Publication date (published_at)
 ```yaml
 published_at:

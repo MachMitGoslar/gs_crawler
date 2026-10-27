@@ -74,6 +74,7 @@ def get_selector_config(selectors: Dict, field: str) -> Dict[str, Any]:
             'attribute': selector_def.get('attribute', 'text'),
             'prefix': selector_def.get('prefix', ''),
             'regex': selector_def.get('regex'),
+            'exclude': selector_def.get('exclude'),
             'date_format': selector_def.get('date_format'),
             'fallback': selector_def.get('fallback'),
             'default': selector_def.get('default'),

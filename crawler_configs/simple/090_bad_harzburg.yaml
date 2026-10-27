@@ -17,12 +17,19 @@ selectors:
 
   description:
     selector: "div.liste_text"
-    default: ""
+    attribute: "text"
+    exclude: "a"
 
   call_to_action_url:
     selector: "div.liste_titel a"
     attribute: "href"
     prefix: "https://www.stadt-bad-harzburg.de"
+
+  image_url:
+    selector: "div.liste_bild img"
+    attribute: "src"
+    prefix: "https://www.stadt-bad-harzburg.de"
+    default: "https://www.stadt-bad-harzburg.de/layout/badharzburg/media/logo_stadt_bad_harzburg.png"
 
 
   published_at:

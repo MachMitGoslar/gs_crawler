@@ -8,6 +8,7 @@ import os
 import json
 import random
 import re
+import copy
 from datetime import datetime
 from typing import Dict, Any, List, Optional
 
@@ -37,6 +38,7 @@ def extract_value(element, selector_config: Dict[str, Any], base_url: str = '') 
     attribute = selector_config.get('attribute', 'text')
     prefix = selector_config.get('prefix', '')
     pattern = selector_config.get('regex')
+    exclude = selector_config.get('exclude')
     fallback = selector_config.get('fallback')
     default = selector_config.get('default')
 
@@ -49,6 +51,11 @@ def extract_value(element, selector_config: Dict[str, Any], base_url: str = '') 
 
     # Extract value based on attribute type
     if attribute == 'text':
+        if exclude:
+            # Work on a copy so other fields still see the complete element
+            found = copy.copy(found)
+            for unwanted in found.select(exclude):
+                unwanted.decompose()
         value = found.get_text(strip=True)
     elif attribute in ('href', 'src', 'id'):
         value = found.get(attribute, '')
