@@ -25,6 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       containers: ${{ steps.registry.outputs.containers }}
+      disabled-containers: ${{ steps.registry.outputs.disabled-containers }}
       config-dirs: ${{ steps.registry.outputs.config-dirs }}
       base-images: ${{ steps.registry.outputs.base-images }}
 
@@ -44,15 +45,18 @@ jobs:
       id: registry
       run: |
         containers=$(python scripts/generate-workflow-matrix.py --containers)
+        disabled_containers=$(python scripts/generate-workflow-matrix.py --disabled)
         config_dirs=$(python scripts/generate-workflow-matrix.py --config-dirs)
         base_images=$(python scripts/generate-workflow-matrix.py --base-images)
 
         echo "containers=$containers" >> $GITHUB_OUTPUT
+        echo "disabled-containers=$disabled_containers" >> $GITHUB_OUTPUT
         echo "config-dirs=$config_dirs" >> $GITHUB_OUTPUT
         echo "base-images=$base_images" >> $GITHUB_OUTPUT
 
         echo "Loaded from crawlers.yaml registry:"
         echo "  Containers: $containers"
+        echo "  Disabled (enabled: false): $disabled_containers"
         echo "  Config dirs: $config_dirs"
         echo "  Base images: $base_images"
 
@@ -97,7 +101,7 @@ jobs:
         fi
 
         # Check for base image changes
-        if echo "$changed_files" | grep -q "^base_images/python\|^base_images/php\|^base_images/flask"; then
+        if echo "$changed_files" | grep -q "^base_images/python\|^base_images/flask"; then
           base_images_changed="true"
         fi
 
@@ -113,7 +117,7 @@ jobs:
 
         # Collect changed containers (only if they still exist - skip deleted)
         for file in $changed_files; do
-          if [[ $file == docker_instances/*/Dockerfile ]] || [[ $file == docker_instances/*/*.py ]] || [[ $file == docker_instances/*/*.php ]] || [[ $file == docker_instances/*/crontab ]] || [[ $file == docker_instances/*/*.html ]] || [[ $file == docker_instances/*/*.css ]] || [[ $file == docker_instances/*/*.json ]] || [[ $file == docker_instances/*/*.js ]] || [[ $file == docker_instances/*/*.svg ]]; then
+          if [[ $file == docker_instances/*/Dockerfile ]] || [[ $file == docker_instances/*/*.py ]] || [[ $file == docker_instances/*/crontab ]] || [[ $file == docker_instances/*/*.html ]] || [[ $file == docker_instances/*/*.css ]] || [[ $file == docker_instances/*/*.json ]] || [[ $file == docker_instances/*/*.js ]] || [[ $file == docker_instances/*/*.svg ]]; then
             container=$(echo $file | cut -d'/' -f2)
             # Only add if container directory still exists (not deleted)
             if [[ -d "docker_instances/$container" ]] && [[ ! " ${changed_containers[@]} " =~ " ${container} " ]]; then
@@ -161,6 +165,9 @@ jobs:
       run: |
         pip install pyyaml
         pip install -r base_images/generic_scraper/requirements.txt
+
+    - name: Check files shared between base images
+      run: ./scripts/check-shared-files.sh
 
     - name: Test config-driven crawlers
       run: |
@@ -254,17 +261,41 @@ jobs:
         # Build single platform (uses locally built base images from previous step)
         docker build --tag test/${{ matrix.container }}:test .
 
-        # Basic start test - pass env vars so credential-dependent containers
-        # reach cron without crashing on missing secrets
+        # Crawlers paused with enabled: false in crawlers.yaml are only built, never run:
+        # starting them would contact the (possibly not yet permitted) source again.
+        if echo '${{ needs.load-registry.outputs.disabled-containers }}' | jq -e --arg c "${{ matrix.container }}" 'index($c)' > /dev/null; then
+          echo "${{ matrix.container }} is disabled (enabled: false) - image built, start test skipped"
+          exit 0
+        fi
+
+        # Basic start test with the same hardening as production (see compose.yaml):
+        # non-root, read-only root filesystem, no capabilities, only /tmp and the
+        # output folder are writable. Pass env vars so credential-dependent
+        # containers reach the scheduler without crashing on missing secrets.
+        out_dir="$RUNNER_TEMP/out_${{ matrix.container }}"
+        mkdir -p "$out_dir" && chmod 777 "$out_dir"
         docker run -d --name test_${{ matrix.container }} \
+          --read-only --cap-drop ALL --security-opt no-new-privileges \
+          --user 1234:1234 \
+          --tmpfs /tmp:rw,noexec,nosuid,size=64m \
+          --tmpfs /data:rw,mode=1777 \
+          -v "$out_dir:/app/output" \
           -e FREIWILLIGEN_AGENTUR_API_KEY=${{ secrets.FREIWILLIGEN_AGENTUR_API_KEY }} \
           -e WOCHENMARKT_CLIENT_ID=${{ secrets.WOCHENMARKT_CLIENT_ID }} \
           -e WOCHENMARKT_CLIENT_SECRET=${{ secrets.WOCHENMARKT_CLIENT_SECRET }} \
           test/${{ matrix.container }}:test
-        sleep 3
+        sleep 20
 
         # Capture logs before any cleanup
-        docker logs test_${{ matrix.container }} 2>&1 || true
+        docker logs test_${{ matrix.container }} > "$RUNNER_TEMP/logs_${{ matrix.container }}.txt" 2>&1 || true
+        cat "$RUNNER_TEMP/logs_${{ matrix.container }}.txt"
+
+        # Hardening must not break the crawler: it may only write to /tmp, /data and /app/output
+        if grep -qiE "Read-only file system|PermissionError|Permission denied|readonly database" "$RUNNER_TEMP/logs_${{ matrix.container }}.txt"; then
+          echo "Container writes outside its writable paths (hardening violation)"
+          docker rm -f test_${{ matrix.container }} || true
+          exit 1
+        fi
 
         if docker ps | grep -q test_${{ matrix.container }}; then
           echo "Container started successfully (still running)"

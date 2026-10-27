@@ -107,7 +107,7 @@ output:
   single:
     enabled: true
     filename: "${CRAWLER_ID}.json"
-    cta_override: "https://crawler.goslar.app/crawler/${CRAWLER_ID}-alle.json"
+    cta_override: "https://crawler.goslar.app/crawler/${CRAWLER_ID}/${CRAWLER_ID}-alle.json"
 
   all:
     enabled: true

@@ -34,7 +34,7 @@ output:
   single:
     enabled: true
     filename: "054-tschuessschule-ausbildung.json"
-    cta_override: "https://crawler.goslar.app/crawler/054-tschuessschule-ausbildung-alle.json"
+    cta_override: "https://crawler.goslar.app/crawler/054_tschuessschule_ausbildung/054-tschuessschule-ausbildung-alle.json"
     title_override: "Ausbildungsangebote"
 
   all:

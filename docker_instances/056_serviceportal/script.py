@@ -8,13 +8,13 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 OUTPUT_DIR = Path("/app/output")
 UI_KIT_DIR = SCRIPT_DIR / "ui-kit"
 
-IMAGE_URL = "https://crawler.goslar.app/crawler/056_serviceportal_image.png"
+IMAGE_URL = "https://crawler.goslar.app/crawler/056_serviceportal/056_serviceportal_image.png"
 EXPORT_JSON_FILE = "056-serviceportal.json"
 EXPORT_HTML_FILES = ["056_serviceportal_index.html", "056_serviceportal_termin.html"]
 EXPORT_ASSET_FILES = ["056_serviceportal_image.png"]
 EXPORT_UI_KIT_FILES = ["goslar-ui.css", "goslar-ui.js"]
 UI_OUTPUT_DIR = "ui-kit"
-INDEX_HTML_URL = "https://crawler.goslar.app/crawler/056_serviceportal_index.html"
+INDEX_HTML_URL = "https://crawler.goslar.app/crawler/056_serviceportal/056_serviceportal_index.html"
 
 entry = {
     "title": "Online-Dienstleistungen der Stadt Goslar",

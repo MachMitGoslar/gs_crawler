@@ -27,8 +27,8 @@ CITY_HTML_FILE = "080_bereitschaftsdienste_staedtisch.html"
 PHARMACY_CACHE_FILE = "080_bereitschaftsdienste_apotheke_cache.json"
 DOCTOR_CACHE_FILE = "080_bereitschaftsdienste_arztpraxis_cache.json"
 DENTIST_CACHE_FILE = "080_bereitschaftsdienste_zahnarzt_cache.json"
-INDEX_HTML_URL = "https://crawler.goslar.app/crawler/080_bereitschaftsdienste_index.html"
-CARD_IMAGE_URL = "https://crawler.goslar.app/crawler/080_bereitschaftsdienste_card.png"
+INDEX_HTML_URL = "https://crawler.goslar.app/crawler/080_bereitschaftsdienste/080_bereitschaftsdienste_index.html"
+CARD_IMAGE_URL = "https://crawler.goslar.app/crawler/080_bereitschaftsdienste/080_bereitschaftsdienste_card.png"
 CACHE_VERSION = 11
 
 GOSLAR_LAT = 51.90355041574386

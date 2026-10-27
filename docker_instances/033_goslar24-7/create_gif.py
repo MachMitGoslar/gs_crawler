@@ -11,7 +11,7 @@ import pytz
 
 
 
-DB_PATH = "webcam_images.db"
+DB_PATH = os.environ.get("DB_PATH", "webcam_images.db")
 
 def slugify_url(url):
     """Hilfsfunktion: Dateinamen aus URL generieren"""
@@ -19,7 +19,7 @@ def slugify_url(url):
 
 def create_gif_from_db_images():
     output_dir = "output"
-    img_url_path = "https://crawler.goslar.app/crawler/"
+    img_url_path = "https://crawler.goslar.app/crawler/033_goslar24-7/"
     os.makedirs(output_dir, exist_ok=True)
 
     conn = sqlite3.connect(DB_PATH)

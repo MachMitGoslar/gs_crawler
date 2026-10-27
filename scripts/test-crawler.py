@@ -115,8 +115,6 @@ def get_base_image_requirements(docker_dir):
         content = dockerfile.read_text()
         if "python_basic_crawler" in content:
             return PROJECT_ROOT / "base_images" / "python_basic_crawler" / "requirements.txt"
-        elif "python_selenium_crawler" in content:
-            return PROJECT_ROOT / "base_images" / "python_selenium_crawler" / "requirements.txt"
         elif "flask_monitor" in content:
             return PROJECT_ROOT / "base_images" / "flask_monitor" / "requirements.txt"
         elif "generic_scraper" in content:
@@ -185,13 +183,17 @@ def test_custom_crawler(crawler):
     env = os.environ.copy()
     env['OUTPUT_DIR'] = str(TEST_OUTPUT_DIR)
 
-    # Many custom scripts use hardcoded ./output/ path
-    # Create symlink from docker_dir/output to test_output
+    # Many custom scripts use hardcoded ./output/ path. Im Container ist das der eigene
+    # Ordner des Crawlers (httpdocs/crawler/<id>), daher Symlink auf test_output/<id>.
     local_output = docker_dir / "output"
     symlink_created = False
+    if local_output.is_symlink() and local_output.resolve() == TEST_OUTPUT_DIR.resolve():
+        local_output.unlink()
     if not local_output.exists():
         try:
-            local_output.symlink_to(TEST_OUTPUT_DIR)
+            crawler_output = TEST_OUTPUT_DIR / docker_dir.name
+            crawler_output.mkdir(parents=True, exist_ok=True)
+            local_output.symlink_to(crawler_output)
             symlink_created = True
         except Exception:
             pass
@@ -208,11 +210,6 @@ def test_custom_crawler(crawler):
 
         if result.returncode != 0:
             error_msg = result.stderr or result.stdout
-            # Some scripts exit with errors due to missing dependencies (selenium, etc)
-            if "selenium" in error_msg.lower() or "chrome" in error_msg.lower():
-                return None, "Requires Selenium (skip)"
-            if "firefox" in error_msg.lower() or "geckodriver" in error_msg.lower():
-                return None, "Requires Firefox/geckodriver (skip)"
             return False, error_msg[:500]
 
         # Check if expected files were created
@@ -287,6 +284,12 @@ def run_tests(crawlers, registry, test_config=True, test_custom=True):
             continue
 
         print(f"{Colors.BOLD}Testing: {crawler_id}{Colors.RESET} ({crawler['name']})")
+
+        if not crawler.get('enabled', True):
+            reason = crawler.get('disabled_reason', 'enabled: false')
+            results['skipped'].append((crawler_id, f"Disabled: {reason}"))
+            print(f"  {Colors.YELLOW}SKIPPED{Colors.RESET}: disabled ({reason})\n")
+            continue
 
         if impl == 'config' and test_config:
             success, message = test_config_crawler(crawler, venv_python)

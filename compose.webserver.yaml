@@ -1,19 +1,42 @@
 # Dev webserver for testing httpdocs output.
-# Mirrors the production path: http://localhost:8888/crawler/
+# Mirrors the production path: http://gs-crawler.localhost/crawler/
+#
+# Traefik listens on the default HTTP port (80) and routes by hostname to nginx.
+# *.localhost resolves to 127.0.0.1 in browsers and on macOS, no /etc/hosts entry needed.
+# Override the hostname with WEBSERVER_HOST (e.g. in .env).
 #
 # Usage:
 #   docker compose -f compose.webserver.yaml up -d
-#   open http://localhost:8888/crawler/070_wochenmarkt_index.html
+#   open http://gs-crawler.localhost/crawler/070_wochenmarkt_index.html
 #
 # Stop:
 #   docker compose -f compose.webserver.yaml down
 
 services:
+  traefik:
+    image: traefik
+    container_name: gs_dev_traefik
+    command:
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --entrypoints.web.address=:80
+      - --log.level=INFO
+    ports:
+      - "80:80"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    restart: unless-stopped
+
   gs_dev_webserver:
     image: nginx:alpine
     container_name: gs_dev_webserver
     volumes:
       - ./httpdocs:/usr/share/nginx/html:ro
-    ports:
-      - "8888:80"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.gs-webserver.rule=Host(`${WEBSERVER_HOST:-gs-crawler.localhost}`)
+      - traefik.http.routers.gs-webserver.entrypoints=web
+      - traefik.http.services.gs-webserver.loadbalancer.server.port=80
+    depends_on:
+      - traefik
     restart: unless-stopped

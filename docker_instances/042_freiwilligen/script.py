@@ -22,7 +22,7 @@ DETAIL_URL_TEMPLATE = (
 )
 INDEX_HTML_FILE = "042_freiwilligenagentur_index.html"
 DETAIL_HTML_FILE = "042_freiwilligenagentur_detail.html"
-INDEX_HTML_URL = f"https://crawler.goslar.app/crawler/{INDEX_HTML_FILE}"
+INDEX_HTML_URL = f"https://crawler.goslar.app/crawler/042_freiwilligen/{INDEX_HTML_FILE}"
 OUTPUT_DIR = Path("output")
 SCRIPT_DIR = Path(__file__).resolve().parent
 UI_KIT_DIR = SCRIPT_DIR / "ui-kit"

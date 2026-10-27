@@ -162,11 +162,7 @@ data = {
     "published_at": published_at
 }
 
-output_dir = (
-    "/app/output/045_naturgefahren"
-    if os.path.exists("/app/output")
-    else "output/045_naturgefahren"
-)
+output_dir = "/app/output" if os.path.exists("/app/output") else "output"
 os.makedirs(output_dir, exist_ok=True)
 output_file = os.path.join(output_dir, "045_naturgefahren_de.json")
 with open(output_file, "w", encoding="utf-8") as f:

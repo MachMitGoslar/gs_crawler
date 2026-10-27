@@ -32,8 +32,6 @@ build_local() {
 
 # Build all base images
 build_local "python_basic_crawler" "python_basic_crawler"
-build_local "python_selenium_crawler" "python_selenium_crawler"
-build_local "php_basic_crawler" "php_basic_crawler"
 build_local "flask_monitor" "flask_monitor"
 build_local "generic_scraper" "generic_scraper"
 

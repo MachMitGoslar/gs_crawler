@@ -15,9 +15,9 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parent.parent
 
 if Path("/app/output").exists():
-    OUTPUT_DIR = Path("/app/output/busflotte")
+    OUTPUT_DIR = Path("/app/output")
 else:
-    OUTPUT_DIR = REPO_ROOT / "httpdocs" / "crawler" / "busflotte"
+    OUTPUT_DIR = REPO_ROOT / "httpdocs" / "crawler" / "073_busflotte"
 
 API_URL = "https://www.goebus.de/unternehmen/api.php"
 COMPANY_ID = 27  # Stadtbus Goslar GmbH
@@ -25,7 +25,7 @@ COMPANY_URL = "https://www.goebus.de/unternehmen/stadtbus-goslar"
 IMAGE_BASE_URL = "https://www.goebus.de/unternehmen/"
 SOURCE_LABEL = "GöBUS – Das Omnibusportal"
 
-BASE_URL = "https://crawler.goslar.app/crawler/busflotte"
+BASE_URL = "https://crawler.goslar.app/crawler/073_busflotte"
 CARD_FILE = "073_busflotte_card.json"
 INDEX_FILE = "073_busflotte_alle.json"
 DETAIL_FILE_TEMPLATE = "073_busflotte_{vehicle_number}.json"

@@ -28,7 +28,7 @@ for url in urls:
 gif_filename = "032_webcams.gif"
 savemepath = "output/"
 output_path = os.path.join(savemepath, gif_filename)
-img_url_path = "https://crawler.goslar.app/crawler/"
+img_url_path = "https://crawler.goslar.app/crawler/032_webcams_goslar/"
 
 
 # GIF erzeugen

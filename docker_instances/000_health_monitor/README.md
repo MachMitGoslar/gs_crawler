@@ -87,7 +87,8 @@ Der Container benötigt **keinen** Docker Socket Zugriff:
 gs_health_monitor:
   build: ./docker_instances/000_health_monitor
   volumes:
-    - ./httpdocs/crawler:/app/output  # Nur Dateisystem-Zugriff
+    - ./httpdocs/crawler:/app/output:ro                                       # liest alle Ausgaben, nur lesend
+    - ./httpdocs/crawler/000_health_monitor:/app/output/000_health_monitor    # schreibt nur hierhin
   ports:
     - "5000:5000"
 ```

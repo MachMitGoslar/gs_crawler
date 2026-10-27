@@ -34,7 +34,7 @@ output:
   single:
     enabled: true
     filename: "053-tschuessschule-praktikum.json"
-    cta_override: "https://crawler.goslar.app/crawler/053-tschuessschule-praktikum-alle.json"
+    cta_override: "https://crawler.goslar.app/crawler/053_tschuessschule_praktikum/053-tschuessschule-praktikum-alle.json"
     title_override: "Praktikumsangebote"
 
   all:

@@ -8,9 +8,9 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parent.parent
 
 if Path("/app/output").exists():
-    OUTPUT_DIR = Path("/app/output/defi-kataster")
+    OUTPUT_DIR = Path("/app/output")
 else:
-    OUTPUT_DIR = REPO_ROOT / "httpdocs" / "crawler" / "defi-kataster"
+    OUTPUT_DIR = REPO_ROOT / "httpdocs" / "crawler" / "060_defi_kataster"
 
 # Der Registry-Eintrag erwartet aktuell den historischen Dateinamen mit
 CARD_OUTPUT_FILES = (
@@ -22,11 +22,9 @@ UI_KIT_FILES = ("goslar-ui.css", "goslar-ui.js")
 UI_KIT_OUTPUT_DIR = "ui-kit"
 LOCATIONS_FILE = "data.json"
 SOURCE_LOCATIONS_FILE = SCRIPT_DIR / LOCATIONS_FILE
-MAP_OUTPUT_DIR = ""
-LEGACY_MAP_OUTPUT_DIR = "060_defi_kataster"
 
 
-MAP_URL = "https://crawler.goslar.app/crawler/defi-kataster/index.html"
+MAP_URL = "https://crawler.goslar.app/crawler/060_defi_kataster/index.html"
 IMAGE_URL = None
 
 PUBLISHED_AT = datetime.now().strftime("%Y-%m-%dT%H:%M")
@@ -100,9 +98,7 @@ def resolve_ui_kit_dir():
 
 
 def map_output_dirs():
-    current_dir = OUTPUT_DIR / MAP_OUTPUT_DIR
-    legacy_dir = OUTPUT_DIR.parent / LEGACY_MAP_OUTPUT_DIR
-    return (current_dir, legacy_dir)
+    return (OUTPUT_DIR,)
 
 
 def main():

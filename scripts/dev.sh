@@ -21,6 +21,16 @@ COMPOSE_FILE="$PROJECT_ROOT/compose.dev.yaml"
 
 cd "$PROJECT_ROOT"
 
+# Container laufen mit der eigenen UID/GID, damit die Ausgabedateien dem lokalen User gehören
+export CRAWLER_UID="${CRAWLER_UID:-$(id -u)}"
+export CRAWLER_GID="${CRAWLER_GID:-$(id -g)}"
+
+# Jeder Container bekommt nur seinen Ordner httpdocs/crawler/<id>; Docker legt fehlende
+# Bind-Mount-Ordner nicht an (create_host_path: false), also vor dem Start anlegen
+prepare_output_dirs() {
+    "$SCRIPT_DIR/init-output-dirs.sh"
+}
+
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -93,8 +103,8 @@ case "${1:-help}" in
         echo "🔧 Setting up local development environment..."
         echo ""
 
-        # Create output directory
-        mkdir -p httpdocs/crawler
+        # Create output directories (one per crawler)
+        prepare_output_dirs
 
         # Build base images
         "$SCRIPT_DIR/build-base-images-local.sh"
@@ -112,6 +122,7 @@ case "${1:-help}" in
         fi
 
         select_services_to_build
+        prepare_output_dirs
 
         echo ""
         if [ "$BUILD_ALL" = true ]; then

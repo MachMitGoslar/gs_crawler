@@ -1,6 +1,8 @@
 import json
+import os
 import random
 import re
+import shutil
 import threading
 from datetime import datetime, timedelta
 from logging import getLogger
@@ -14,7 +16,11 @@ import crawler
 app = Flask(__name__)
 logger = getLogger(__name__)
 
-DATA_FILE = Path("data.json")
+# data.json im Image ist nur der Startwert; geschrieben wird nach DATA_FILE (tmpfs im Container)
+SEED_FILE = Path("data.json")
+DATA_FILE = Path(os.environ.get("DATA_FILE", SEED_FILE))
+if DATA_FILE != SEED_FILE and not DATA_FILE.exists() and SEED_FILE.exists():
+    shutil.copyfile(SEED_FILE, DATA_FILE)
 REFRESH_INTERVAL = timedelta(hours=6)
 
 # Der Produktionsserver läuft in GMT, während das Programm mit lokalen
@@ -369,4 +375,4 @@ if __name__ == "__main__":
     print("  /api/programm.html - Vollständige Programmübersicht")
     print("  /health            - Health Check")
 
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=False)

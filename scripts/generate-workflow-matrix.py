@@ -49,6 +49,12 @@ def get_all_containers(registry):
     return containers
 
 
+def get_disabled_containers(registry):
+    """Container IDs paused with enabled: false (image is still built, but never run in CI)."""
+    return [c['id'] for c in registry['crawlers']
+            if c.get('implementation') == 'custom' and not c.get('enabled', True)]
+
+
 def get_custom_containers(registry):
     """Get custom container IDs that have docker_instances directories."""
     return get_all_containers(registry)
@@ -87,6 +93,7 @@ def get_base_images():
 def main():
     parser = argparse.ArgumentParser(description='Generate workflow matrix data')
     parser.add_argument('--containers', action='store_true', help='List all container IDs')
+    parser.add_argument('--disabled', action='store_true', help='List custom containers paused with enabled: false')
     parser.add_argument('--custom', action='store_true', help='List custom container IDs')
     parser.add_argument('--config-dirs', action='store_true', help='List config directories')
     parser.add_argument('--expected-files', action='store_true', help='Map of expected files')
@@ -108,6 +115,8 @@ def main():
         print(json.dumps(data, indent=2))
     elif args.containers:
         print(json.dumps(get_all_containers(registry)))
+    elif args.disabled:
+        print(json.dumps(get_disabled_containers(registry)))
     elif args.custom:
         print(json.dumps(get_custom_containers(registry)))
     elif args.config_dirs:

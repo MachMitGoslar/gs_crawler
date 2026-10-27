@@ -10,3 +10,5 @@ urllib3==2.5.0
 PyYAML==6.0.2
 schedule==1.2.1
 pytz==2024.1
+croniter==6.2.4
+python-dateutil==2.9.0.post0

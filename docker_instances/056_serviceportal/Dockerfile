@@ -6,11 +6,8 @@ COPY script.py .
 COPY 056_serviceportal_index.html .
 COPY 056_serviceportal_termin.html .
 COPY 056_serviceportal_image.png .
-COPY crontab /etc/cron.d/mycron
 
+RUN mkdir -p /app/output
 
-
-# Konfiguriere Cron
-RUN chmod 0600 /etc/cron.d/mycron && \
-    crontab /etc/cron.d/mycron && \
-    mkdir -p /app/output
+# Takt (Cron-Ausdruck, UTC) für den Scheduler im Base-Image
+ENV SCHEDULE="0 9 * * *"
