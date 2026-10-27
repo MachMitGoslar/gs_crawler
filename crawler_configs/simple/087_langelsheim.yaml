@@ -51,4 +51,4 @@ selection:
   strategy: "first"
 
 post_process:
-  single_description_template: "{title} {description}"
+  single_description_template: "{title}: {description}"

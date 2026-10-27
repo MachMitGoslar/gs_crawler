@@ -173,6 +173,19 @@ crawlers:
       - "041_immenrode/041_immenrode.json"
     implementation: config
     config_dir: simple
+  
+  - id: "086_liebenburg"
+    name: "Liebenburg aktuelle Mitteilungen"
+    category: local
+    type: "Local News"
+    source: "https://www.liebenburg.de/rathaus-verwaltung/verwaltung/aktuelle-meldungen/"
+    schedule: "0 9 * * *"
+    schedule_human: "Täglich 09:00"
+    expected_files:
+      - "086_liebenburg/086_liebenburg.json"
+      - "086_liebenburg/086_liebenburg_alle.json"
+    implementation: config
+    config_dir: simple
 
   - id: "087_langelsheim"
     name: "Langelsheim aktuelle Mitteilungen"

@@ -308,6 +308,11 @@ services:
         bind:
           create_host_path: false
       - type: bind
+        source: ./httpdocs/crawler/086_liebenburg
+        target: /app/output/086_liebenburg
+        bind:
+          create_host_path: false
+      - type: bind
         source: ./httpdocs/crawler/087_langelsheim
         target: /app/output/087_langelsheim
         bind:
