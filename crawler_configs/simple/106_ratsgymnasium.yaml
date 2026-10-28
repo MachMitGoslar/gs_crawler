@@ -1,0 +1,53 @@
+# Ratsgymnasium Goslar - Archiv (Beiträge)
+id: "106_ratsgymnasium"
+name: "Ratsgymnasium Goslar - Beiträge"
+
+url: "https://ratsgymnasium-goslar.de/archiv/"
+base_url: "https://ratsgymnasium-goslar.de"
+
+schedule: "0 9 * * *"
+run_on_start: true
+
+selectors:
+  container: "article.elementor-post"
+
+  title:
+    selector: ".elementor-post__title a"
+    attribute: "text"
+
+  description:
+    selector: ".elementor-post__excerpt"
+    attribute: "text"
+    default: ""
+
+  image_url:
+    selector: ".elementor-post__thumbnail img"
+    attribute: "src"
+    default: ""
+
+  call_to_action_url:
+    selector: ".elementor-post__title a"
+    attribute: "href"
+
+  # z. B. "24. Oktober 2026"
+  published_at:
+    selector: ".elementor-post-date"
+    attribute: "text"
+    date_format: "%d. %B %Y"
+
+output:
+  single:
+    enabled: true
+    filename: "106_ratsgymnasium.json"
+    cta_override: "https://crawler.goslar.app/crawler/106_ratsgymnasium/106_ratsgymnasium_alle.json"
+
+  all:
+    enabled: true
+    filename: "106_ratsgymnasium_alle.json"
+
+# Neueste Beiträge stehen oben
+selection:
+  strategy: "latest"
+
+post_process:
+  single_description_template: "{title}: {description}"

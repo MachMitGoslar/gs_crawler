@@ -12,15 +12,14 @@ selectors:
   container: "div.artikel_self"
 
   title:
-    selector: "h2.titel a"
+    default: "Neuigkeiten aus dem CvD"
     attribute: "text"
 
   # Viele Artikel bestehen nur aus einem Bild, dann bleibt die Beschreibung leer
   description:
-    selector: "div.artikel_textbox"
+    selector: "h2.titel a"
     attribute: "text"
-    exclude: "p.footline_small"
-    default: ""
+
 
   # Link auf das Originalbild (die <img> zeigt nur eine 200px-Vorschau)
   image_url:

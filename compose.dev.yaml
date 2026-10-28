@@ -343,6 +343,11 @@ services:
         bind:
           create_host_path: false
       - type: bind
+        source: ./httpdocs/crawler/106_ratsgymnasium
+        target: /app/output/106_ratsgymnasium
+        bind:
+          create_host_path: false
+      - type: bind
         source: ./crawler_configs/simple
         target: /app/configs
         read_only: true

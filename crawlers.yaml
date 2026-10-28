@@ -265,6 +265,19 @@ crawlers:
     implementation: config
     config_dir: simple
 
+  - id: "106_ratsgymnasium"
+    name: "Ratsgymnasium Goslar Beiträge"
+    category: local
+    type: "Local News"
+    source: "https://ratsgymnasium-goslar.de/archiv/"
+    schedule: "0 9 * * *"
+    schedule_human: "Täglich 09:00"
+    expected_files:
+      - "106_ratsgymnasium/106_ratsgymnasium.json"
+      - "106_ratsgymnasium/106_ratsgymnasium_alle.json"
+    implementation: config
+    config_dir: simple
+
   - id: "044_wiedelah"
     name: "Wiedelah Events"
     category: local
