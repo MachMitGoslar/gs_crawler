@@ -239,6 +239,19 @@ crawlers:
     implementation: config
     config_dir: simple
 
+  - id: "057_cvd"
+    name: "CVD Goslar Nachrichten"
+    category: local
+    type: "Local News"
+    source: "https://www.cvd-gs.de/nachrichten.php"
+    schedule: "0 9 * * *"
+    schedule_human: "Täglich 09:00"
+    expected_files:
+      - "057_cvd/057_cvd.json"
+      - "057_cvd/057_cvd_alle.json"
+    implementation: config
+    config_dir: simple
+
   - id: "092_lewerdaele"
     name: "Lewer-Daele Veranstaltungen"
     category: local

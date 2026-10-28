@@ -1,0 +1,49 @@
+# CVD Goslar - Nachrichten
+id: "057_cvd"
+name: "CVD Goslar - Nachrichten"
+
+url: "https://www.cvd-gs.de/nachrichten.php"
+base_url: "https://www.cvd-gs.de"
+
+schedule: "0 9 * * *"
+run_on_start: true
+
+selectors:
+  container: "div.artikel_self"
+
+  title:
+    selector: "h2.titel a"
+    attribute: "text"
+
+  # Viele Artikel bestehen nur aus einem Bild, dann bleibt die Beschreibung leer
+  description:
+    selector: "div.artikel_textbox"
+    attribute: "text"
+    exclude: "p.footline_small"
+    default: ""
+
+  # Link auf das Originalbild (die <img> zeigt nur eine 200px-Vorschau)
+  image_url:
+    selector: "div.artikel_textbox a[href*='01pics']"
+    attribute: "href"
+    prefix: "https://www.cvd-gs.de/"
+    default: ""
+
+  call_to_action_url:
+    selector: "h2.titel a"
+    attribute: "href"
+    prefix: "https://www.cvd-gs.de"
+
+output:
+  single:
+    enabled: true
+    filename: "057_cvd.json"
+    cta_override: "https://crawler.goslar.app/crawler/057_cvd/057_cvd_alle.json"
+
+  all:
+    enabled: true
+    filename: "057_cvd_alle.json"
+
+# Neueste Artikel stehen oben
+selection:
+  strategy: "first"
