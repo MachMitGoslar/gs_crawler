@@ -40,6 +40,7 @@ output:
   single:
     enabled: true
     filename: "059_bbs.json"
+    title_override: "BBS Goslar-Bassgeige"
     cta_override: "https://crawler.goslar.app/crawler/059_bbs/059_bbs_alle.json"
 
   all:
