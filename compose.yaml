@@ -313,6 +313,11 @@ services:
         bind:
           create_host_path: false
       - type: bind
+        source: ./httpdocs/crawler/059_bbs
+        target: /app/output/059_bbs
+        bind:
+          create_host_path: false
+      - type: bind
         source: ./httpdocs/crawler/086_liebenburg
         target: /app/output/086_liebenburg
         bind:

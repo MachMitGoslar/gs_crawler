@@ -1,0 +1,54 @@
+# BBS Goslar-Bassgeige - Übersicht (Beiträge)
+id: "059_bbs"
+name: "BBS Goslar-Bassgeige - Beiträge"
+
+url: "https://bbs-bassgeige.de/uebersicht/"
+base_url: "https://bbs-bassgeige.de"
+
+schedule: "0 9 * * *"
+run_on_start: true
+
+selectors:
+  container: "article.elementor-post"
+
+  title:
+    selector: ".elementor-post__title a"
+    attribute: "text"
+
+  description:
+    selector: ".elementor-post__excerpt"
+    attribute: "text"
+    default: ""
+
+  image_url:
+    selector: ".elementor-post__thumbnail img"
+    attribute: "src"
+    default: ""
+
+  call_to_action_url:
+    selector: ".elementor-post__title a"
+    attribute: "href"
+
+  # Datum steckt im Link, z. B. https://bbs-bassgeige.de/2026/10/26/mostanlage-in-betrieb/
+  published_at:
+    selector: ".elementor-post__title a"
+    attribute: "href"
+    regex: "/(\\d{4}/\\d{2}/\\d{2})/"
+    date_format: "%Y/%m/%d"
+
+output:
+  single:
+    enabled: true
+    filename: "059_bbs.json"
+    cta_override: "https://crawler.goslar.app/crawler/059_bbs/059_bbs_alle.json"
+
+  all:
+    enabled: true
+    filename: "059_bbs_alle.json"
+
+# Neueste Beiträge stehen oben
+selection:
+  strategy: "latest"
+
+post_process:
+  single_description_template: "{title}: {description}"

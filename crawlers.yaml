@@ -252,6 +252,19 @@ crawlers:
     implementation: config
     config_dir: simple
 
+  - id: "059_bbs"
+    name: "BBS Goslar-Bassgeige Beiträge"
+    category: local
+    type: "Local News"
+    source: "https://bbs-bassgeige.de/uebersicht/"
+    schedule: "0 9 * * *"
+    schedule_human: "Täglich 09:00"
+    expected_files:
+      - "059_bbs/059_bbs.json"
+      - "059_bbs/059_bbs_alle.json"
+    implementation: config
+    config_dir: simple
+
   - id: "092_lewerdaele"
     name: "Lewer-Daele Veranstaltungen"
     category: local
