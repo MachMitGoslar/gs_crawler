@@ -39,6 +39,7 @@ output:
   single:
     enabled: true
     filename: "092_lewerdaele.json"
+    title_override: "Lewer Däle"
     cta_override: "https://crawler.goslar.app/crawler/092_lewerdaele/092_lewerdaele_alle.json"
 
   all:
