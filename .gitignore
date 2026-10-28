@@ -5,6 +5,7 @@
 # --- PHP Configuration ---
 .php-ini
 .php-version
+.python-version
 
 # --- Output Files ---
 # Crawler output directory (generated JSON/XML files)
@@ -15,6 +16,7 @@ httpdocs/*
 .venv
 .venv/
 docker_instances/*/.venv
+
 
 # Python version files
 docker_instances/*/.python-version

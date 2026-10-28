@@ -308,6 +308,11 @@ services:
         bind:
           create_host_path: false
       - type: bind
+        source: ./httpdocs/crawler/057_cvd
+        target: /app/output/057_cvd
+        bind:
+          create_host_path: false
+      - type: bind
         source: ./httpdocs/crawler/086_liebenburg
         target: /app/output/086_liebenburg
         bind:
@@ -330,6 +335,16 @@ services:
       - type: bind
         source: ./httpdocs/crawler/090_bad_harzburg
         target: /app/output/090_bad_harzburg
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./httpdocs/crawler/092_lewerdaele
+        target: /app/output/092_lewerdaele
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./httpdocs/crawler/106_ratsgymnasium
+        target: /app/output/106_ratsgymnasium
         bind:
           create_host_path: false
       - type: bind

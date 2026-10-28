@@ -25,7 +25,7 @@ To add/modify a crawler:
 3. Commit the changes
 
 <!-- CRAWLER_TABLE_START -->
-**Total Crawlers:** 36 (22 custom containers, 14 config-driven)
+**Total Crawlers:** 39 (22 custom containers, 17 config-driven)
 
 ### Infrastructure
 _System monitoring and management_
@@ -65,6 +65,9 @@ _Village and neighborhood news_
 | 088_braunlage | Braunlage Mitteilungen | Local News | Täglich 09:00 | `088_braunlage/088_braunlage.json, 088_braunlage...` |
 | 089_seesen | Seesen Mitteilungen | Local News | Täglich 09:00 | `089_seesen/089_seesen.json, 089_seesen/089_sees...` |
 | 090_bad_harzburg | Bad Harzburg aktuelle Mitteilungen | Local News | Täglich 09:00 | `090_bad_harzburg/090_bad_harzburg.json, 090_bad...` |
+| 057_cvd | CVD Goslar Nachrichten | Local News | Täglich 09:00 | `057_cvd/057_cvd.json, 057_cvd/057_cvd_alle.json` |
+| 092_lewerdaele | Lewer-Daele Veranstaltungen | Community Events | Täglich 09:00 | `092_lewerdaele/092_lewerdaele.json, 092_lewerda...` |
+| 106_ratsgymnasium | Ratsgymnasium Goslar Beiträge | Local News | Täglich 09:00 | `106_ratsgymnasium/106_ratsgymnasium.json, 106_r...` |
 | 044_wiedelah | Wiedelah Events | Community Events | 2x täglich (02:00, 14:00) | `044_wiedelah/044-wiedelah.json, 044_wiedelah/04...` |
 | 048_jerstedt | Jerstedt News _(pausiert)_ | Local News | - | `048_jerstedt/048_jerstedt.json` |
 

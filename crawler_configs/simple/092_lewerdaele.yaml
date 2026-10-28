@@ -1,0 +1,53 @@
+# Lewer-Daele Liebenburg - Veranstaltungen
+id: "092_lewerdaele"
+name: "Lewer-Daele - Veranstaltungen"
+
+url: "https://www.lewer-daele.de"
+base_url: "https://www.lewer-daele.de"
+
+schedule: "0 9 * * *"
+run_on_start: true
+
+selectors:
+  # Chronologisch sortierte Liste der kommenden Veranstaltungen
+  container: ".mod_eventlist .event"
+
+  title:
+    selector: "h1"
+    attribute: "text"
+
+  # Datum und Uhrzeit, z. B. "30.10.2026, 17:45"
+  description:
+    selector: "div.ce_text"
+    attribute: "text"
+    exclude: "p:first-child"
+
+  # Nicht jede Veranstaltung hat ein Bild (src ist relativ, die Seite setzt <base>)
+  image_url:
+    selector: "div.event-wrapper img"
+    attribute: "src"
+    prefix: "https://www.lewer-daele.de/"
+    default: ""
+
+  # Die Seite hat keine Detailseiten, die Veranstaltungen liegen alle auf der Startseite
+  call_to_action_url:
+    selector: "h1"
+    attribute: "href"
+    default: "https://www.lewer-daele.de"
+
+output:
+  single:
+    enabled: true
+    filename: "092_lewerdaele.json"
+    cta_override: "https://crawler.goslar.app/crawler/092_lewerdaele/092_lewerdaele_alle.json"
+
+  all:
+    enabled: true
+    filename: "092_lewerdaele_alle.json"
+
+# Die Liste ist nach Datum sortiert: der erste Eintrag ist die nächste Veranstaltung
+selection:
+  strategy: "first"
+
+post_process:
+  single_description_template: "{title} – {description}"
