@@ -32,7 +32,7 @@ def load_html(url):
         response.raise_for_status()
         return html.fromstring(response.content)
     except Exception as e:
-        print(f"Fehler beim Laden der Seite: {e}")
+        logging.error(f"Fehler beim Laden der Seite: {e}")
         exit(1)
 
 

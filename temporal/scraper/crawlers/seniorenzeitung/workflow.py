@@ -2,7 +2,7 @@ from datetime import timedelta
 
 from temporalio import workflow
 
-from .activities import crawl_senioren, save_senioren
+from crawlers.seniorenzeitung.activities import crawl_senioren, save_senioren
 
 @workflow.defn
 class SeniorenCrawlerWorkflow:

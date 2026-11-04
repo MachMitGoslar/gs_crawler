@@ -1,0 +1,45 @@
+# Immenrode - Local Community Website
+id: "041_immenrode"
+name: "Immenrode"
+
+url: "https://immenro.de/"
+base_url: "https://immenro.de"
+
+schedule: "0 2,14 * * *"
+run_on_start: true
+
+selectors:
+  # Single featured article, not a list
+  container: "section#content div.featured"
+
+  title:
+    selector: "h2.post-title"
+    attribute: "text"
+
+  description:
+    selector: "div.entry p"
+    attribute: "text"
+
+  image_url:
+    selector: "img"
+    attribute: "src"
+
+  call_to_action_url:
+    selector: "a"
+    attribute: "href"
+
+  # Date from time element
+  published_at:
+    selector: "time"
+    attribute: "datetime"
+
+output:
+  single:
+    enabled: true
+    filename: "041_immenrode.json"
+
+  all:
+    enabled: false
+
+selection:
+  strategy: "first"
