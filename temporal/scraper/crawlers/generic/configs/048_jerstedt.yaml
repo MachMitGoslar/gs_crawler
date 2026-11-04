@@ -1,0 +1,49 @@
+# Jerstedt - Stadtteilverein
+id: "048_jerstedt"
+name: "Stadtteilverein Jerstedt"
+
+url: "https://jerstedt.de"
+base_url: "https://jerstedt.de"
+
+schedule: "0 2,14 * * *"
+run_on_start: true
+
+selectors:
+  # Single item from widget
+  container: "ul#tab-recent-2 li:first-child"
+
+  title:
+    selector: ""
+    default: "Stadtteilverein Jerstedt"
+
+  description:
+    selector: "p.tab-item-title"
+    attribute: "text"
+
+  image_url:
+    selector: "a img"
+    attribute: "src"
+
+  call_to_action_url:
+    selector: "a"
+    attribute: "href"
+
+  published_at:
+    selector: "p.tab-item-date"
+    attribute: "text"
+
+output:
+  single:
+    enabled: true
+    filename: "048_jerstedt.json"
+
+  all:
+    enabled: false
+
+selection:
+  strategy: "first"
+
+post_process:
+  # German date format: "01. Januar 2025"
+  date_format: "%d. %B %Y"
+  date_locale: "de_DE"
