@@ -1601,5 +1601,14 @@
       "sa": [],
       "so": []
     }
+  },
+  {
+    "title": "Defibrillator: Hotel Niedersächsischer Hof GmbH",
+    "city": "Goslar",
+    "Defi": "Genauer Standort: Eingangsbereich vor der Treppe links an der Wand",
+    "phone": "0171 6776477",
+    "lat": 51.910396,
+    "lng": 10.423788,
+    "opening_hours": "24/7"
   }
 ]
